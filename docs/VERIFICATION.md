@@ -90,3 +90,6 @@ Rollup сообщает о большом отдельном XR-chunk (~1,05 М�
 - `npm run test:stackblitz` PASS: 76 экспортированных файлов, точное восстановление PNG, production build экспортированного проекта, реальный browser form POST с локальным перехватом, корректная передача кириллицы и экранирование </script>.
 - Внешний StackBlitz не тестирован (CONNECT 403); проверенный формат POST соответствует официальному SDK 1.11.1. Это импортный файл, не подтверждённый hosted URL.
 - `npm run test:deployment`: 6/6 PASS, включая безопасные metadata и artifact URL. Workflow YAML/Prettier/git diff --check PASS. UI/данные приложения не менялись, новые UI E2E не требовались.
+
+- Реальный CI build/exports PASS для 8a96e4f (run 39011423496), оба output artifact IDs получены из upload-artifact и записаны в [receipt](evidence/stackblitz-artifacts-2026-10-17.json). Pages deploy отдельно failure/404.
+- Дополнительный ZIP с двумя HTML и README проверен CRC через Python ZipFile.testzip, ошибок нет. Наличие artifact/download файла не объявляется внешним запуском StackBlitz.
