@@ -4,7 +4,16 @@ import { pathToFileURL } from "node:url";
 
 /** Collect a bounded deployment receipt. Credentials only go to the GitHub API, never to the site or report. */
 export async function collectDeploymentStatus(
-  { repository, token, sourceCommit, runId, phase, buildResult, deployResult },
+  {
+    repository,
+    token,
+    sourceCommit,
+    runId,
+    phase,
+    buildResult,
+    deployResult,
+    artifactIds = {},
+  },
   fetchImpl = fetch,
 ) {
   if (!/^[A-Za-z0-9_.-]+\/[A-Za-z0-9_.-]+$/.test(repository))
@@ -19,6 +28,17 @@ export async function collectDeploymentStatus(
     phase,
     buildResult,
     deployResult,
+    artifacts: Object.entries(artifactIds)
+      .filter(
+        ([name, id]) =>
+          ["orbita-stackblitz", "orbita-preview"].includes(name) &&
+          /^\d+$/.test(id) &&
+          /^\d+$/.test(runId),
+      )
+      .map(([name, id]) => ({
+        name,
+        url: `https://github.com/${repository}/actions/runs/${runId}/artifacts/${id}`,
+      })),
     repositoryAccess: null,
     pages: null,
     site: { url, status: null, app: false, assets: [] },
@@ -127,6 +147,10 @@ async function main() {
     phase: process.env.DEPLOYMENT_PHASE,
     buildResult: process.env.BUILD_RESULT || null,
     deployResult: process.env.DEPLOY_RESULT || null,
+    artifactIds: {
+      "orbita-stackblitz": process.env.STACKBLITZ_ARTIFACT_ID,
+      "orbita-preview": process.env.PREVIEW_ARTIFACT_ID,
+    },
   });
   const output = process.env.DEPLOYMENT_STATUS_OUTPUT;
   if (!output) throw new Error("Deployment receipt output path missing");

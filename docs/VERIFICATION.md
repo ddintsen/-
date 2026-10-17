@@ -83,3 +83,10 @@ Rollup сообщает о большом отдельном XR-chunk (~1,05 М�
 - GitHub Actions run 39009913265 действительно выполнил сборку: success. Deploy: failure. Completed receipt: Pages API 404, сайт 404; [снимок](evidence/deployment-2026-10-17.json). Это не успешный онлайн-просмотр.
 - Стандартный GITHUB_TOKEN не разрешает первоначальное enablement Pages согласно официальному configure-pages action. Рабочий Git-доступ не предоставляет cloud REST-доступ к настройкам.
 - Временный Cloudflare Tunnel не создан (DNS connection refused); Netlify Drop HTTP 403. Онлайн-ссылка не подтверждена и не выдана как рабочая.
+
+## 2026-10-17 — исправление StackBlitz Repository not found
+
+- CI подтвердил private/main с HTTP 200 metadata; [снимок](evidence/repository-access-2026-10-17.json). Прямая ссылка импорта у пользователя не работает.
+- `npm run test:stackblitz` PASS: 76 экспортированных файлов, точное восстановление PNG, production build экспортированного проекта, реальный browser form POST с локальным перехватом, корректная передача кириллицы и экранирование </script>.
+- Внешний StackBlitz не тестирован (CONNECT 403); проверенный формат POST соответствует официальному SDK 1.11.1. Это импортный файл, не подтверждённый hosted URL.
+- `npm run test:deployment`: 6/6 PASS, включая безопасные metadata и artifact URL. Workflow YAML/Prettier/git diff --check PASS. UI/данные приложения не менялись, новые UI E2E не требовались.

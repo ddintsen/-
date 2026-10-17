@@ -68,6 +68,25 @@ test("an absent Pages configuration and 404 site never count as a publication", 
   assert.equal(report.pages.status, 404);
   assert.equal(report.site.app, false);
 });
+test("includes fixed GitHub download links only for known artifact names and numeric output IDs", async () => {
+  const report = await collectDeploymentStatus(
+    {
+      ...context,
+      artifactIds: {
+        "orbita-stackblitz": "12345",
+        "orbita-preview": "not-an-id",
+        arbitrary: "6789",
+      },
+    },
+    async () => Response.json({ message: "Not Found" }, { status: 404 }),
+  );
+  assert.deepEqual(report.artifacts, [
+    {
+      name: "orbita-stackblitz",
+      url: "https://github.com/ddintsen/-/actions/runs/1/artifacts/12345",
+    },
+  ]);
+});
 test("HTML with a missing asset is not reported as a working app", async () => {
   const report = await collectDeploymentStatus(
     context,

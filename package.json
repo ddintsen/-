@@ -21,7 +21,9 @@
     "test:production": "node scripts/verify-production.mjs",
     "build:preview": "tsc -b && vite build --mode standalone && node scripts/standalone.mjs",
     "test:preview": "node scripts/verify-preview.mjs",
-    "test:deployment": "node --test scripts/deployment-status.test.mjs"
+    "test:deployment": "node --test scripts/deployment-status.test.mjs",
+    "export:stackblitz": "node scripts/stackblitz-export.mjs",
+    "test:stackblitz": "node scripts/verify-stackblitz.mjs"
   },
   "dependencies": {
     "@fontsource-variable/inter": "^5.2.8",

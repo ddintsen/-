@@ -14,3 +14,4 @@ playwright-report/
 *.p12
 *.pfx
 standalone-dist/
+stackblitz-export/

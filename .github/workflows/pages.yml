@@ -13,6 +13,9 @@ concurrency:
 jobs:
   build:
     runs-on: ubuntu-latest
+    outputs:
+      stackblitz_artifact: ${{ steps.stackblitz.outputs.artifact-id }}
+      preview_artifact: ${{ steps.preview.outputs.artifact-id }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -28,9 +31,17 @@ jobs:
       - uses: actions/upload-pages-artifact@v3
         with:
           path: dist
+      - name: Build direct StackBlitz import
+        run: npm run export:stackblitz
+      - uses: actions/upload-artifact@v4
+        id: stackblitz
+        with:
+          name: orbita-stackblitz
+          path: stackblitz-export/orbita-stackblitz.html
       - name: Build downloadable preview
         run: npm run build:preview
       - uses: actions/upload-artifact@v4
+        id: preview
         with:
           name: orbita-preview
           path: standalone-dist/orbita-preview.html
@@ -87,6 +98,8 @@ jobs:
           DEPLOYMENT_PHASE: complete
           BUILD_RESULT: ${{ needs.build.result }}
           DEPLOY_RESULT: ${{ needs.deploy.result }}
+          STACKBLITZ_ARTIFACT_ID: ${{ needs.build.outputs.stackblitz_artifact }}
+          PREVIEW_ARTIFACT_ID: ${{ needs.build.outputs.preview_artifact }}
           DEPLOYMENT_STATUS_OUTPUT: ${{ runner.temp }}/orbita-deployment.json
       - name: Save publication receipt
         env:
