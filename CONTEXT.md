@@ -99,3 +99,6 @@ Run 39011423496, source 8a96e4f: build success, orbita-stackblitz artifact 12091
 Новый скриншот StackBlitz: IMPORTING FROM GITHUB, ddintsen/-/tree/main, Cloning repo from GitHub активно, Mounting environment ожидает. Полный импорт/установка/приложение не подтверждены. Официальный GitHub guide StackBlitz проверен (raw HTTP 200): branch URL и /fork/github корректны; пользователю предложен свежий fork/import. Размер tracked tree измерен около 15,8МБ/137 файлов, evidence 12МБ, public 3,1МБ; это не доказанная причина задержки.
 
 Последний прочитанный CI run 39013836292/source 631a23a: public/main, build success, deploy failure, Pages API/site 404. Пользователь не понял настройку Pages; дано: открыть Settings/Pages, Build and deployment → Source, Deploy from a branch → GitHub Actions. Выбор не подтверждён. Не выдавать ответ/скриншот StackBlitz за изменение Pages.
+
+## Pages: пользователь сообщил «готово»
+После инструкции Settings/Pages → Source → GitHub Actions пользователь ответил «готово». Это подтверждение настройки со слов пользователя; текущий push передачи запускает фактическую проверку build/deploy/сайта. Не повторять просьбу выбрать источник, пока новый CI не показал реальную проблему. HANDOFF и AGENTS обновлены этим уточнением.

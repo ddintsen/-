@@ -76,3 +76,7 @@ Jobs `inspect` и `receipt` сохраняют `deployment-status.json` в сл�
 Пользователь сначала выбрал «Идёт установка зависимостей», но затем прислал скриншот: Cloning repo from GitHub, Mounting environment ещё ожидает. Это текущий подтверждённый этап; npm/Vite/Preview не подтверждены. Форматы branch URL и /fork/github проверены по официальному source guide StackBlitz. Предложен [свежий fork/import](https://stackblitz.com/fork/github/ddintsen/-?view=preview&startScript=dev). Причина задержки по одному скриншоту не установлена.
 
 По Pages пользователь ответил «я не понимаю», получил конкретные шаги Settings/Pages → Build and deployment/Source → Deploy from a branch → GitHub Actions. Подтверждения выбора пока нет. Полная передача следующих действий — [HANDOFF.md](HANDOFF.md).
+
+### Настройка сообщена выполненной
+
+После конкретных шагов Source → GitHub Actions пользователь ответил «готово». Новый push передачи запускает проверку публикации; результат нужно подтвердить completed receipt и доступными HTML/assets, не выдавать одно сообщение о настройке за готовый сайт.
