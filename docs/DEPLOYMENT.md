@@ -70,3 +70,9 @@ Jobs `inspect` и `receipt` сохраняют `deployment-status.json` в сл�
 ## После открытия репозитория пользователем
 
 17 октября 2026 новый run [39013695211](https://github.com/ddintsen/-/actions/runs/39013695211) для 8846f30 подтвердил public/main и успешную сборку. Deploy по-прежнему failure: Pages API 404 и сайт 404. [Completed receipt](evidence/public-deployment-2026-10-17.json). Для постоянного сайта остаётся выбрать Source=GitHub Actions в Settings/Pages и повторить workflow. Рабочая ссылка приложения в очках пока не подтверждена.
+
+## Последнее пользовательское свидетельство StackBlitz
+
+Пользователь сначала выбрал «Идёт установка зависимостей», но затем прислал скриншот: Cloning repo from GitHub, Mounting environment ещё ожидает. Это текущий подтверждённый этап; npm/Vite/Preview не подтверждены. Форматы branch URL и /fork/github проверены по официальному source guide StackBlitz. Предложен [свежий fork/import](https://stackblitz.com/fork/github/ddintsen/-?view=preview&startScript=dev). Причина задержки по одному скриншоту не установлена.
+
+По Pages пользователь ответил «я не понимаю», получил конкретные шаги Settings/Pages → Build and deployment/Source → Deploy from a branch → GitHub Actions. Подтверждения выбора пока нет. Полная передача следующих действий — [HANDOFF.md](HANDOFF.md).
