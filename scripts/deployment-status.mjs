@@ -19,10 +19,33 @@ export async function collectDeploymentStatus(
     phase,
     buildResult,
     deployResult,
+    repositoryAccess: null,
     pages: null,
     site: { url, status: null, app: false, assets: [] },
     outcome: "unconfirmed",
   };
+  try {
+    const response = await fetchImpl(
+      `https://api.github.com/repos/${owner}/${name}`,
+      {
+        headers: {
+          Accept: "application/vnd.github+json",
+          Authorization: `Bearer ${token}`,
+        },
+        signal: AbortSignal.timeout(8000),
+        redirect: "error",
+      },
+    );
+    const data = await response.json();
+    report.repositoryAccess = {
+      status: response.status,
+      visibility: response.ok ? (data.visibility ?? null) : null,
+      private: response.ok ? (data.private ?? null) : null,
+      defaultBranch: response.ok ? (data.default_branch ?? null) : null,
+    };
+  } catch {
+    report.repositoryAccess = { status: null, visibility: null, private: null };
+  }
   try {
     const response = await fetchImpl(
       `https://api.github.com/repos/${owner}/${name}/pages`,

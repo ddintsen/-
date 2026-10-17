@@ -32,8 +32,30 @@ test("reports a live app only when HTML and its assets load, without leaking API
     "Bearer TEST_MEMORY_ONLY",
   );
   assert.ok(
-    calls.slice(1).every((call) => !call.options.headers?.Authorization),
+    calls
+      .filter((call) => !call.url.startsWith("https://api.github.com/"))
+      .every((call) => !call.options.headers?.Authorization),
   );
+  assert.ok(!JSON.stringify(report).includes(context.token));
+});
+test("records only selected repository visibility metadata for import diagnostics", async () => {
+  const report = await collectDeploymentStatus(context, async (url) => {
+    if (url === "https://api.github.com/repos/ddintsen/-")
+      return Response.json({
+        visibility: "private",
+        private: true,
+        default_branch: "main",
+        irrelevantField: "not part of receipt",
+      });
+    return new Response("Not Found", { status: 404 });
+  });
+  assert.deepEqual(report.repositoryAccess, {
+    status: 200,
+    visibility: "private",
+    private: true,
+    defaultBranch: "main",
+  });
+  assert.ok(!JSON.stringify(report).includes("irrelevantField"));
   assert.ok(!JSON.stringify(report).includes(context.token));
 });
 test("an absent Pages configuration and 404 site never count as a publication", async () => {
