@@ -19,6 +19,7 @@
     "tokens": "node scripts/tokens.mjs",
     "tokens:check": "node scripts/tokens.mjs --check",
     "test:production": "node scripts/verify-production.mjs",
+    "test:update": "node scripts/verify-update.mjs",
     "build:preview": "tsc -b && vite build --mode standalone && node scripts/standalone.mjs",
     "test:preview": "node scripts/verify-preview.mjs",
     "test:deployment": "node --test scripts/deployment-status.test.mjs",

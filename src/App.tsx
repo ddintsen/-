@@ -27,6 +27,7 @@ import {
 } from "./components/DashboardCard";
 import { Button, Modal, Toast } from "./components/ui";
 import { Admin } from "./components/Admin";
+import { AppUpdate } from "./components/AppUpdate";
 import "./styles/app.css";
 const SpatialView = lazy(() => import("./spatial/SpatialView"));
 type View = "overview" | "payments" | "cash" | "equipment";
@@ -455,6 +456,7 @@ export default function App() {
         </Modal>
       ) : null}
       <Toast />
+      <AppUpdate />
     </>
   );
 }

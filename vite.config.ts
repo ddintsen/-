@@ -30,6 +30,7 @@ export default defineConfig(({ mode }) => ({
       : [
           VitePWA({
             registerType: "prompt",
+            injectRegister: false,
             includeAssets: ["icon.svg", "icon-192.png", "icon-512.png"],
             manifest: {
               name: "Орбита — аналитика департамента",
@@ -58,6 +59,8 @@ export default defineConfig(({ mode }) => ({
               ],
             },
             workbox: {
+              clientsClaim: true,
+              importScripts: ["sw-recovery.js"],
               globPatterns: ["**/*.{js,css,html,svg,png,woff2,json}"],
               globIgnores: [
                 "**/emulate-*.js",

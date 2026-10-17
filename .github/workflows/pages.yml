@@ -18,6 +18,8 @@ jobs:
       preview_artifact: ${{ steps.preview.outputs.artifact-id }}
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # Real legacy PWA fixture for the upgrade regression.
       - uses: actions/setup-node@v4
         with:
           node-version: "22"
@@ -28,6 +30,17 @@ jobs:
         run: npm run build
         env:
           VITE_BASE_PATH: /${{ github.event.repository.name }}/
+      - name: Verify upgrade from the legacy installed PWA
+        run: npm run test:update
+        env:
+          VITE_BASE_PATH: /${{ github.event.repository.name }}/
+          CHROMIUM_PATH: /usr/bin/google-chrome
+          UPDATE_EVIDENCE_DIR: ${{ runner.temp }}/orbita-update-evidence
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: orbita-update-smoke
+          path: ${{ runner.temp }}/orbita-update-evidence
       - uses: actions/upload-pages-artifact@v3
         with:
           path: dist

@@ -1,0 +1,13 @@
+{
+  "baseURL": "http://127.0.0.1:4173/-/",
+  "productionHttp": true,
+  "serviceWorkerControlled": true,
+  "manifest": true,
+  "questControllerProfiles": true,
+  "offlineDemo": true,
+  "offlineRoom": true,
+  "offlineProceduralRoom": true,
+  "offlineWebGL": true,
+  "offlineDashboardCount": 10,
+  "errors": []
+}

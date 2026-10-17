@@ -1422,6 +1422,19 @@ textarea::placeholder {
   opacity: 1;
   transform: translateX(-50%);
 }
+.app-update {
+  position: fixed;
+  right: 16px;
+  bottom: 84px;
+  z-index: 70;
+  max-width: calc(100vw - 32px);
+}
+.app-update p {
+  padding: 10px;
+  background: var(--color-surface);
+  color: var(--color-text);
+  font-size: 12px;
+}
 .spatial-modal.wide {
   width: min(1280px, calc(100vw - 40px));
 }
