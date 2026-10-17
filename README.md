@@ -20,7 +20,7 @@ React + TypeScript приложение по предоставленному Т
 
 В Meta Quest 3S откройте этот адрес в Meta Quest Browser и выберите вход в VR. Физический шлем ещё не проверен; браузерный WebGL не заменяет такую приёмку.
 
-Каждый push main собирается и публикуется через `.github/workflows/pages.yml`; после deploy добавлена browser verify job (PWA/10 карточек/offline/WebGL) с artifact orbita-live-smoke. Проверяйте её отдельный результат и sourceCommit; первая проверка новой job ещё ожидается.
+Каждый push main собирается и публикуется через `.github/workflows/pages.yml`; после deploy добавлена browser verify job (PWA/10 карточек/offline/WebGL) с artifact orbita-live-smoke. Первый запуск прошёл: build/deploy/verify success ([receipt](docs/evidence/live-site-verified-2026-10-17.json)). При следующих изменениях проверяйте новый результат и sourceCommit.
 
 Для разработки есть [импорт main в StackBlitz](https://stackblitz.com/github/ddintsen/-/tree/main?view=preview&startScript=dev) и [новая копия](https://stackblitz.com/fork/github/ddintsen/-?view=preview&startScript=dev). Репозиторий public; последний скриншот пользователя показывает Cloning repo from GitHub, Preview не подтверждён. Уже открытая копия не подтягивает новые GitHub-коммиты автоматически.
 

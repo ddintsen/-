@@ -202,3 +202,9 @@
 - Для проверки фактической публикации добавлена verify job после deploy: настоящий браузер, PWA/profiles, screenshots, offline 10 карточек/фон/WebGL. Использует существующий test:production, новый PRODUCTION_EVIDENCE_DIR направляет свежие доказательства в runner.temp. Отдельный verificationResult и artifact orbita-live-smoke входят в receipt; это не выдаётся за physical Quest.
 - Deployment tests 6/6 PASS, YAML/Prettier/git diff --check PASS. Проверка live browser ожидает первого CI запуска; пока не объявляется пройденной. App UI/данные не менялись.
 - Особенность текущего restricted Node 24 runner: node --test в process-isolation вывел один file-level PASS вместо шести case-строк. Проверены реальные asserts напрямую node scripts/deployment-status.test.mjs и с --test-isolation=none: 6/6 PASS, 0 skipped/failed. Package script/CI Node 22 не менялись ради локальной особенности.
+
+### Browser verification опубликованной ОРБИТЫ завершена
+- Source 22159f675b1feb5ee46493e1dd5546d7b5894653 отправлен в main, remote SHA совпал, tree был чист. Новый run 39025574329 реально завершил build/deploy/verify success.
+- Существующий production smoke выполнен на deployment URL в настоящем browser CI: PWA/SW/manifest/profiles, 10 карточек, фон и WebGL offline, 0 page errors. Receipt сохранён в docs/evidence/live-site-verified-2026-10-17.json; screenshots/JSON artifact orbita-live-smoke ID 12098855173.
+- HANDOFF/README/AGENTS/CONTEXT/DEPLOYMENT/VERIFICATION обновлены фактическим успехом; пользователь получил работающий https://ddintsen.github.io/-/. Физический Quest и боевой API остаются следующими задачами.
+- Последний коммит только docs/evidence: приложение то же, что в проверенной 22159f6. Markdown links/Prettier/git diff --check проверяются перед финальным push; повторная полная UI-матрица не нужна.

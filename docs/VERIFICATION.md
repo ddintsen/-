@@ -106,3 +106,10 @@ Rollup сообщает о большом отдельном XR-chunk (~1,05 М�
 - Run 39014468288/source a1cdf58: build/deploy success, Pages API 200/configured workflow, HTML/JS/CSS/registerSW 200. [Receipt](evidence/published-site-2026-10-17.json), сайт https://ddintsen.github.io/-/.
 - Добавлена post-deploy verify job с браузером против deployment URL и свежим evidence вне checkout. Проверяет PWA/manifest/profiles, offline room/10 карточек/WebGL, создаёт screenshots и orbita-live-smoke artifact. Первый CI результат ещё ожидается.
 - IO-настройка PRODUCTION_EVIDENCE_DIR не меняет код приложения. Node syntax check/Prettier/YAML/git diff --check PASS. Deployment assertions 6/6 PASS при прямом Node запуске и --test-isolation=none; process-isolation локально отчитался одним file-level PASS, эта особенность не выдана за шесть выполненных cases без дополнительной проверки.
+
+## 2026-10-17 — браузерная проверка опубликованного сайта PASS
+
+- Реальный run 39025574329/source 22159f6: build success, deploy success, verificationResult success.
+- test:production выполнен именно против deployment HTTPS URL: service-worker control, manifest, Quest profiles, offline room, 10 дашбордов и WebGL, отсутствие page errors.
+- [Completed receipt](evidence/live-site-verified-2026-10-17.json); свежие overview/spatial screenshots и production-smoke.json — [orbita-live-smoke](https://github.com/ddintsen/-/actions/runs/39025574329/artifacts/12098855173). Это browser CI, не аппаратная проверка шлема.
+- Итоговая правка HANDOFF/документации/evidence не меняет приложение; проверки UI заново не перезапускались.

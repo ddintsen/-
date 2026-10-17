@@ -85,4 +85,8 @@ Jobs `inspect` и `receipt` сохраняют `deployment-status.json` в сл�
 
 **https://ddintsen.github.io/-/** опубликован. Run [39014468288](https://github.com/ddintsen/-/actions/runs/39014468288), source a1cdf58: build/deploy success, API Pages 200/configured workflow, HTML/JS/CSS/registerSW 200. [Receipt](evidence/published-site-2026-10-17.json). Включать Source повторно не требуется.
 
-Добавлена verify job после deploy: npm ci, доступный Chrome/Chromium (с установкой Playwright Chromium при отсутствии), test:production против deployment URL, screenshots и PWA/offline/10-card/WebGL smoke. Artifact orbita-live-smoke содержит свежие файлы из runner.temp; receipt ждёт verify и записывает verificationResult и download URL. Первый результат новой job ещё проверяется. PRODUCTION_EVIDENCE_DIR можно использовать для отдельной папки evidence при локальном прогоне.
+Добавлена verify job после deploy: npm ci, доступный Chrome/Chromium (с установкой Playwright Chromium при отсутствии), test:production против deployment URL, screenshots и PWA/offline/10-card/WebGL smoke. Artifact orbita-live-smoke содержит свежие файлы из runner.temp; receipt ждёт verify и записывает verificationResult и download URL. Первый запуск прошёл: run 39025574329/source 22159f6, build/deploy/verify success. PRODUCTION_EVIDENCE_DIR можно использовать для отдельной папки evidence при локальном прогоне.
+
+## Опубликованный URL проверен браузером
+
+Run [39025574329](https://github.com/ddintsen/-/actions/runs/39025574329), source 22159f6: build/deploy/verify **success**. Проверены manifest/SW/profiles, 10 дашбордов, offline room и WebGL. [Receipt](evidence/live-site-verified-2026-10-17.json), [screenshots и JSON artifact](https://github.com/ddintsen/-/actions/runs/39025574329/artifacts/12098855173). HTML и ресурсы также 200. Физический Quest остаётся отдельной приёмкой.
