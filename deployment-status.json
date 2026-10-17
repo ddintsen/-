@@ -1,11 +1,11 @@
 {
-  "checkedAt": "2026-10-17T06:27:46.903Z",
+  "checkedAt": "2026-10-17T06:29:33.966Z",
   "repository": "ddintsen/-",
-  "sourceCommit": "4f16cc75a3f870bc70630a024f90e07f6206acb8",
-  "runId": "39009913265",
-  "phase": "complete",
-  "buildResult": "success",
-  "deployResult": "failure",
+  "sourceCommit": "f97a7f42b4e3f3bc837388fc17f2c1750f43a0ff",
+  "runId": "39010094552",
+  "phase": "preflight",
+  "buildResult": null,
+  "deployResult": null,
   "pages": {
     "status": 404,
     "configured": false,
