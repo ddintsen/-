@@ -1,0 +1,15 @@
+{
+  "baseRevision": "cd65c73",
+  "workingTree": true,
+  "desktop": [
+    1600,
+    1050
+  ],
+  "mobile": [
+    390,
+    844
+  ],
+  "singleViewHeadingCount": 1,
+  "mobileOverflow": false,
+  "errors": []
+}

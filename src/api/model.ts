@@ -58,7 +58,7 @@ export function dashboardModel(
   const m: DashboardModel = {
     id,
     title: titles[id],
-    subtitle: data.meta.reportDate,
+    subtitle: "",
     kind: "gauges",
     gauges: [],
     metrics: [],
@@ -79,7 +79,7 @@ export function dashboardModel(
     }));
   if (id === 1) {
     m.kind = "channels";
-    m.subtitle = "Январь и отчётный месяц · млн шт.";
+    m.subtitle = "млн шт.";
     m.bars = p.dashboard1_channels.channels.map((x) => ({
       label: x.name,
       values: [x.jan, x.cur],
@@ -104,7 +104,7 @@ export function dashboardModel(
   if (id === 2 || id === 3) {
     const d = id === 2 ? p.dashboard2_monthlyCount : p.dashboard3_monthlyVolume;
     m.kind = "monthly";
-    m.subtitle = "Выполнение месячного плана";
+    m.subtitle = "План на месяц";
     m.unit = id === 3 ? data.meta.currency : "шт.";
     m.bars = d.planBars.map((x) => ({ label: x.label, values: [x.percent] }));
     m.metrics = d.cards.map((x, i) => ({
@@ -127,11 +127,11 @@ export function dashboardModel(
   }
   if (id === 4) {
     m.gauges = plans(p.dashboard4_ytdMain, (i) => i > 0);
-    m.subtitle = `Годовой план · ${data.meta.ytdStartLabel}`;
+    m.subtitle = `План ${data.meta.ytdStartLabel}`;
   }
   if (id === 5) {
     m.kind = "cash";
-    m.subtitle = "Распределение операций за месяц";
+    m.subtitle = "За месяц";
     m.slices = c.dashboard5_operationTypes.types.map((x) => ({
       label: x.name,
       value: x.count,
@@ -148,12 +148,11 @@ export function dashboardModel(
   }
   if (id === 6) {
     m.gauges = plans(c.dashboard6_ytdMain, (i) => i > 0);
-    m.subtitle = `Годовой план · ${data.meta.ytdStartLabel}`;
+    m.subtitle = `План ${data.meta.ytdStartLabel}`;
   }
   if (id === 7) {
     const d = c.dashboard7_operationsAndStaff;
     m.kind = "staff";
-    m.subtitle = "Работающие кассы по дням";
     m.series = [
       {
         label: "Работающие кассы",
@@ -180,12 +179,17 @@ export function dashboardModel(
     ];
     m.facts = [["Открытые вакансии", formatNumber(d.staffShortageVacancies)]];
   }
-  if (id === 8) m.gauges = plans(e.dashboard8_operationsCount, () => false);
-  if (id === 9) m.gauges = plans(e.dashboard9_operationsVolume, () => true);
+  if (id === 8 || id === 9) {
+    m.gauges = plans(
+      id === 8 ? e.dashboard8_operationsCount : e.dashboard9_operationsVolume,
+      () => id === 9,
+    );
+    m.subtitle = "Выполнение плана";
+  }
   if (id === 10) {
     const d = e.dashboard10_workingEquipmentAndDowntime;
     m.kind = "equipment";
-    m.subtitle = "Работающие устройства по дням";
+    m.subtitle = "Работающие устройства";
     m.days = d.days;
     m.series = [
       { label: "ТСО", points: d.tsoLine, color: colors.success },

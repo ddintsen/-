@@ -26,9 +26,6 @@ export function DashboardContent({ model: m }: { model: DashboardModel }) {
             label="доля в ДБО"
           />
           <div className="chart-legend">
-            <span>
-              <i style={{ background: "var(--color-purple)" }} />В ДБО
-            </span>
             <span>В отделениях {formatPercent(100 - (m.share ?? 0))}</span>
           </div>
         </div>
@@ -92,7 +89,6 @@ export function DashboardContent({ model: m }: { model: DashboardModel }) {
               {m.metrics[0].value}
               <span>вакансий</span>
             </strong>
-            <p>Нехватка кассиров</p>
           </div>
           <ArcGauge gauge={m.gauges[0]} small />
         </div>
@@ -101,10 +97,13 @@ export function DashboardContent({ model: m }: { model: DashboardModel }) {
   return (
     <>
       <LineChart series={m.series} days={m.days} />
-      <div className="gauges-row equipment-gauges">
-        {m.gauges.map((g) => (
-          <ArcGauge key={g.label} gauge={g} small />
-        ))}
+      <div className="equipment-downtime">
+        <p>Простой</p>
+        <div className="gauges-row equipment-gauges">
+          {m.gauges.map((g) => (
+            <ArcGauge key={g.label} gauge={g} small />
+          ))}
+        </div>
       </div>
     </>
   );
@@ -126,7 +125,7 @@ export function DashboardCard({
           <div className="card-title">
             <h3>{model.title}</h3>
           </div>
-          <p>{model.subtitle}</p>
+          {model.subtitle ? <p>{model.subtitle}</p> : null}
         </div>
         <Button
           className="focus-button icon-button"
@@ -144,7 +143,7 @@ export function DashboardCard({
 export function DataTable({ model }: { model: DashboardModel }) {
   return (
     <details className="data-details">
-      <summary>Точные значения · {model.facts.length} показателей</summary>
+      <summary>Точные значения</summary>
       <div className="table-scroll">
         <table>
           <caption className="sr-only">{model.title}: точные значения</caption>

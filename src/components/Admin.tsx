@@ -125,7 +125,7 @@ export function Admin({ onClose }: { onClose: () => void }) {
       if (!controller.signal.aborted)
         setResult({
           ok: true,
-          message: `Соединение установлено · ${r.latency} мс. Схема всех 10 дашбордов проверена.`,
+          message: `Ответ получен · ${r.latency} мс`,
         });
     } catch (e) {
       if (!controller.signal.aborted)
@@ -141,7 +141,7 @@ export function Admin({ onClose }: { onClose: () => void }) {
     if (config.mode !== "mock" && !valid()) return;
     if (config.url && !valid()) return;
     s.setConfig({ ...config });
-    notify("Настройки подключения сохранены в этом браузере");
+    notify("Сохранено в этом браузере");
   }
   function applyJson() {
     try {
@@ -155,7 +155,7 @@ export function Admin({ onClose }: { onClose: () => void }) {
       s.applyDemo(parsed);
       setConfig({ ...useDashboardStore.getState().config });
       resetEditor();
-      notify("Демоданные применены к панелям");
+      notify("Демоданные обновлены");
     } catch (e) {
       setJsonError(
         e instanceof SyntaxError
@@ -232,7 +232,6 @@ export function Admin({ onClose }: { onClose: () => void }) {
     <>
       <Modal
         title="Источники данных"
-        description="Подключение API и управление демонстрацией"
         onClose={close}
         wide
         className="settings-modal"
@@ -268,13 +267,6 @@ export function Admin({ onClose }: { onClose: () => void }) {
             }}
             className="settings-body"
           >
-            <div className="info-box">
-              <Cable size={20} />
-              <p>
-                Подключите источник аналитики. Приложение только читает данные;
-                изменения в демонстрации не отправляются в API.
-              </p>
-            </div>
             <div className="form-columns">
               <Field id="api-mode" label="Источник">
                 <NativeSelect
@@ -307,7 +299,7 @@ export function Admin({ onClose }: { onClose: () => void }) {
               id="endpoint"
               label="Адрес API"
               error={urlError}
-              hint="HTTPS или относительный путь. Для внешнего сервера нужно разрешение CORS."
+              hint="HTTPS или путь /api/…"
             >
               <input
                 id="endpoint"
@@ -324,7 +316,7 @@ export function Admin({ onClose }: { onClose: () => void }) {
             <Field
               id="api-token"
               label="Bearer token"
-              hint="Только в памяти этой вкладки. После перезагрузки введите заново."
+              hint="Не сохраняется. Введите после перезагрузки."
             >
               <div className="secret-field">
                 <input
@@ -348,7 +340,7 @@ export function Admin({ onClose }: { onClose: () => void }) {
             </Field>
             <div className="connection-result" role="status">
               {checking ? (
-                <span>Проверяем соединение и схему…</span>
+                <span>Проверяем API…</span>
               ) : result ? (
                 <p className={result.ok ? "tone-success" : "error-text"}>
                   {result.ok ? (
@@ -358,11 +350,7 @@ export function Admin({ onClose }: { onClose: () => void }) {
                   )}{" "}
                   {result.message}
                 </p>
-              ) : (
-                <span>
-                  Проверка прочитает один ответ API. Таймаут — 4 секунды.
-                </span>
-              )}
+              ) : null}
             </div>
             <div className="form-actions">
               <Button
@@ -382,29 +370,24 @@ export function Admin({ onClose }: { onClose: () => void }) {
           <div className="settings-body demo-settings">
             <div className="section-heading">
               <div>
-                <h3>Готовые сценарии</h3>
-                <p>Изменяют только демоданные, сразу на всех панелях.</p>
+                <h3>Сценарии</h3>
               </div>
-              <span className="badge">Локально</span>
             </div>
             <div className="scenario-grid">
               {[
                 {
                   id: "baseline" as const,
                   title: "Базовый срез",
-                  desc: "Исходные данные из ТЗ",
                   icon: Database,
                 },
                 {
                   id: "stress" as const,
                   title: "Сбой оборудования",
-                  desc: "Простой АТМ и дефицит кассиров",
                   icon: TriangleAlert,
                 },
                 {
                   id: "yearend" as const,
                   title: "Закрытие года",
-                  desc: "Выполнение плана 102%+",
                   icon: CheckCircle2,
                 },
               ].map((x) => (
@@ -422,20 +405,17 @@ export function Admin({ onClose }: { onClose: () => void }) {
                 >
                   <x.icon size={21} />
                   <strong>{x.title}</strong>
-                  <span>{x.desc}</span>
                 </Button>
               ))}
             </div>
             {jsonDirty || quickDirty ? (
               <p className="field-help">
-                Сначала примените или перезагрузите JSON, чтобы сменить
-                сценарий.
+                Примените или отмените изменения, чтобы сменить сценарий.
               </p>
             ) : null}
             <div className="simulation-row">
               <div>
-                <h3>Симуляция транзакций</h3>
-                <p>Демонстрационные значения меняются каждые 2,5 секунды.</p>
+                <h3>Симуляция данных</h3>
               </div>
               <Button
                 variant="outline"
@@ -452,7 +432,7 @@ export function Admin({ onClose }: { onClose: () => void }) {
                 Выберите сценарий, чтобы перейти с API на демоданные.
               </p>
             ) : null}
-            <h3>Быстрое изменение</h3>
+            <h3>Показатели</h3>
             <form
               noValidate
               onSubmit={(e) => {
@@ -495,10 +475,6 @@ export function Admin({ onClose }: { onClose: () => void }) {
               </Button>
             </form>
             <div className="section-heading editor-heading">
-              <div>
-                <h3>Все данные · JSON</h3>
-                <p>Полная схема десяти дашбордов</p>
-              </div>
               <Button onClick={resetEditor}>
                 <RefreshCw size={15} />
                 Загрузить актуальные
@@ -506,9 +482,8 @@ export function Admin({ onClose }: { onClose: () => void }) {
             </div>
             {conflict ? (
               <p className="inline-warning" role="status">
-                Данные изменились в другой вкладке или симуляции. Ваш текст
-                сохранён в редакторе. Загрузите актуальные данные перед
-                применением.
+                Данные изменились в другой вкладке или симуляции. Загрузите
+                актуальные; ваш черновик остаётся в редакторе.
               </p>
             ) : null}
             <Field id="json-editor" label="Редактор JSON" error={jsonError}>
@@ -547,7 +522,6 @@ export function Admin({ onClose }: { onClose: () => void }) {
       {guard ? (
         <Modal
           title="Есть несохранённые изменения"
-          description="Можно вернуться к редактированию или закрыть настройки без сохранения полей."
           onClose={() => setGuard(false)}
         >
           <div className="guard-actions">

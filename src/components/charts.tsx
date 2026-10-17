@@ -28,7 +28,13 @@ export function ArcGauge({
   const compact = useDashboardStore((s) => s.compact);
   const tone = gaugeTone(gauge.percent, gauge.mode);
   return (
-    <div className={`arc-gauge ${small ? "small" : ""}`} data-tone={tone}>
+    <div
+      className={`arc-gauge ${small ? "small" : ""}`}
+      data-tone={tone}
+      title={
+        gauge.mode === "downtime" ? downtimeLabel(gauge.percent) : undefined
+      }
+    >
       <div
         className="gauge-graphic"
         role="img"
@@ -57,11 +63,6 @@ export function ArcGauge({
           {formatNumber(gauge.value, compact)}
           {gauge.unit ? <small> {gauge.unit}</small> : null}
         </strong>
-      ) : null}
-      {gauge.mode === "downtime" ? (
-        <span className={`gauge-status tone-${tone}`}>
-          {downtimeLabel(gauge.percent)}
-        </span>
       ) : null}
     </div>
   );

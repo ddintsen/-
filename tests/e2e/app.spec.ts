@@ -115,9 +115,7 @@ test("API success, fallback, strict failure and token memory-only storage", asyn
   await page
     .getByRole("button", { name: "Проверить соединение", exact: true })
     .click();
-  await expect(
-    page.getByText(/Схема всех 10 дашбордов проверена/),
-  ).toBeVisible();
+  await expect(page.getByText(/Ответ получен · \d+ мс/)).toBeVisible();
   await page.getByRole("button", { name: "Сохранить подключение" }).click();
   await page.getByRole("button", { name: "Закрыть", exact: true }).click();
   await expect(page.locator(".source-item")).toContainText("API подключён");
@@ -245,7 +243,7 @@ test("real WebGL preview renders and unsupported immersive mode is explained", a
   await page.goto("/");
   await page.getByRole("button", { name: /Открыть в пространстве/ }).click();
   await expect(
-    page.getByText(/Этот браузер не поддерживает immersive WebXR/),
+    page.getByText("Для AR и VR откройте сайт в Meta Quest Browser."),
   ).toBeVisible();
   await expect(page.locator(".xr-canvas canvas")).toBeVisible();
   await expect(

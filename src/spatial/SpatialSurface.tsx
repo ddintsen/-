@@ -78,22 +78,20 @@ export function SpatialSurface({
 /** @dashboard Д1–Д10. The shared group surface carries its subject heading. */
 export function SpatialWing({
   title,
-  subtitle,
   width,
   height,
   position,
   opacity = 1,
 }: {
   title: string;
-  subtitle: string;
   width: number;
   height: number;
   position: [number, number, number];
   opacity?: number;
 }) {
   const texture = useMemo(
-    () => drawWing(title, subtitle, width / height),
-    [title, subtitle, width, height],
+    () => drawWing(title, width / height),
+    [title, width, height],
   );
   useEffect(() => () => texture.dispose(), [texture]);
   return (

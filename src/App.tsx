@@ -16,11 +16,10 @@ import {
   Moon,
   Wallet,
   WifiOff,
-  ChevronRight,
 } from "lucide-react";
 import { useDashboardStore, startSync } from "./store/dashboard";
 import { dashboardModel } from "./api/model";
-import { formatTime } from "./api/format";
+import { formatSource, formatTime } from "./api/format";
 import {
   DashboardCard,
   DashboardContent,
@@ -114,13 +113,7 @@ export default function App() {
     history.replaceState({}, "", u);
     setAdmin(open);
   }
-  const sourceLabel = {
-    mock: "Демоданные",
-    simulation: "Симуляция",
-    live: "API подключён",
-    fallback: s.lastLive ? "Последний снимок API" : "Резерв · демоданные",
-    error: "Ошибка API",
-  }[s.source];
+  const sourceLabel = formatSource(s.source, !!s.lastLive);
   const activeEquipment =
     s.data?.block3_atmTso.dashboard10_workingEquipmentAndDowntime;
   const attention =
@@ -133,13 +126,11 @@ export default function App() {
   const renderCard = (id: number) => (
     <DashboardCard key={id} model={models[id - 1]} onFocus={setFocus} />
   );
-  const blockHeading = (title: string, sub: string) => {
+  const blockHeading = (title: string) => {
+    if (view !== "overview") return null;
     return (
       <header className="wing-heading">
-        <div>
-          <h2>{title}</h2>
-          <p>{sub}</p>
-        </div>
+        <h2>{title}</h2>
       </header>
     );
   };
@@ -197,10 +188,7 @@ export default function App() {
         </aside>
         <div className="workspace">
           <header className="topbar">
-            <div className="wordmark">
-              Орбита
-              <span>Аналитика департамента</span>
-            </div>
+            <div className="wordmark">Орбита</div>
             <div className="topbar-right">
               <div className="source-item source-pill" role="status">
                 <span
@@ -229,31 +217,20 @@ export default function App() {
           <main id="analytics">
             <div className="page-heading">
               <div>
-                <div className="eyebrow">Операционный обзор</div>
                 <h1>
                   {view === "overview"
-                    ? "Обзор департамента"
+                    ? "Обзор"
                     : view === "payments"
                       ? "Платежи"
                       : view === "cash"
                         ? "Кассовые операции"
                         : "Оборудование"}
                 </h1>
-                <p>
-                  {view === "overview"
-                    ? "Платежи, кассовая сеть и оборудование."
-                    : view === "payments"
-                      ? "Каналы, месячный план и результаты с начала года."
-                      : view === "cash"
-                        ? "Операции, команда и доступность кассовой сети."
-                        : "АТМ, ТСО и Recycle: объёмы, операции и простои."}
-                </p>
               </div>
               <div className="page-actions">
-                <div className="report-period">
+                <div className="report-period" aria-label="Отчётный период">
                   <CalendarDays size={18} />
                   <div>
-                    <span>Отчётный период</span>
                     <strong>
                       {s.data?.meta.reportDate ?? "Данные не загружены"}
                     </strong>
@@ -318,10 +295,7 @@ export default function App() {
                       ? `${sourceLabel}. Обновление недоступно.`
                       : "Данные API недоступны."}
                   </strong>
-                  <p>
-                    {s.error}
-                    {s.lastLive ? " Показан ранее полученный снимок." : ""}
-                  </p>
+                  <p>{s.error}</p>
                 </div>
                 <Button onClick={() => void s.refresh()} disabled={s.busy}>
                   Повторить
@@ -334,9 +308,6 @@ export default function App() {
                 <h2>
                   {s.busy ? "Загружаем аналитику" : "Нет доступных данных API"}
                 </h2>
-                <p>
-                  Проверьте подключение или выберите демонстрационный источник.
-                </p>
                 <Button variant="primary" onClick={() => openAdmin(true)}>
                   Настроить источник
                 </Button>
@@ -348,7 +319,7 @@ export default function App() {
                     className="wing cash-wing"
                     aria-label="Кассовые операции"
                   >
-                    {blockHeading("Кассовые операции", "Операции и команда")}
+                    {blockHeading("Кассовые операции")}
                     <div className="wing-cards">
                       {[5, 6, 7].map(renderCard)}
                     </div>
@@ -356,7 +327,7 @@ export default function App() {
                 ) : null}
                 {view === "overview" || view === "payments" ? (
                   <section className="wing payments-wing" aria-label="Платежи">
-                    {blockHeading("Платежи", "Каналы и выполнение плана")}
+                    {blockHeading("Платежи")}
                     <div className="wing-cards">
                       {renderCard(1)}
                       <div
@@ -397,7 +368,7 @@ export default function App() {
                     className="wing equipment-wing"
                     aria-label="Оборудование"
                   >
-                    {blockHeading("Оборудование", "АТМ · ТСО · Recycle")}
+                    {blockHeading("Оборудование")}
                     <div className="wing-cards">
                       {[8, 9, 10].map(renderCard)}
                     </div>
@@ -405,24 +376,19 @@ export default function App() {
                 ) : null}
               </div>
             )}
-            <footer className="workspace-footer">
-              <div>
-                <span
-                  className={`live-dot ${s.source === "live" ? "live" : ""}`}
-                />
-                {sourceLabel}
-                <span className="footer-divider">·</span>
-                {s.updatedAt
-                  ? `Обновлено ${formatTime(s.updatedAt)} · Киев`
-                  : "Данные из исходного среза"}
-              </div>
-              {attention ? (
-                <span className="tone-danger">
-                  <Activity size={13} />
-                  {attention} зоны внимания
-                </span>
-              ) : null}
-            </footer>
+            {s.lastLive || attention ? (
+              <footer className="workspace-footer">
+                {s.lastLive && s.updatedAt ? (
+                  <div>Обновлено {formatTime(s.updatedAt)} · Киев</div>
+                ) : null}
+                {attention ? (
+                  <span className="tone-danger">
+                    <Activity size={13} />
+                    {attention} зоны внимания
+                  </span>
+                ) : null}
+              </footer>
+            ) : null}
           </main>
           <div className="environment-dock">
             <span>
@@ -430,10 +396,12 @@ export default function App() {
               {s.theme === "office" ? "Кабинет" : "Тёмное окружение"}
             </span>
             <span className="tool-divider" />
-            <Button onClick={() => setSpatial(true)}>
+            <Button
+              onClick={() => setSpatial(true)}
+              aria-label="Открыть 3D-пространство"
+              title="Открыть 3D-пространство"
+            >
               <Glasses size={18} />
-              <span>Meta Quest 3S</span>
-              <ChevronRight size={14} />
             </Button>
             <span className="tool-divider" />
             <Button
@@ -462,50 +430,26 @@ export default function App() {
       {admin ? <Admin onClose={() => openAdmin(false)} /> : null}
       {spatial ? (
         <Modal
-          title="Пространство Орбита"
-          description="WebXR · Meta Quest 3S"
+          title="Пространство"
           onClose={() => setSpatial(false)}
           wide
           className="spatial-modal"
         >
-          <Suspense
-            fallback={
-              <div className="xr-loading">
-                Загружаем пространственный режим…
-              </div>
-            }
-          >
+          <Suspense fallback={<div className="xr-loading">Загружаем 3D…</div>}>
             <SpatialView />
           </Suspense>
         </Modal>
       ) : null}
       {help ? (
-        <Modal
-          title="Всё нужное — в поле зрения"
-          description="Короткая инструкция по пространству аналитики"
-          onClose={() => setHelp(false)}
-        >
+        <Modal title="Как пользоваться" onClose={() => setHelp(false)}>
           <div className="help-body">
             <p>
-              <strong>Обзор.</strong> Три блока: кассы слева, платежи в центре,
-              оборудование справа. На узком экране они располагаются друг под
-              другом.
+              Значок разворота открывает график и точные значения. Escape
+              закрывает окно.
             </p>
             <p>
-              <strong>Фокус.</strong> Нажмите значок разворота на карточке:
-              график откроется крупнее, а ниже доступны точные значения.
-              Закройте через Escape.
-            </p>
-            <p>
-              <strong>Данные.</strong> Исходный срез — демонстрационный.
-              Подключите API или переключите сценарий в настройках. Годовые
-              показатели показывают выполнение плана, а не оценку календарного
-              темпа.
-            </p>
-            <p>
-              <strong>Шлем.</strong> Откройте приложение по доверенному HTTPS в
-              Meta Quest Browser и выберите AR или VR. Управляйте лучом
-              контроллера или жестом pinch.
+              В Meta Quest Browser выберите AR или VR. Для выбора панели нажмите
+              курок или соедините большой и указательный пальцы.
             </p>
           </div>
         </Modal>

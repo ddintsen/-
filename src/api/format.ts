@@ -1,3 +1,5 @@
+import type { Source } from "./schema";
+
 export function formatNumber(n: number, compact = false): string {
   if (compact && Math.abs(n) >= 1e9)
     return `${new Intl.NumberFormat("ru-RU", { maximumFractionDigits: 1 }).format(n / 1e9)} млрд`;
@@ -32,3 +34,13 @@ export const downtimeLabel = (value: number) =>
     : value <= 6.5
       ? "Рабочий уровень"
       : "Высокий простой";
+
+export function formatSource(source: Source, hasLiveSnapshot = false): string {
+  return {
+    mock: "Демоданные",
+    simulation: "Симуляция",
+    live: "API подключён",
+    fallback: hasLiveSnapshot ? "Последний снимок API" : "Резерв · демоданные",
+    error: "Ошибка API",
+  }[source];
+}

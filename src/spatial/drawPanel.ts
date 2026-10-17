@@ -3,11 +3,7 @@ import { type DashboardModel, colors, seriesColors } from "../api/model";
 import { formatNumber, formatPercent, gaugeTone } from "../api/format";
 
 /** @dashboard Д1–Д10. Rasterize the same data model into the XR framebuffer, with Cyrillic fonts. */
-export function drawPanel(
-  m: DashboardModel,
-  compact: boolean,
-  source: string,
-): CanvasTexture {
+export function drawPanel(m: DashboardModel, compact: boolean): CanvasTexture {
   const canvas = document.createElement("canvas");
   canvas.width = 1280;
   canvas.height = 800;
@@ -49,7 +45,6 @@ export function drawPanel(
   ctx.fill();
   text(m.title, 45, 64, 34);
   text(m.subtitle, 45, 108, 23, colors.muted);
-  text(source, 1235, 108, 21, colors.muted, "right");
   const gauge = (
     g: DashboardModel["gauges"][number],
     x: number,
@@ -266,16 +261,9 @@ export function drawPanel(
   }
   if (m.kind === "equipment") {
     lines(85, 200, 1110, 230);
-    m.gauges.forEach((g, i) => gauge(g, 150 + i * 360, 510, 230));
+    text("Простой", 70, 530, 25, colors.muted);
+    m.gauges.forEach((g, i) => gauge(g, 150 + i * 360, 550, 230));
   }
-  text(
-    "Нажмите на панель, чтобы вернуться к обзору",
-    640,
-    765,
-    22,
-    colors.muted,
-    "center",
-  );
   const texture = new CanvasTexture(canvas);
   texture.colorSpace = SRGBColorSpace;
   texture.anisotropy = 4;
@@ -301,10 +289,7 @@ export function drawLabel(label: string, aspect = 6.4): CanvasTexture {
 }
 
 /** @dashboard Д1–Д10. At overview distance prioritize large readings; full charts open in focus. */
-export function drawOverviewPanel(
-  m: DashboardModel,
-  source: string,
-): CanvasTexture {
+export function drawOverviewPanel(m: DashboardModel): CanvasTexture {
   const c = document.createElement("canvas");
   c.width = 1280;
   c.height = 800;
@@ -332,7 +317,8 @@ export function drawOverviewPanel(
   ctx.fill();
   ctx.globalAlpha = 1;
   text(m.title, 55, 87, 48);
-  text(source, 55, 145, 32, colors.muted);
+  const context = m.kind === "equipment" ? "Простой" : m.subtitle;
+  if (context) text(context, 55, 145, 32, colors.muted);
   const metric = (
     label: string,
     value: string,
@@ -414,7 +400,6 @@ export function drawOverviewPanel(
           colors.text,
           "center",
         );
-      else text("простой", cx, 550, 32, colors.muted, "center");
     });
   }
   if (m.kind === "cash") {
@@ -472,11 +457,7 @@ export function drawOverviewPanel(
 }
 
 /** @dashboard Д1–Д10. Decorative group material; headings encode the real data groups. */
-export function drawWing(
-  title: string,
-  subtitle: string,
-  aspect: number,
-): CanvasTexture {
+export function drawWing(title: string, aspect: number): CanvasTexture {
   const c = document.createElement("canvas");
   c.width = 1280;
   c.height = Math.round(c.width / aspect);
@@ -493,9 +474,6 @@ export function drawWing(
   ctx.font = '600 64px "Manrope Variable", sans-serif';
   ctx.fillStyle = colors.text;
   ctx.fillText(title, 60, 100, c.width - 120);
-  ctx.font = '400 32px "Inter Variable", sans-serif';
-  ctx.fillStyle = colors.muted;
-  ctx.fillText(subtitle, 60, 153, c.width - 120);
   const texture = new CanvasTexture(c);
   texture.colorSpace = SRGBColorSpace;
   return texture;

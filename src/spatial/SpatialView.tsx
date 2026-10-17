@@ -26,6 +26,7 @@ import {
 } from "lucide-react";
 import { useDashboardStore } from "../store/dashboard";
 import { colors, dashboardModel, type DashboardModel } from "../api/model";
+import { formatSource } from "../api/format";
 import { drawPanel, drawOverviewPanel } from "./drawPanel";
 import { SpatialSurface, SpatialWing, SpatialControl } from "./SpatialSurface";
 import { ProceduralRoom } from "./ProceduralRoom";
@@ -83,24 +84,10 @@ function Panel({
   opacity?: number;
   onSelect: () => void;
 }) {
-  const compact = useDashboardStore((s) => s.compact),
-    source = useDashboardStore((s) => s.source);
-  const label =
-    source === "live"
-      ? "API"
-      : source === "fallback"
-        ? "Резервные данные"
-        : source === "error"
-          ? "Ошибка API"
-          : source === "simulation"
-            ? "Симуляция"
-            : "Демоданные";
+  const compact = useDashboardStore((s) => s.compact);
   const texture = useMemo(
-    () =>
-      focused
-        ? drawPanel(model, compact, label)
-        : drawOverviewPanel(model, label),
-    [model, compact, label, focused],
+    () => (focused ? drawPanel(model, compact) : drawOverviewPanel(model)),
+    [model, compact, focused],
   );
   useEffect(() => () => texture.dispose(), [texture]);
   return (
@@ -121,10 +108,12 @@ function Scene({
   setFocused,
   focused,
   roomOnly,
+  dataContext,
 }: {
   yaw: number;
   focused: number | null;
   roomOnly: boolean;
+  dataContext: string;
   setFocused: (v: number | null) => void;
 }) {
   const data = useDashboardStore((s) => s.data);
@@ -214,7 +203,6 @@ function Scene({
       <group position={[0, 1.6, -1.8]}>
         <SpatialWing
           title="Платежи"
-          subtitle="Каналы и выполнение плана"
           width={2}
           height={1.66}
           position={[0, 0.04, -0.025]}
@@ -242,14 +230,12 @@ function Scene({
           x: -1.55,
           angle: 0.48,
           title: "Кассовые операции",
-          subtitle: "Операции и команда",
         },
         {
           ids: [8, 9, 10],
           x: 1.55,
           angle: -0.48,
           title: "Оборудование",
-          subtitle: "АТМ, ТСО и Recycle",
         },
       ].map((wing) => (
         <group
@@ -259,7 +245,6 @@ function Scene({
         >
           <SpatialWing
             title={wing.title}
-            subtitle={wing.subtitle}
             width={1.08}
             height={2.24}
             position={[0, 0.08, -0.025]}
@@ -312,16 +297,30 @@ function Scene({
             disabled={focused === 10}
             onSelect={() => setFocused(Math.min(10, focused + 1))}
           />
+          <SpatialControl
+            label={dataContext}
+            position={[0, -0.65, 0]}
+            width={1.28}
+            height={0.08}
+            focused
+          />
         </group>
       ) : null}
-      <SpatialControl
-        label={session ? "Завершить XR-сеанс" : "Выберите панель для фокуса"}
-        position={[0, 0.78, -1.8]}
-        onSelect={() => {
-          if (session) void session.end();
-          else setFocused(1);
-        }}
-      />
+      {!focused ? (
+        <SpatialControl
+          label={dataContext}
+          position={[0, 0.78, -1.8]}
+          width={1.8}
+          height={0.11}
+        />
+      ) : null}
+      {session ? (
+        <SpatialControl
+          label="Завершить XR-сеанс"
+          position={[0, 0.56, -1.8]}
+          onSelect={() => void session.end()}
+        />
+      ) : null}
     </>
   );
 }
@@ -386,6 +385,10 @@ export default function SpatialView() {
     }
   }
   const data = useDashboardStore((s) => s.data);
+  const dataContext = useDashboardStore(
+    (s) =>
+      `${formatSource(s.source, !!s.lastLive)} · ${s.data?.meta.reportDate ?? "Нет данных"}`,
+  );
   const loading = useDashboardStore((s) => s.busy);
   const refresh = useDashboardStore((s) => s.refresh);
   useEffect(() => {
@@ -395,17 +398,13 @@ export default function SpatialView() {
     <div className="spatial-view">
       <div className="xr-toolbar">
         <div>
-          <h3>Пространственный обзор</h3>
-          <p>Три панели вокруг вас. Выберите карточку, чтобы приблизить.</p>
-        </div>
-        <div>
           <Button
             variant="outline"
             disabled={!data || !support.ar || busy || sessionActive}
             onClick={() => void enter("ar")}
           >
             <Glasses size={18} />
-            AR · окружение
+            Войти в AR
           </Button>
           <Button
             variant="primary"
@@ -495,6 +494,7 @@ export default function SpatialView() {
                 focused={focused}
                 setFocused={setFocused}
                 roomOnly={roomOnly}
+                dataContext={dataContext}
               />
             </XR>
           </Canvas>
@@ -507,7 +507,6 @@ export default function SpatialView() {
                 ? "Загружаем аналитику"
                 : "Нет данных для пространственного просмотра"}
             </h3>
-            <p>Проверьте источник данных и повторите загрузку.</p>
             <Button
               variant="primary"
               busy={loading}
@@ -543,7 +542,7 @@ export default function SpatialView() {
             </NativeSelect>
           </div>
           <div className="xr-focus-navigation">
-            <p role="status" className="xr-focus-status">
+            <p role="status" className="xr-focus-status sr-only">
               {!data
                 ? "Данные недоступны"
                 : focused
@@ -580,7 +579,7 @@ export default function SpatialView() {
       ) : null}
       <div className="xr-controls">
         <MoveHorizontal size={18} />
-        <span>Поворот взгляда</span>
+        <span>Поворот</span>
         <Button
           className="icon-button"
           aria-label="Посмотреть на кассы"
@@ -618,11 +617,12 @@ export default function SpatialView() {
           {error}
         </p>
       ) : null}
-      <p className="xr-support">
-        {support.checked && !support.ar && !support.vr
-          ? "Этот браузер не поддерживает immersive WebXR. Просматривайте панели здесь или откройте приложение в совместимом шлеме по HTTPS."
-          : "В шлеме: луч контроллера + курок или луч руки + pinch. Повторное нажатие возвращает панель."}
-      </p>
+      {support.checked && !support.ar && !support.vr ? (
+        <p className="xr-support">
+          Для AR и VR откройте сайт в Meta Quest Browser.
+        </p>
+      ) : null}
+      <p className="sr-only">{dataContext}</p>
     </div>
   );
 }
