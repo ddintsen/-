@@ -1,21 +1,12 @@
 {
-  "checkedAt": "2026-10-17T07:30:51.142Z",
+  "checkedAt": "2026-10-17T07:39:55.747Z",
   "repository": "ddintsen/-",
-  "sourceCommit": "631a23a724a41323960fb85deda05ea37db1e5f2",
-  "runId": "39013836292",
-  "phase": "complete",
-  "buildResult": "success",
-  "deployResult": "failure",
-  "artifacts": [
-    {
-      "name": "orbita-stackblitz",
-      "url": "https://github.com/ddintsen/-/actions/runs/39013836292/artifacts/12093703480"
-    },
-    {
-      "name": "orbita-preview",
-      "url": "https://github.com/ddintsen/-/actions/runs/39013836292/artifacts/12094230939"
-    }
-  ],
+  "sourceCommit": "a1cdf58878ce8206bda78520a316ec548293437e",
+  "runId": "39014468288",
+  "phase": "preflight",
+  "buildResult": null,
+  "deployResult": null,
+  "artifacts": [],
   "repositoryAccess": {
     "status": 200,
     "visibility": "public",
@@ -23,11 +14,11 @@
     "defaultBranch": "main"
   },
   "pages": {
-    "status": 404,
-    "configured": false,
-    "buildType": null,
-    "htmlUrl": null,
-    "message": "Not Found"
+    "status": 200,
+    "configured": true,
+    "buildType": "workflow",
+    "htmlUrl": "https://ddintsen.github.io/-/",
+    "message": null
   },
   "site": {
     "url": "https://ddintsen.github.io/-/",
@@ -35,5 +26,5 @@
     "app": false,
     "assets": []
   },
-  "outcome": "pages-not-configured"
+  "outcome": "unconfirmed"
 }
