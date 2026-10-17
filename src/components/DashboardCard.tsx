@@ -1,6 +1,6 @@
 import { Maximize2 } from "lucide-react";
 import type { ReactNode } from "react";
-import { type DashboardModel } from "../api/model";
+import { comparisonRows, type DashboardModel } from "../api/model";
 import { formatNumber, formatPercent } from "../api/format";
 import { useDashboardStore } from "../store/dashboard";
 import { t, useLocale } from "../i18n";
@@ -90,7 +90,14 @@ export function DashboardContent({ model: m }: { model: DashboardModel }) {
         <LineChart series={m.series} days={m.days} />
         <div className="staff-bottom">
           <div className="vacancy">
-            <strong style={{ color: m.metrics[0].color }}>
+            <strong
+              style={{
+                color:
+                  m.metrics[0].value > 20
+                    ? "var(--color-danger)"
+                    : "var(--color-warning)",
+              }}
+            >
               {m.metrics[0].value}
               <span>{t("вакансий")}</span>
             </strong>
@@ -162,16 +169,22 @@ export function DataTable({ model }: { model: DashboardModel }) {
           <thead>
             <tr>
               <th scope="col">{t("Показатель")}</th>
-              <th scope="col">{t("Значение")}</th>
+              <th scope="col">{t("Факт")}</th>
+              <th scope="col">{t("План / Порог")}</th>
+              <th scope="col">{t("Выполнение / Статус")}</th>
             </tr>
           </thead>
           <tbody>
-            {model.facts.map(([label, value], i) => (
-              <tr key={i}>
-                <th scope="row">{t(label)}</th>
-                <td>{value}</td>
-              </tr>
-            ))}
+            {comparisonRows(model).map(
+              ({ label, actual, reference, status }, i) => (
+                <tr key={i}>
+                  <th scope="row">{t(label)}</th>
+                  <td>{actual}</td>
+                  <td>{reference}</td>
+                  <td>{status}</td>
+                </tr>
+              ),
+            )}
           </tbody>
         </table>
       </div>

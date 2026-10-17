@@ -1,0 +1,22 @@
+{
+  "unit": {
+    "passed": 55
+  },
+  "e2e": {
+    "startTime": "2026-10-17T21:52:01.146Z",
+    "duration": 126570.422,
+    "expected": 32,
+    "skipped": 0,
+    "unexpected": 0,
+    "flaky": 0
+  },
+  "build": "passed",
+  "typecheck": "passed",
+  "tokens": "passed",
+  "format": "passed",
+  "production": "passed",
+  "legacyPwaUpdate": "passed",
+  "standalone": "passed",
+  "physicalQuest": "unrun",
+  "realApi": "unrun"
+}

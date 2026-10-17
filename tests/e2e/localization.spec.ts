@@ -44,7 +44,9 @@ test("fresh sessions default to Ukrainian across demo labels, dates and exact fa
   await expect(dialog.locator("details")).toHaveAttribute("open", "");
   await expect(dialog.getByRole("columnheader")).toHaveText([
     "Показник",
-    "Значення",
+    "Факт",
+    "План / Поріг",
+    "Виконання / Статус",
   ]);
   await expect(dialog.locator("tbody tr").first()).toContainText(
     "Інтернет · січень",
@@ -187,7 +189,7 @@ test("monthly controls belong to their card and exact focus tables start expande
   await expect(
     card(page, 2).getByRole("group", { name: "Показник платежів" }),
   ).toBeVisible();
-  await expect(card(page, 3)).toHaveCount(0);
+  await expect(card(page, 3)).toBeVisible();
   await switcher.getByRole("button", { name: "Обсяг", exact: true }).click();
   await expect(card(page, 2)).toHaveCount(0);
   await expect(
@@ -230,7 +232,7 @@ test("plan and downtime meters expose exact values and truthful overachievement"
       "aria-valuenow",
       String(source[index].percent),
     );
-    await expect(downtime.nth(index)).toHaveAttribute("aria-valuemax", "100");
+    await expect(downtime.nth(index)).toHaveAttribute("aria-valuemax", "10");
     await expect(downtime.nth(index)).toHaveAttribute(
       "aria-valuetext",
       new RegExp(`^${source[index].percent}%;`),
@@ -252,7 +254,7 @@ test("plan and downtime meters expose exact values and truthful overachievement"
   await page.getByRole("button", { name: "Year end", exact: true }).click();
   await page.getByRole("button", { name: "Close", exact: true }).click();
   const overPlan = card(page, 4).getByRole("meter").first();
-  await expect(overPlan).toHaveAttribute("aria-valuenow", "100");
+  await expect(overPlan).toHaveAttribute("aria-valuenow", "102");
   await expect(overPlan).toHaveAttribute(
     "aria-valuetext",
     /^102%; Plan 100%; Actual:/,
@@ -266,7 +268,7 @@ test("plan and downtime meters expose exact values and truthful overachievement"
   const fillWidth = await overPlan
     .locator(".progress-fill")
     .evaluate((element) => element.getBoundingClientRect().width);
-  expect(Math.abs(trackWidth - fillWidth)).toBeLessThan(1);
+  expect(fillWidth / trackWidth).toBeCloseTo(102 / 120, 2);
   await card(page, 4).locator(".focus-button").click();
   await expect(
     page.getByRole("dialog").locator("tbody tr").first(),

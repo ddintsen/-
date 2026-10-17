@@ -1,6 +1,19 @@
 /* Generated from DESIGN.md. Run npm run tokens. */
 :root {
-  --color-background: #24262b;
+  --color-background: #141821;
+  --color-light-background: #eef1f6;
+  --color-light-surface: #ffffff;
+  --color-light-elevated: #e2e7ef;
+  --color-light-text: #182232;
+  --color-light-muted: #46566b;
+  --color-light-primary: #35305c;
+  --color-light-border: #c3ccd8;
+  --color-light-success: #166947;
+  --color-light-warning: #825500;
+  --color-light-danger: #ae2c38;
+  --color-light-cyan: #176783;
+  --color-light-purple: #6252a5;
+  --color-light-focus: #6344b5;
   --color-surface: rgba(44, 45, 51, 0.78);
   --color-elevated: #35363e;
   --color-text: #f5f3f8;

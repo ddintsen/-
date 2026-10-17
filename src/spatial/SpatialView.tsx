@@ -27,8 +27,8 @@ import {
 import { useDashboardStore } from "../store/dashboard";
 import { colors, dashboardModel, type DashboardModel } from "../api/model";
 import { formatSource } from "../api/format";
-import { drawPanel, drawOverviewPanel } from "./drawPanel";
-import { SpatialSurface, SpatialWing, SpatialControl } from "./SpatialSurface";
+import { drawPanel, drawOverviewPanel, drawFacts } from "./drawPanel";
+import { SpatialSurface, SpatialControl } from "./SpatialSurface";
 import { ProceduralRoom } from "./ProceduralRoom";
 import { Button, NativeSelect } from "../components/ui";
 import { formatReportDate, t, useLocale } from "../i18n";
@@ -78,27 +78,34 @@ function Panel({
   focused,
   opacity = 1,
   onSelect,
+  factsPage,
 }: {
+  factsPage?: number;
   model: DashboardModel;
   position: [number, number, number];
   scale?: number;
   focused: boolean;
   opacity?: number;
-  onSelect: () => void;
+  onSelect?: () => void;
 }) {
   const compact = useDashboardStore((s) => s.compact);
   const locale = useLocale();
   const texture = useMemo(
-    () => (focused ? drawPanel(model, compact) : drawOverviewPanel(model)),
-    [model, compact, focused, locale],
+    () =>
+      factsPage !== undefined
+        ? drawFacts(model, factsPage)
+        : focused
+          ? drawPanel(model, compact)
+          : drawOverviewPanel(model),
+    [model, compact, focused, locale, factsPage],
   );
   useEffect(() => () => texture.dispose(), [texture]);
   return (
     <group position={position} scale={scale}>
       <SpatialSurface
         texture={texture}
-        width={1.28}
-        height={0.8}
+        width={focused ? 1.8 : 1.28}
+        height={focused ? 1.125 : 0.8}
         opacity={opacity}
         focused={focused}
         onSelect={onSelect}
@@ -106,18 +113,40 @@ function Panel({
     </group>
   );
 }
+type SpatialCategory = "cash" | "payments" | "equipment";
+const spatialCategories: {
+  id: SpatialCategory;
+  label: string;
+  ids: number[];
+}[] = [
+  { id: "cash", label: "Кассовые операции", ids: [5, 6, 7] },
+  { id: "payments", label: "Платежи", ids: [1, 2, 3, 4] },
+  { id: "equipment", label: "Оборудование", ids: [8, 9, 10] },
+];
 function Scene({
   yaw,
   setFocused,
   focused,
   roomOnly,
   dataContext,
+  category,
+  setCategory,
+  recenter,
+  onRecenter,
+  factsPage,
+  setFactsPage,
 }: {
   yaw: number;
   focused: number | null;
   roomOnly: boolean;
   dataContext: string;
   setFocused: (v: number | null) => void;
+  category: SpatialCategory;
+  setCategory: (v: SpatialCategory) => void;
+  recenter: number;
+  onRecenter: () => void;
+  factsPage: number | null;
+  setFactsPage: (v: number | null) => void;
 }) {
   const data = useDashboardStore((s) => s.data);
   const locale = useLocale();
@@ -125,6 +154,7 @@ function Scene({
   const { camera, gl, size, invalidate, setFrameloop } = useThree();
   const mode = useXR((s) => s.mode);
   const session = useXR((s) => s.session);
+  const anchor = useRef<Group>(null);
   const focusGroup = useRef<Group>(null);
   const focusPose = useRef<{ p: Vector3; q: Quaternion } | null>(null);
   const models = useMemo(
@@ -136,13 +166,9 @@ function Scene({
   );
   useEffect(() => {
     gl.setClearColor(colors.background, mode === "immersive-ar" ? 0 : 1);
-  }, [gl, mode]);
-  useEffect(() => {
-    // A language change redraws canvas textures even while the browser scene is idle.
     invalidate();
-  }, [locale, invalidate]);
+  }, [gl, mode, invalidate]);
   useEffect(() => {
-    // Static browser scenes redraw on interaction; head tracking needs every XR frame.
     setFrameloop(session ? "always" : "demand");
     invalidate();
   }, [session, setFrameloop, invalidate]);
@@ -151,11 +177,9 @@ function Scene({
       camera.position.set(0, 1.6, 0.7);
       camera.rotation.set(0, (yaw * Math.PI) / 180, 0);
       if (camera instanceof PerspectiveCamera) {
-        // Keep the whole 1.28m focus card visible in a narrow or expanded browser preview.
-        // The headset projection is owned by WebXR and is never changed here.
         camera.fov = Math.max(
           68,
-          (2 * Math.atan(0.72 / ((1.1 * size.width) / size.height)) * 180) /
+          (2 * Math.atan(1.05 / ((1.5 * size.width) / size.height)) * 180) /
             Math.PI,
         );
         camera.updateProjectionMatrix();
@@ -163,180 +187,204 @@ function Scene({
       invalidate();
     }
   }, [camera, yaw, session, size.width, size.height, invalidate]);
+  // Recenter the workspace in the viewer's horizontal heading; never move the headset camera.
   useEffect(() => {
-    if (focused) {
-      const p = camera.getWorldPosition(new Vector3());
-      const dir = camera.getWorldDirection(new Vector3());
-      p.addScaledVector(dir, 1.1);
-      focusPose.current = { p, q: camera.getWorldQuaternion(new Quaternion()) };
+    if (!anchor.current) return;
+    const viewer = session ? gl.xr.getCamera() : camera;
+    const p = viewer.getWorldPosition(new Vector3());
+    const d = viewer.getWorldDirection(new Vector3());
+    anchor.current.position.set(p.x, p.y - 1.6, p.z);
+    anchor.current.rotation.set(0, Math.atan2(-d.x, -d.z), 0);
+    invalidate();
+  }, [recenter, session, camera, gl, invalidate, roomOnly]);
+  const hasFocus = focused !== null;
+  useEffect(() => {
+    if (hasFocus) {
+      const viewer = session ? gl.xr.getCamera() : camera;
+      const p = viewer.getWorldPosition(new Vector3());
+      const dir = viewer.getWorldDirection(new Vector3());
+      // A stable, world-anchored focus; switching data does not make it chase the head.
+      dir.y = 0;
+      dir.normalize();
+      p.addScaledVector(dir, 1.5);
+      const q = new Quaternion().setFromAxisAngle(
+        new Vector3(0, 1, 0),
+        Math.atan2(-dir.x, -dir.z),
+      );
+      focusPose.current = { p, q };
     } else focusPose.current = null;
     invalidate();
-  }, [focused, camera, invalidate]);
+  }, [hasFocus, session, camera, gl, invalidate]);
   useFrame(() => {
     if (focusGroup.current && focusPose.current) {
       focusGroup.current.position.copy(focusPose.current.p);
       focusGroup.current.quaternion.copy(focusPose.current.q);
     }
   });
-  // An opaque synthetic room belongs only to VR and the browser preview.
   const room =
     mode !== "immersive-ar" ? <ProceduralRoom dark={theme === "dark"} /> : null;
   if (roomOnly && !session) return <>{room}</>;
-  if (!data)
-    return (
-      <>
-        {room}
-        <XROrigin />
-        {session ? (
-          <>
-            <SpatialControl
-              label={t("Данные недоступны")}
-              position={[0, 1.7, -1.1]}
-              width={0.9}
-              height={0.16}
-            />
-            <SpatialControl
-              label={t("Завершить XR-сеанс")}
-              position={[0, 1.45, -1.1]}
-              onSelect={() => void session.end()}
-            />
-          </>
-        ) : null}
-      </>
-    );
+  const ids = spatialCategories.find((c) => c.id === category)!.ids;
+  const pageCount =
+    focused && data ? Math.ceil(models[focused - 1].facts.length / 3) : 1;
   return (
     <>
       <XROrigin />
       {room}
-      <group position={[0, 1.6, -1.8]}>
-        <SpatialWing
-          title={t("Платежи")}
-          width={2}
-          height={1.66}
-          position={[0, 0.04, -0.025]}
-          opacity={focused ? 0.35 : 1}
-        />
-        {[1, 2, 3, 4].map((id, i) => (
-          <Panel
-            key={id}
-            model={models[id - 1]}
-            position={[
-              ((i % 2) - 0.5) * 0.94,
-              0.28 - Math.floor(i / 2) * 0.6,
-              0,
-            ]}
-            scale={0.7}
-            opacity={focused ? 0.25 : 1}
-            focused={false}
-            onSelect={() => setFocused(id)}
-          />
-        ))}
-      </group>
-      {[
-        {
-          ids: [5, 6, 7],
-          x: -1.55,
-          angle: 0.48,
-          title: t("Кассовые операции"),
-        },
-        {
-          ids: [8, 9, 10],
-          x: 1.55,
-          angle: -0.48,
-          title: t("Оборудование"),
-        },
-      ].map((wing) => (
-        <group
-          key={wing.x}
-          position={[wing.x, 1.6, -1.45]}
-          rotation={[0, wing.angle, 0]}
-        >
-          <SpatialWing
-            title={wing.title}
-            width={1.08}
-            height={2.24}
-            position={[0, 0.08, -0.025]}
-            opacity={focused ? 0.35 : 1}
-          />
-          {wing.ids.map((id, i) => (
-            <Panel
-              key={id}
-              model={models[id - 1]}
-              position={[0, 0.62 - i * 0.62, 0]}
-              scale={0.74}
-              opacity={focused ? 0.25 : 1}
-              focused={false}
-              onSelect={() => setFocused(id)}
+      <group ref={anchor}>
+        {!hasFocus && data ? (
+          <group position={[0, 1.6, -1.85]}>
+            {spatialCategories.map((c, index) => (
+              <SpatialControl
+                key={c.id}
+                label={t(c.label)}
+                position={[(index - 1) * 0.84, 0.92, 0]}
+                width={0.8}
+                height={0.16}
+                selected={category === c.id}
+                onSelect={() => setCategory(c.id)}
+              />
+            ))}
+            {ids.map((id, index) => (
+              <Panel
+                key={id}
+                model={models[id - 1]}
+                position={[
+                  ((index % 2) - 0.5) * 1.2,
+                  0.36 - Math.floor(index / 2) * 0.73,
+                  0,
+                ]}
+                scale={0.9}
+                focused={false}
+                onSelect={() => setFocused(id)}
+              />
+            ))}
+            <SpatialControl
+              label={dataContext}
+              position={[0, -0.88, 0]}
+              width={2.2}
+              height={0.11}
             />
-          ))}
-        </group>
-      ))}
-      {focused ? (
+          </group>
+        ) : null}
+        {!data ? (
+          <SpatialControl
+            label={t("Данные недоступны")}
+            position={[0, 1.6, -1.85]}
+            width={1.4}
+            height={0.2}
+          />
+        ) : null}
+        {/* Only XR gets these persistent spatial actions. No desktop bottom dock. */}
+        {session && !hasFocus ? (
+          <group position={[0, 1.04, -1.35]} rotation={[-0.31, 0, 0]}>
+            <SpatialControl
+              label={t("Центрировать пространство")}
+              position={[-0.5, 0, 0]}
+              width={0.94}
+              height={0.16}
+              onSelect={onRecenter}
+            />
+            <SpatialControl
+              label={t("Завершить XR-сеанс")}
+              position={[0.5, 0, 0]}
+              width={0.94}
+              height={0.16}
+              onSelect={() => void session.end()}
+            />
+          </group>
+        ) : null}
+      </group>
+      {focused && data ? (
         <group ref={focusGroup}>
           <Panel
             model={models[focused - 1]}
             position={[0, 0, 0]}
             focused
-            onSelect={() => setFocused(null)}
+            factsPage={factsPage ?? undefined}
           />
           <SpatialControl
             label={t("← Назад")}
-            position={[-0.45, -0.5, 0]}
-            width={0.35}
-            height={0.12}
+            position={[-0.65, -0.69, 0]}
+            width={0.45}
+            height={0.16}
             focused
             disabled={focused === 1}
-            onSelect={() => setFocused(Math.max(1, focused - 1))}
+            onSelect={() => setFocused(focused - 1)}
           />
           <SpatialControl
             label={t("Панорама")}
-            position={[0, -0.5, 0]}
-            width={0.43}
-            height={0.12}
+            position={[0, -0.69, 0]}
+            width={0.66}
+            height={0.16}
             focused
             onSelect={() => setFocused(null)}
           />
           <SpatialControl
             label={t("Далее →")}
-            position={[0.45, -0.5, 0]}
-            width={0.35}
-            height={0.12}
+            position={[0.65, -0.69, 0]}
+            width={0.45}
+            height={0.16}
             focused
             disabled={focused === 10}
-            onSelect={() => setFocused(Math.min(10, focused + 1))}
+            onSelect={() => setFocused(focused + 1)}
           />
           <SpatialControl
+            label={t(factsPage === null ? "Точные значения" : "График")}
+            position={[0, 0.68, 0]}
+            width={0.9}
+            height={0.16}
+            focused
+            onSelect={() => setFactsPage(factsPage === null ? 0 : null)}
+          />
+          {factsPage !== null ? (
+            <>
+              <SpatialControl
+                label="←"
+                position={[-0.65, 0.68, 0]}
+                width={0.18}
+                height={0.16}
+                focused
+                disabled={factsPage === 0}
+                onSelect={() => setFactsPage(factsPage - 1)}
+              />
+              <SpatialControl
+                label="→"
+                position={[0.65, 0.68, 0]}
+                width={0.18}
+                height={0.16}
+                focused
+                disabled={factsPage >= pageCount - 1}
+                onSelect={() => setFactsPage(factsPage + 1)}
+              />
+            </>
+          ) : null}
+          <SpatialControl
             label={dataContext}
-            position={[0, -0.65, 0]}
-            width={1.28}
-            height={0.08}
+            position={[0, -0.86, 0]}
+            width={1.8}
+            height={0.1}
             focused
           />
         </group>
-      ) : null}
-      {!focused ? (
-        <SpatialControl
-          label={dataContext}
-          position={[0, 0.78, -1.8]}
-          width={1.8}
-          height={0.11}
-        />
-      ) : null}
-      {session ? (
-        <SpatialControl
-          label={t("Завершить XR-сеанс")}
-          position={[0, 0.56, -1.8]}
-          onSelect={() => void session.end()}
-        />
       ) : null}
     </>
   );
 }
 export default function SpatialView() {
   useLocale();
+  const [category, setCategory] = useState<SpatialCategory>("payments");
+  const [recenter, setRecenter] = useState(0);
+  const [factsPage, setFactsPage] = useState<number | null>(null);
+  const recenterSpace = () => {
+    setYaw(0);
+    setFocused(null);
+    setRecenter((value) => value + 1);
+  };
   const [yaw, setYaw] = useState(0),
     [focused, setFocused] = useState<number | null>(null),
     [support, setSupport] = useState({ ar: false, vr: false, checked: false });
+  useEffect(() => setFactsPage(null), [focused]);
   function lookAt(nextYaw: number) {
     setFocused(null);
     setYaw(nextYaw);
@@ -475,8 +523,33 @@ export default function SpatialView() {
         </div>
       </div>
       <div
+        className="xr-category-tabs"
+        role="group"
+        aria-label={t("Вид аналитики")}
+      >
+        {spatialCategories.map((c) => (
+          <Button
+            key={c.id}
+            aria-pressed={category === c.id}
+            className={category === c.id ? "selected" : ""}
+            onClick={() => {
+              setCategory(c.id);
+              setFocused(null);
+              setYaw(0);
+            }}
+          >
+            {t(c.label)}
+          </Button>
+        ))}
+        <Button onClick={recenterSpace}>
+          {t("Центрировать пространство")}
+        </Button>
+      </div>
+      <div
         className={`xr-canvas ${expanded ? "expanded" : ""}`}
         data-environment={theme}
+        data-category={category}
+        data-focus-view={factsPage === null ? "chart" : "facts"}
         role="group"
         aria-label={t(
           roomOnly
@@ -503,6 +576,12 @@ export default function SpatialView() {
                 setFocused={setFocused}
                 roomOnly={roomOnly}
                 dataContext={dataContext}
+                category={category}
+                setCategory={setCategory}
+                recenter={recenter}
+                onRecenter={recenterSpace}
+                factsPage={factsPage}
+                setFactsPage={setFactsPage}
               />
             </XR>
           </Canvas>
@@ -551,6 +630,48 @@ export default function SpatialView() {
                 : null}
             </NativeSelect>
           </div>
+          {focused && data ? (
+            <div className="xr-focus-actions">
+              <Button
+                aria-pressed={factsPage !== null}
+                onClick={() => setFactsPage(factsPage === null ? 0 : null)}
+              >
+                {t(factsPage === null ? "Точные значения" : "График")}
+              </Button>
+              {factsPage !== null ? (
+                <>
+                  <Button
+                    aria-label={t("Предыдущая страница")}
+                    disabled={factsPage === 0}
+                    onClick={() => setFactsPage(factsPage - 1)}
+                  >
+                    ←
+                  </Button>
+                  <span>
+                    {t("Страница {page} / {count}", {
+                      page: factsPage + 1,
+                      count: Math.ceil(
+                        dashboardModel(data!, focused).facts.length / 3,
+                      ),
+                    })}
+                  </span>
+                  <Button
+                    aria-label={t("Следующая страница")}
+                    disabled={
+                      factsPage >=
+                      Math.ceil(
+                        dashboardModel(data!, focused).facts.length / 3,
+                      ) -
+                        1
+                    }
+                    onClick={() => setFactsPage(factsPage + 1)}
+                  >
+                    →
+                  </Button>
+                </>
+              ) : null}
+            </div>
+          ) : null}
           <div className="xr-focus-navigation">
             <p role="status" className="xr-focus-status sr-only">
               {!data

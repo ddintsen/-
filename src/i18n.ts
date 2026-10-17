@@ -60,6 +60,22 @@ export function intlLocale(): string {
 // Source keys are the existing Russian UI copy. Only exact, known labels are
 // translated: arbitrary names and descriptions supplied by an API stay intact.
 const messages: Record<string, readonly [string, string]> = {
+  Устройства: ["Пристрої", "Devices"],
+  "Кассы кратко": ["Каси", "Cash"],
+  "Зоны внимания": ["Зони уваги", "Needs attention"],
+  "Порог внимания": ["Поріг уваги", "Attention threshold"],
+  "План / Порог": ["План / Поріг", "Plan / Threshold"],
+  "Выполнение / Статус": ["Виконання / Статус", "Performance / Status"],
+  "Не передано": ["Не передано", "Not supplied"],
+  "Выбрать дашборд": ["Обрати дашборд", "Choose dashboard"],
+  "Центрировать пространство": ["Центрувати простір", "Recenter space"],
+  "Предыдущая страница": ["Попередня сторінка", "Previous page"],
+  "Следующая страница": ["Наступна сторінка", "Next page"],
+  График: ["Графік", "Chart"],
+  "Страница {page} / {count}": [
+    "Сторінка {page} / {count}",
+    "Page {page} / {count}",
+  ],
   Орбита: ["Орбіта", "Orbita"],
   "Орбита — обзор": ["Орбіта — огляд", "Orbita — overview"],
   Обзор: ["Огляд", "Overview"],

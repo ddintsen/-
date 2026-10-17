@@ -13,6 +13,7 @@ import {
   TriangleAlert,
 } from "lucide-react";
 import { type ApiConfig, parseData, validateEndpoint } from "../api/schema";
+import { makeScenario } from "../api/scenarios";
 import { requestData } from "../api/client";
 import { useDashboardStore } from "../store/dashboard";
 import { getLocale, setLocale, t, useLocale } from "../i18n";
@@ -449,6 +450,9 @@ export function Admin({ onClose }: { onClose: () => void }) {
               <Button
                 key={x.id}
                 className="scenario"
+                aria-pressed={
+                  JSON.stringify(s.mock) === JSON.stringify(makeScenario(x.id))
+                }
                 variant="outline"
                 disabled={jsonDirty || quickDirty}
                 onClick={() => {

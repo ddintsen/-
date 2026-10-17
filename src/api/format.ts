@@ -27,13 +27,21 @@ export const formatTime = (time: number) =>
     second: "2-digit",
     timeZone: "Europe/Kyiv",
   }).format(time);
+// Display policy from the existing data contract; this is not a contractual SLA.
+export const DOWNTIME_LIMIT = 6.5;
+export const meterMaximum = (percent: number, mode: "plan" | "downtime") =>
+  mode === "plan"
+    ? Math.max(120, Math.ceil(percent / 20) * 20)
+    : Math.max(10, Math.ceil(percent / 5) * 5);
 export function gaugeTone(
   value: number,
   mode: "plan" | "downtime",
-): "success" | "warning" | "danger" {
-  return mode === "plan" || value <= 2
+): "success" | "cyan" | "warning" | "danger" {
+  if (mode === "plan")
+    return value >= 95 ? "success" : value >= 85 ? "cyan" : "warning";
+  return value <= 2
     ? "success"
-    : value <= 6.5
+    : value <= DOWNTIME_LIMIT
       ? "warning"
       : "danger";
 }

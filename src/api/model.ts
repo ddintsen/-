@@ -1,5 +1,10 @@
 import type { DashboardData } from "./schema";
-import { formatNumber, formatPercent } from "./format";
+import {
+  formatNumber,
+  formatPercent,
+  downtimeLabel,
+  DOWNTIME_LIMIT,
+} from "./format";
 import { formatDelta, formatReportDate, t } from "../i18n";
 import tokens from "../styles/tokens.json";
 export const colors = tokens.colors;
@@ -250,4 +255,45 @@ export function dashboardModel(
     ),
   );
   return m;
+}
+
+/** Keep unavailable absolute targets explicit; never derive them from rounded percentages. */
+export function comparisonRows(model: DashboardModel) {
+  if (model.kind === "monthly")
+    return model.metrics.map((metric, index) => ({
+      label: metric.label,
+      actual: `${formatNumber(metric.value)} ${model.unit ?? ""}`,
+      reference: t("План 100%"),
+      status: formatPercent(model.bars[index].values[0]),
+    }));
+  const gaugeLabels = model.gauges.map((g) => g.label);
+  return [
+    ...model.gauges.map((g) => ({
+      label: g.label,
+      actual:
+        g.mode === "downtime"
+          ? formatPercent(g.percent)
+          : g.value === undefined
+            ? t("Не передано")
+            : `${formatNumber(g.value)} ${g.unit ?? t("шт.")}`,
+      reference:
+        g.mode === "downtime"
+          ? `${t("Порог внимания")} ${formatPercent(DOWNTIME_LIMIT)}`
+          : t("План 100%"),
+      status:
+        g.mode === "downtime"
+          ? downtimeLabel(g.percent)
+          : formatPercent(g.percent),
+    })),
+    ...model.facts
+      .filter(
+        ([label]) => !gaugeLabels.some((g) => label.startsWith(`${g} · `)),
+      )
+      .map(([label, actual]) => ({
+        label,
+        actual,
+        reference: "—",
+        status: "—",
+      })),
+  ];
 }

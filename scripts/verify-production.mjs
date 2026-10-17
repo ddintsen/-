@@ -59,7 +59,7 @@ try {
   }, new URL("images/room.png", baseURL).href);
   if (!offlineRoom) throw new Error("Offline room asset unavailable");
   const offlineCards = await page.locator("[data-dashboard-id]").count();
-  if (offlineCards !== 9)
+  if (offlineCards !== 10)
     throw new Error("Default offline dashboard set incomplete");
   await page.getByRole("button", { name: "Вместе", exact: true }).click();
   if ((await page.locator("[data-dashboard-id]").count()) !== 10)

@@ -6,6 +6,7 @@ import { useLocale } from "../i18n";
 
 const surfaceColor = new Color(1, 1, 1);
 const hoverColor = new Color(1.16, 1.16, 1.16);
+const pressedColor = new Color(0.78, 0.78, 0.9);
 
 /** @dashboard Д1–Д10. Shared XR surface: fill feedback, pointer and disabled controls. */
 export function SpatialSurface({
@@ -17,6 +18,7 @@ export function SpatialSurface({
   onSelect,
   disabled = false,
   focused = false,
+  selected = false,
 }: {
   texture: CanvasTexture;
   position?: [number, number, number];
@@ -26,8 +28,10 @@ export function SpatialSurface({
   onSelect?: () => void;
   disabled?: boolean;
   focused?: boolean;
+  selected?: boolean;
 }) {
   const [hovered, setHovered] = useState(false);
+  const [pressed, setPressed] = useState(false);
   const { gl } = useThree();
   const interactive = !!onSelect && !disabled;
   useEffect(() => {
@@ -41,7 +45,7 @@ export function SpatialSurface({
   return (
     <group position={position}>
       <mesh
-        renderOrder={focused ? 10 : 0}
+        renderOrder={focused ? 10 : 2}
         onPointerOver={
           interactive
             ? (e) => {
@@ -50,7 +54,19 @@ export function SpatialSurface({
               }
             : undefined
         }
-        onPointerOut={() => setHovered(false)}
+        onPointerOut={() => {
+          setHovered(false);
+          setPressed(false);
+        }}
+        onPointerDown={
+          interactive
+            ? (e) => {
+                e.stopPropagation();
+                setPressed(true);
+              }
+            : undefined
+        }
+        onPointerUp={() => setPressed(false)}
         onClick={
           interactive
             ? (e) => {
@@ -66,9 +82,15 @@ export function SpatialSurface({
           transparent
           opacity={opacity * (disabled ? 0.4 : 1)}
           // Brighten the whole surface on hover, without a decorative rim or scale jump.
-          color={hovered && interactive ? hoverColor : surfaceColor}
+          color={
+            pressed
+              ? pressedColor
+              : (hovered && interactive) || selected
+                ? hoverColor
+                : surfaceColor
+          }
           toneMapped={false}
-          depthTest={!focused}
+          depthTest={false}
           depthWrite={false}
         />
       </mesh>
@@ -116,6 +138,7 @@ export function SpatialControl({
   height = 0.14,
   disabled = false,
   focused = false,
+  selected = false,
 }: {
   label: string;
   position: [number, number, number];
@@ -124,11 +147,12 @@ export function SpatialControl({
   height?: number;
   disabled?: boolean;
   focused?: boolean;
+  selected?: boolean;
 }) {
   const locale = useLocale();
   const texture = useMemo(
-    () => drawLabel(label, width / height),
-    [label, width, height, locale],
+    () => drawLabel(label, width / height, selected),
+    [label, width, height, locale, selected],
   );
   useEffect(() => () => texture.dispose(), [texture]);
   return (
@@ -140,6 +164,7 @@ export function SpatialControl({
       onSelect={onSelect}
       disabled={disabled}
       focused={focused}
+      selected={selected}
     />
   );
 }

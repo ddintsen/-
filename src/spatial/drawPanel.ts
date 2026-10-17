@@ -1,7 +1,46 @@
 import { CanvasTexture, SRGBColorSpace } from "three";
 import { type DashboardModel, colors, seriesColors } from "../api/model";
-import { formatNumber, formatPercent, gaugeTone } from "../api/format";
+import {
+  formatNumber,
+  formatPercent,
+  gaugeTone,
+  downtimeLabel,
+  DOWNTIME_LIMIT,
+  meterMaximum,
+} from "../api/format";
 import { t } from "../i18n";
+
+/** Shared truthful canvas scales: target fill for plan; position on a risk band for downtime. */
+function paintMeter(
+  ctx: CanvasRenderingContext2D,
+  percent: number,
+  mode: "plan" | "downtime",
+  x: number,
+  y: number,
+  width: number,
+  height: number,
+) {
+  const max = meterMaximum(percent, mode),
+    target = mode === "plan" ? 100 : DOWNTIME_LIMIT;
+  ctx.fillStyle = colors.border;
+  ctx.fillRect(x, y, width, height);
+  if (mode === "plan") {
+    ctx.fillStyle = colors[gaugeTone(percent, mode)];
+    ctx.fillRect(x, y, (width * percent) / max, height);
+  } else {
+    const gradient = ctx.createLinearGradient(x, y, x + width, y);
+    gradient.addColorStop(0, colors.success);
+    gradient.addColorStop(2 / max, colors.success);
+    gradient.addColorStop(DOWNTIME_LIMIT / max, colors.warning);
+    gradient.addColorStop(1, colors.danger);
+    ctx.fillStyle = gradient;
+    ctx.fillRect(x, y, width, height);
+    ctx.fillStyle = colors.text;
+    ctx.fillRect(x + (width * percent) / max - 3, y - 7, 6, height + 14);
+  }
+  ctx.fillStyle = colors.text;
+  ctx.fillRect(x + (width * target) / max, y - 4, 2, height + 8);
+}
 
 /** @dashboard Д1–Д10. Rasterize the same data model into the XR framebuffer, with Cyrillic fonts. */
 export function drawPanel(m: DashboardModel, compact: boolean): CanvasTexture {
@@ -17,10 +56,16 @@ export function drawPanel(m: DashboardModel, compact: boolean): CanvasTexture {
     color = colors.text,
     align: CanvasTextAlign = "left",
   ) => {
+    size = Math.max(32, size);
     ctx.font = `${size >= 36 ? 600 : 500} ${size}px "Inter Variable", sans-serif`;
     ctx.fillStyle = color;
     ctx.textAlign = align;
-    ctx.fillText(t(value), x, y);
+    ctx.fillText(
+      t(value),
+      x,
+      y,
+      align === "center" ? 360 : align === "right" ? x - 30 : 1230 - x,
+    );
   };
   const line = (
     x: number,
@@ -52,52 +97,40 @@ export function drawPanel(m: DashboardModel, compact: boolean): CanvasTexture {
     y: number,
     w: number,
   ) => {
-    const radius = w * 0.37,
-      cx = x + w / 2,
-      cy = y + radius + 16;
-    ctx.lineWidth = 18;
-    ctx.lineCap = "butt";
-    ctx.strokeStyle = colors.border;
-    ctx.beginPath();
-    ctx.arc(cx, cy, radius, Math.PI, Math.PI * 2);
-    ctx.stroke();
-    ctx.strokeStyle = colors[gaugeTone(g.percent, g.mode)];
-    ctx.beginPath();
-    ctx.arc(
-      cx,
-      cy,
-      radius,
-      Math.PI,
-      Math.PI + (Math.min(g.percent, 100) / 100) * Math.PI,
+    const tone = colors[gaugeTone(g.percent, g.mode)];
+    text(g.label, x, y + 32, 32, colors.muted);
+    text(formatPercent(g.percent), x, y + 92, 48, tone);
+    paintMeter(ctx, g.percent, g.mode, x, y + 120, w - 30, 12);
+    text(
+      g.mode === "plan" ? "План 100%" : downtimeLabel(g.percent),
+      x,
+      y + 183,
+      32,
+      colors.muted,
     );
-    ctx.stroke();
-    text(formatPercent(g.percent), cx, cy - 8, 42, colors.text, "center");
-    text(g.label, cx, cy + 52, 25, colors.muted, "center");
     if (g.value !== undefined)
       text(
-        `${formatNumber(g.value, compact)} ${g.unit ?? ""}`,
-        cx,
-        cy + 102,
-        30,
-        colors.text,
-        "center",
+        `${formatNumber(g.value, compact)} ${g.unit ?? t("шт.")}`,
+        x,
+        y + 238,
+        34,
       );
   };
   const bars = (x: number, y: number, w: number, h: number) => {
-    const max =
-      Math.max(
-        m.kind === "monthly" ? 115 : 1,
-        ...m.bars.flatMap((b) => b.values),
-      ) * 1.1;
+    if (m.kind === "monthly") {
+      m.bars.forEach((bar, index) =>
+        gauge(
+          { label: bar.label, percent: bar.values[0], mode: "plan" },
+          x,
+          y - 100 + index * 185,
+          w,
+        ),
+      );
+      return;
+    }
+    const max = Math.max(1, ...m.bars.flatMap((b) => b.values)) * 1.1;
     const group = w / Math.max(1, m.bars.length);
     line(x, y + h, x + w, y + h);
-    if (m.kind === "monthly") {
-      const target = y + h - (100 / max) * h;
-      ctx.setLineDash([8, 8]);
-      line(x, target, x + w, target, colors.muted);
-      ctx.setLineDash([]);
-      text("План 100%", x + w, target - 16, 21, colors.muted, "right");
-    }
     m.bars.forEach((b, i) => {
       const count = b.values.length,
         bw = Math.min(55, group / (count + 1));
@@ -111,9 +144,9 @@ export function drawPanel(m: DashboardModel, compact: boolean): CanvasTexture {
         ctx.fill();
         ctx.globalAlpha = 1;
         text(
-          m.kind === "monthly" ? formatPercent(v) : formatNumber(v),
+          formatNumber(v),
           bx + bw / 2,
-          y + h - bh - 18,
+          y + h - bh - 18 - (j === 1 ? 36 : 0),
           26,
           colors.text,
           "center",
@@ -248,7 +281,7 @@ export function drawPanel(m: DashboardModel, compact: boolean): CanvasTexture {
     gauge(m.gauges[0], 920, 290, 300);
   }
   if (m.kind === "staff") {
-    lines(90, 200, 690, 330);
+    lines(165, 200, 615, 330);
     text(
       String(m.metrics[0].value),
       1020,
@@ -261,7 +294,7 @@ export function drawPanel(m: DashboardModel, compact: boolean): CanvasTexture {
     gauge(m.gauges[0], 850, 410, 340);
   }
   if (m.kind === "equipment") {
-    lines(85, 200, 1110, 230);
+    lines(155, 200, 1040, 230);
     text("Простой", 70, 530, 25, colors.muted);
     m.gauges.forEach((g, i) => gauge(g, 150 + i * 360, 550, 230));
   }
@@ -270,17 +303,21 @@ export function drawPanel(m: DashboardModel, compact: boolean): CanvasTexture {
   texture.anisotropy = 4;
   return texture;
 }
-export function drawLabel(label: string, aspect = 6.4): CanvasTexture {
+export function drawLabel(
+  label: string,
+  aspect = 6.4,
+  selected = false,
+): CanvasTexture {
   const c = document.createElement("canvas");
   c.width = 1024;
   c.height = Math.round(c.width / aspect);
   const ctx = c.getContext("2d")!;
-  ctx.fillStyle = colors.elevated;
+  ctx.fillStyle = selected ? colors.purple : colors.elevated;
   ctx.beginPath();
   ctx.roundRect(2, 2, 1020, c.height - 4, c.height / 2 - 2);
   ctx.fill();
   ctx.font = `500 ${Math.round(c.height * 0.3)}px "Inter Variable", sans-serif`;
-  ctx.fillStyle = colors.text;
+  ctx.fillStyle = selected ? colors["on-primary"] : colors.text;
   ctx.textAlign = "center";
   ctx.textBaseline = "middle";
   ctx.fillText(t(label), 512, c.height / 2, 930);
@@ -366,41 +403,26 @@ export function drawOverviewPanel(m: DashboardModel): CanvasTexture {
       const x = 65 + i * 385;
       text(formatPercent(b.values[0]), x, 530, 75, seriesColors[i]);
       text(b.label, x, 590, 30, colors.muted);
+      paintMeter(ctx, b.values[0], "plan", x, 635, 320, 14);
+      text("План 100%", x, 710, 30, colors.muted);
     });
   }
   if (m.kind === "gauges" || m.kind === "equipment") {
     m.gauges.forEach((g, i) => {
-      const w = 1160 / m.gauges.length,
-        x = 60 + i * w;
-      const r = w * 0.37,
-        cx = x + w / 2,
-        cy = 425;
-      ctx.lineWidth = 22;
-      ctx.strokeStyle = colors.border;
-      ctx.beginPath();
-      ctx.arc(cx, cy, r, Math.PI, Math.PI * 2);
-      ctx.stroke();
-      ctx.strokeStyle = colors[gaugeTone(g.percent, g.mode)];
-      ctx.beginPath();
-      ctx.arc(
-        cx,
-        cy,
-        r,
-        Math.PI,
-        Math.PI + (Math.min(100, g.percent) / 100) * Math.PI,
+      const y = 230 + i * 170,
+        tone = colors[gaugeTone(g.percent, g.mode)];
+      text(g.label, 65, y, 42, colors.muted);
+      text(formatPercent(g.percent), 1200, y, 56, tone, "right");
+      paintMeter(ctx, g.percent, g.mode, 65, y + 30, 1135, 15);
+      text(
+        g.mode === "plan"
+          ? "План 100%"
+          : `${downtimeLabel(g.percent)} · ${t("Порог внимания")} ${formatPercent(DOWNTIME_LIMIT)}`,
+        65,
+        y + 96,
+        36,
+        colors.muted,
       );
-      ctx.stroke();
-      text(formatPercent(g.percent), cx, cy - 15, 62, colors.text, "center");
-      text(g.label, cx, 490, 30, colors.muted, "center");
-      if (g.value !== undefined)
-        text(
-          `${formatNumber(g.value, true)} ${g.unit ?? ""}`,
-          cx,
-          565,
-          44,
-          colors.text,
-          "center",
-        );
     });
   }
   if (m.kind === "cash") {
@@ -477,5 +499,44 @@ export function drawWing(title: string, aspect: number): CanvasTexture {
   ctx.fillText(t(title), 60, 100, c.width - 120);
   const texture = new CanvasTexture(c);
   texture.colorSpace = SRGBColorSpace;
+  return texture;
+}
+
+/** Paginate actual source facts instead of squeezing a desktop table onto a distant texture. */
+export function drawFacts(model: DashboardModel, page: number): CanvasTexture {
+  const c = document.createElement("canvas");
+  c.width = 1280;
+  c.height = 800;
+  const ctx = c.getContext("2d")!;
+  ctx.fillStyle = colors.background;
+  ctx.beginPath();
+  ctx.roundRect(3, 3, 1274, 794, 34);
+  ctx.fill();
+  const text = (
+    value: string,
+    x: number,
+    y: number,
+    size: number,
+    maxWidth = 1160,
+  ) => {
+    ctx.font = `500 ${size}px "Inter Variable", sans-serif`;
+    ctx.fillStyle = colors.text;
+    ctx.fillText(value, x, y, maxWidth);
+  };
+  text(model.title, 55, 75, 48);
+  text(
+    `${t("Точные значения")} · ${t("Страница {page} / {count}", { page: page + 1, count: Math.ceil(model.facts.length / 3) })}`,
+    55,
+    140,
+    36,
+  );
+  model.facts.slice(page * 3, page * 3 + 3).forEach(([label, value], index) => {
+    const y = 230 + index * 175;
+    text(label, 55, y, 42);
+    text(value, 55, y + 72, 60);
+  });
+  const texture = new CanvasTexture(c);
+  texture.colorSpace = SRGBColorSpace;
+  texture.anisotropy = 4;
   return texture;
 }

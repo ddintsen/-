@@ -4,6 +4,8 @@ import {
   formatPercent,
   gaugeTone,
   downtimeLabel,
+  DOWNTIME_LIMIT,
+  meterMaximum,
 } from "../api/format";
 import {
   colors,
@@ -17,6 +19,12 @@ import {
 import { useDashboardStore } from "../store/dashboard";
 import { t, useLocale } from "../i18n";
 import { Empty } from "./ui";
+
+/** Resolve semantic chart colors through the active DOM theme, preserving custom API colors. */
+function chartColor(color: string) {
+  const key = Object.entries(colors).find(([, value]) => value === color)?.[0];
+  return key ? `var(--color-${key})` : color;
+}
 
 /** Keep SVG coordinates in CSS pixels so narrow cards retain readable axis labels. */
 function useChartWidth(fallback: number) {
@@ -53,28 +61,41 @@ export function ArcGauge({
     gauge.value === undefined
       ? undefined
       : `${formatNumber(gauge.value)} ${gauge.unit ?? t("шт.")}`;
+  const maximum = meterMaximum(gauge.percent, gauge.mode);
+  const target = downtime ? DOWNTIME_LIMIT : 100;
   return (
-    <div className={`progress-gauge ${small ? "small" : ""}`} data-tone={tone}>
+    <div
+      className={`progress-gauge ${small ? "small" : ""} ${downtime ? "downtime-gauge" : "plan-gauge"}`}
+      data-tone={tone}
+    >
       <div className="progress-heading">
         <span className="progress-label">{label}</span>
-        <strong className="progress-percent" style={{ color: colors[tone] }}>
+        <strong className="progress-percent">
           {formatPercent(gauge.percent)}
         </strong>
       </div>
       <div
         className="progress-track"
+        style={
+          {
+            "--risk-position": `${(gauge.percent / maximum) * 100}%`,
+          } as import("react").CSSProperties
+        }
         role="meter"
         aria-label={label}
         aria-valuemin={0}
-        aria-valuemax={100}
-        aria-valuenow={Math.min(100, Math.max(0, gauge.percent))}
+        aria-valuemax={maximum}
+        aria-valuenow={gauge.percent}
         aria-valuetext={`${formatPercent(gauge.percent)}; ${status}${actual ? `; ${t("Факт")}: ${actual}` : ""}`}
       >
         <span
+          className="progress-target"
+          style={{ left: `${(target / maximum) * 100}%` }}
+        />
+        <span
           className="progress-fill"
           style={{
-            width: `${Math.min(100, Math.max(0, gauge.percent))}%`,
-            background: colors[tone],
+            width: `${(gauge.percent / maximum) * 100}%`,
           }}
         />
       </div>
@@ -88,7 +109,11 @@ export function ArcGauge({
             </strong>
           </span>
         ) : null}
-        <span className="progress-reference">{status}</span>
+        <span className="progress-reference">
+          {downtime
+            ? `${status} · ${t("Порог внимания")} ${formatPercent(DOWNTIME_LIMIT)}`
+            : status}
+        </span>
       </div>
     </div>
   );
@@ -142,11 +167,11 @@ export function GroupedBars({ bars }: { bars: Bar[] }) {
     <div className="grouped-bars" ref={ref}>
       <div className="chart-legend">
         <span>
-          <i style={{ background: colors.purple, opacity: 0.5 }} />
+          <i style={{ background: chartColor(colors.purple), opacity: 0.5 }} />
           {t("Январь")}
         </span>
         <span>
-          <i style={{ background: colors.purple }} />
+          <i style={{ background: chartColor(colors.purple) }} />
           {t("Отчётный месяц")}
         </span>
       </div>
@@ -157,8 +182,12 @@ export function GroupedBars({ bars }: { bars: Bar[] }) {
       >
         <defs>
           <linearGradient id={`${id}-channel`} x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor={colors.purple} />
-            <stop offset="100%" stopColor={colors.purple} stopOpacity=".45" />
+            <stop offset="0%" stopColor={chartColor(colors.purple)} />
+            <stop
+              offset="100%"
+              stopColor={chartColor(colors.purple)}
+              stopOpacity=".45"
+            />
           </linearGradient>
         </defs>
         {[0, 0.5, 1].map((t) => (
@@ -194,9 +223,13 @@ export function GroupedBars({ bars }: { bars: Bar[] }) {
                       width={barWidth}
                       height={h}
                       rx="4"
-                      fill={j === 0 ? colors.purple : `url(#${id}-channel)`}
+                      fill={
+                        j === 0
+                          ? chartColor(colors.purple)
+                          : `url(#${id}-channel)`
+                      }
                       opacity={j === 0 ? 0.3 : 1}
-                      stroke={colors.purple}
+                      stroke={chartColor(colors.purple)}
                       strokeWidth=".5"
                     />
                     <text
@@ -238,96 +271,18 @@ export function GroupedBars({ bars }: { bars: Bar[] }) {
 /** @dashboard Д2–Д3. A 100% reference line remains at its truthful scale. */
 export function PlanBars({ bars }: { bars: Bar[] }) {
   useLocale();
-  const id = useId().replace(/:/g, "");
-  const { ref, width } = useChartWidth(260);
-  const max = Math.max(
-    115,
-    ...bars.flatMap((b) => b.values).map((v) => v * 1.14),
-  );
-  const base = 162,
-    plot = 126,
-    group = width / Math.max(1, bars.length),
-    barWidth = Math.min(49, group * 0.58),
-    targetY = base - (100 / max) * plot;
   return (
-    <div className="plan-bars" ref={ref}>
-      <svg
-        viewBox={`0 0 ${width} 208`}
-        role="img"
-        aria-label={bars
-          .map((b) => `${t(b.label)}: ${formatPercent(b.values[0])}`)
-          .join(", ")}
-      >
-        <defs>
-          {seriesColors.map((c, i) => (
-            <linearGradient
-              key={c}
-              id={`${id}-${i}`}
-              x1="0"
-              y1="0"
-              x2="0"
-              y2="1"
-            >
-              <stop offset="0%" stopColor={c} />
-              <stop offset="100%" stopColor={c} stopOpacity=".32" />
-            </linearGradient>
-          ))}
-        </defs>
-        <line
-          x1="8"
-          x2={width - 8}
-          y1={targetY}
-          y2={targetY}
-          className="plan-target"
+    <div className="plan-bars plan-meters">
+      {bars.map((bar) => (
+        <ArcGauge
+          key={bar.label}
+          gauge={{ label: bar.label, percent: bar.values[0], mode: "plan" }}
         />
-        <text x="10" y="17" className="chart-label" style={{ fontSize: 12 }}>
-          {t("План 100%")}
-        </text>
-        {bars.map((b, i) => {
-          const h = (b.values[0] / max) * plot;
-          const top = base - h;
-          const candidate = h < 38 ? top - 9 : top + 24;
-          const valueY =
-            Math.abs(candidate - targetY) < 18 ? targetY + 25 : candidate;
-          const center = group * (i + 0.5);
-          return (
-            <g key={b.label}>
-              <rect
-                x={center - barWidth / 2}
-                y={base - h}
-                width={barWidth}
-                height={h}
-                rx="6"
-                fill={`url(#${id}-${i})`}
-              />
-              <text
-                x={center}
-                y={valueY}
-                textAnchor="middle"
-                className="bar-percent"
-                style={{
-                  fontSize: 15,
-                  fill: h < 38 ? colors.text : colors["on-primary"],
-                }}
-              >
-                {formatPercent(b.values[0])}
-              </text>
-              <text
-                x={center}
-                y="187"
-                textAnchor="middle"
-                className="chart-label"
-                style={{ fontSize: 12 }}
-              >
-                {i === 0 ? t("Всего") : t(b.label)}
-              </text>
-            </g>
-          );
-        })}
-      </svg>
+      ))}
     </div>
   );
 }
+
 export function Sparkline({
   points,
   color,
@@ -350,7 +305,7 @@ export function Sparkline({
       <polyline
         points={coords}
         fill="none"
-        stroke={color}
+        stroke={chartColor(color)}
         strokeWidth="1.8"
         strokeLinejoin="round"
         strokeLinecap="round"
@@ -408,7 +363,7 @@ export function Donut({
           cy="75"
           r="57"
           fill="none"
-          stroke={colors.border}
+          stroke={chartColor(colors.border)}
           strokeWidth="12"
         />
         {slices.map((s) => {
@@ -422,7 +377,7 @@ export function Donut({
               cy="75"
               r="57"
               fill="none"
-              stroke={s.color}
+              stroke={chartColor(s.color)}
               strokeWidth="12"
               pathLength="100"
               strokeDasharray={`${size} ${100 - size}`}
@@ -505,20 +460,26 @@ export function LineChart({
               {series.length === 1 ? (
                 <polygon
                   points={`${left},${base} ${pts.map((p) => p.join(",")).join(" ")} ${pts.at(-1)?.[0] ?? left},${base}`}
-                  fill={s.color}
+                  fill={chartColor(s.color)}
                   opacity=".07"
                 />
               ) : null}
               <polyline
                 points={pts.map((p) => p.join(",")).join(" ")}
                 fill="none"
-                stroke={s.color}
+                stroke={chartColor(s.color)}
                 strokeWidth="2.3"
                 strokeLinejoin="round"
                 strokeLinecap="round"
               />
               {pts.map(([x, y], i) => (
-                <circle key={i} cx={x} cy={y} r="2.8" fill={s.color} />
+                <circle
+                  key={i}
+                  cx={x}
+                  cy={y}
+                  r="2.8"
+                  fill={chartColor(s.color)}
+                />
               ))}
             </g>
           );
@@ -543,7 +504,7 @@ export function LineChart({
       <div className="chart-legend">
         {series.map((s) => (
           <span key={s.label}>
-            <i style={{ background: s.color }} />
+            <i style={{ background: chartColor(s.color) }} />
             {t(s.label)}
           </span>
         ))}

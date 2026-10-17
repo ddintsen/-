@@ -115,8 +115,15 @@ describe("Business semantics", () => {
   ] as const)("downtime %s is %s", (percent, tone) =>
     expect(gaugeTone(percent, "downtime")).toBe(tone),
   );
-  it.each([0, 5.2, 8.3, 102])("plan %s is never colored as downtime", (n) =>
-    expect(gaugeTone(n, "plan")).toBe("success"),
+  it.each([
+    [0, "warning"],
+    [84, "warning"],
+    [85, "cyan"],
+    [94.9, "cyan"],
+    [95, "success"],
+    [102, "success"],
+  ] as const)("plan %s uses its own achievement bands", (percent, tone) =>
+    expect(gaugeTone(percent, "plan")).toBe(tone),
   );
   it("keeps the base fixture immutable across scenarios", () => {
     const before = JSON.stringify(baseline);

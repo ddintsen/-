@@ -45,7 +45,7 @@ test("WebGL panel and in-scene controls navigate focus, with keyboard parity and
   await expect(
     page.getByRole("button", { name: "Предыдущий дашборд" }),
   ).toBeDisabled();
-  await clickWorld(page, -0.47, 0.28, 2.5);
+  await clickWorld(page, -0.6, 0.36, 1.85);
   await expect(picker).toHaveValue("1");
   await expect(page.locator(".xr-focus-status")).toHaveText(
     "Платежи по каналам",
@@ -53,7 +53,7 @@ test("WebGL panel and in-scene controls navigate focus, with keyboard parity and
   await expect(
     page.getByRole("button", { name: "Предыдущий дашборд" }),
   ).toBeDisabled();
-  await clickWorld(page, 0.45, -0.5, 1.1);
+  await clickWorld(page, 0.65, -0.69, 1.5);
   await expect(picker).toHaveValue("2");
   await page.getByRole("button", { name: "Предыдущий дашборд" }).click();
   await expect(picker).toHaveValue("1");
@@ -182,4 +182,27 @@ test("spatial mode explains strict API failure and recovers without a reload", a
   await expect(page.locator(".xr-focus-status")).toHaveText(
     "Состояние оборудования",
   );
+});
+
+test("spatial category raycasts, paged facts and recenter stay inside the workspace", async ({
+  page,
+}) => {
+  await openSpatial(page);
+  const canvas = page.locator(".xr-canvas");
+  await expect(canvas).toHaveAttribute("data-category", "payments");
+  await clickWorld(page, -0.84, 0.92, 1.85);
+  await expect(canvas).toHaveAttribute("data-category", "cash");
+  await clickWorld(page, -0.6, 0.36, 1.85);
+  await expect(page.getByLabel("Приблизить дашборд")).toHaveValue("5");
+  await clickWorld(page, 0, 0.68, 1.5);
+  await expect(canvas).toHaveAttribute("data-focus-view", "facts");
+  await expect(page.getByText("Страница 1 / 2", { exact: true })).toBeVisible();
+  await clickWorld(page, 0.65, 0.68, 1.5);
+  await expect(page.getByText("Страница 2 / 2", { exact: true })).toBeVisible();
+  await page
+    .getByRole("button", { name: "Центрировать пространство", exact: true })
+    .click();
+  await expect(page.getByLabel("Приблизить дашборд")).toHaveValue("0");
+  await expect(page.getByLabel("Поворот взгляда в градусах")).toHaveValue("0");
+  await expect(canvas).toHaveAttribute("data-focus-view", "chart");
 });

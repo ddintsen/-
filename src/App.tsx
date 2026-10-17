@@ -21,7 +21,12 @@ import {
 } from "lucide-react";
 import { useDashboardStore, startSync } from "./store/dashboard";
 import { dashboardModel } from "./api/model";
-import { formatSource, formatTime } from "./api/format";
+import {
+  formatSource,
+  formatTime,
+  formatPercent,
+  DOWNTIME_LIMIT,
+} from "./api/format";
 import {
   DashboardCard,
   DashboardContent,
@@ -56,7 +61,7 @@ export default function App() {
   const [focus, setFocus] = useState<number | null>(null),
     [spatial, setSpatial] = useState(false),
     [help, setHelp] = useState(false),
-    [monthly, setMonthly] = useState<"count" | "volume" | "both">("count");
+    [monthly, setMonthly] = useState<"count" | "volume" | "both">("both");
   const models = useMemo(
     () =>
       s.data
@@ -120,15 +125,22 @@ export default function App() {
     setAdmin(open);
   }
   const sourceLabel = formatSource(s.source, !!s.lastLive);
-  const activeEquipment =
-    s.data?.block3_atmTso.dashboard10_workingEquipmentAndDowntime;
-  const attention =
-    (activeEquipment?.downtime.filter((x) => x.percent > 6.5).length ?? 0) +
-    (s.data &&
-    s.data.block2_cashDesk.dashboard7_operationsAndStaff.downtimeTodayPercent >
-      6.5
-      ? 1
-      : 0);
+  const attention = models.flatMap((model) => [
+    ...model.gauges
+      .filter((g) =>
+        g.mode === "downtime" ? g.percent > DOWNTIME_LIMIT : g.percent < 85,
+      )
+      .map((g) => ({
+        id: model.id,
+        label: `${g.label}: ${formatPercent(g.percent)} · ${t(g.mode === "downtime" ? "Простой" : "Выполнение плана")}`,
+      })),
+    ...model.bars
+      .filter((b) => model.kind === "monthly" && b.values[0] < 85)
+      .map((b) => ({
+        id: model.id,
+        label: `${model.title} · ${b.label}: ${formatPercent(b.values[0])}`,
+      })),
+  ]);
   const monthlyControls = (
     <div
       className="monthly-switch"
@@ -372,10 +384,19 @@ export default function App() {
                     key={x.id}
                     className={view === x.id ? "selected" : ""}
                     aria-pressed={view === x.id}
+                    aria-label={t(x.label)}
                     onClick={() => navigate(x.id)}
                   >
                     <x.icon size={16} />
-                    {t(x.label)}
+                    {t(
+                      x.id === "equipment"
+                        ? "Устройства"
+                        : x.id === "cash"
+                          ? locale === "en"
+                            ? "Cash"
+                            : "Кассы"
+                          : x.label,
+                    )}
                   </Button>
                 ))}
               </nav>
@@ -452,7 +473,7 @@ export default function App() {
                 ) : null}
               </div>
             )}
-            {s.lastLive || attention ? (
+            {s.lastLive || attention.length ? (
               <footer className="workspace-footer">
                 {s.lastLive && s.updatedAt ? (
                   <div>
@@ -461,11 +482,20 @@ export default function App() {
                     })}
                   </div>
                 ) : null}
-                {attention ? (
-                  <span className="tone-danger">
-                    <Activity size={13} />
-                    {t("Зоны внимания: {count}", { count: attention })}
-                  </span>
+                {attention.length ? (
+                  <div
+                    className="attention-items"
+                    aria-label={t("Зоны внимания")}
+                  >
+                    <Activity size={16} />
+                    <span>{t("Зоны внимания")}</span>
+                    {attention.map((item, index) => (
+                      <Button key={index} onClick={() => setFocus(item.id)}>
+                        {item.label}
+                        <ArrowUpRight size={14} />
+                      </Button>
+                    ))}
+                  </div>
                 ) : null}
               </footer>
             ) : null}
@@ -487,16 +517,30 @@ export default function App() {
               onClick={() => setFocus(focus - 1)}
             >
               <ArrowLeft size={17} />
-              {t("Назад")}
+              <span>{focus > 1 ? models[focus - 2].title : t("Назад")}</span>
             </Button>
             <Button
               aria-label={t("Следующий дашборд")}
               disabled={focus === 10}
               onClick={() => setFocus(focus + 1)}
             >
-              {t("Далее")}
+              <span>{focus < 10 ? models[focus].title : t("Далее")}</span>
               <ArrowRight size={17} />
             </Button>
+          </nav>
+          <nav className="focus-jump" aria-label={t("Выбрать дашборд")}>
+            <span>{focus} / 10</span>
+            {models.map((m) => (
+              <Button
+                key={m.id}
+                aria-label={m.title}
+                aria-pressed={focus === m.id}
+                className={focus === m.id ? "selected" : ""}
+                onClick={() => setFocus(m.id)}
+              >
+                {m.id}
+              </Button>
+            ))}
           </nav>
           <div className="focus-content" key={focus}>
             <DashboardContent model={models[focus - 1]} />

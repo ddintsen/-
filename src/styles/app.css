@@ -2873,3 +2873,191 @@ textarea::placeholder {
 .progress-actual > strong {
   font-weight: 500;
 }
+
+/* Quest readability pass: separate target and risk semantics across DOM and XR. */
+.room-backdrop,
+[data-theme="dark"] .room-backdrop {
+  background: var(--color-background);
+  filter: none;
+}
+.room-backdrop:after {
+  display: none;
+}
+[data-theme="office"] {
+  color-scheme: light;
+  --color-background: var(--color-light-background);
+  --color-surface: var(--color-light-surface);
+  --color-elevated: var(--color-light-elevated);
+  --color-text: var(--color-light-text);
+  --color-muted: var(--color-light-muted);
+  --color-primary: var(--color-light-primary);
+  --color-on-primary: #fff;
+  --color-border: var(--color-light-border);
+  --color-success: var(--color-light-success);
+  --color-warning: var(--color-light-warning);
+  --color-danger: var(--color-light-danger);
+  --color-cyan: var(--color-light-cyan);
+  --color-purple: var(--color-light-purple);
+  --color-focus: var(--color-light-focus);
+  --color-chrome: var(--color-light-surface);
+  --color-glass: var(--color-light-surface);
+  --color-card-dark: var(--color-light-surface);
+  --color-card: var(--color-light-surface);
+  --color-card-hover: var(--color-light-elevated);
+  --color-control-glass: rgba(20, 35, 60, 0.06);
+  --color-rim-light: rgba(255, 255, 255, 0.8);
+  --panel-bg: var(--color-light-surface);
+  --card-bg: var(--color-light-surface);
+  --panel-shadow:
+    inset 0 1px 0 var(--color-rim-light), 0 12px 32px rgba(25, 40, 60, 0.08);
+}
+[data-theme="office"] .modal-content {
+  background: var(--color-light-surface);
+}
+[data-theme="office"] .metric-trend,
+[data-theme="office"] .chart-value {
+  color: var(--color-light-muted);
+  fill: var(--color-light-text);
+}
+[data-theme="office"] .metric-trend > span {
+  color: var(--color-light-muted) !important;
+}
+.wing-heading h2 {
+  background: none;
+  box-shadow: none;
+  backdrop-filter: none;
+  padding: 0 4px;
+  font-size: 15px;
+  font-weight: 600;
+}
+.progress-gauge[data-tone="success"] {
+  --meter-color: var(--color-success);
+}
+.progress-gauge[data-tone="cyan"] {
+  --meter-color: var(--color-cyan);
+}
+.progress-gauge[data-tone="warning"] {
+  --meter-color: var(--color-warning);
+}
+.progress-gauge[data-tone="danger"] {
+  --meter-color: var(--color-danger);
+}
+.progress-percent {
+  color: var(--meter-color);
+}
+.progress-track {
+  position: relative;
+  height: 8px;
+  overflow: visible;
+}
+.progress-fill {
+  background: var(--meter-color);
+}
+.progress-target {
+  position: absolute;
+  top: -4px;
+  height: 16px;
+  width: 2px;
+  background: var(--color-muted);
+  z-index: 1;
+}
+.downtime-gauge .progress-track {
+  height: 12px;
+  background: linear-gradient(
+    90deg,
+    var(--color-success),
+    var(--color-warning) 50%,
+    var(--color-danger)
+  );
+  border-radius: 2px;
+}
+.downtime-gauge .progress-fill {
+  position: absolute;
+  top: -4px;
+  height: 20px;
+  width: 3px !important;
+  margin-left: calc(var(--risk-position, 0%) - 1px);
+  background: var(--color-text);
+  border-radius: 1px;
+}
+.downtime-gauge .progress-target {
+  top: 0;
+  height: 12px;
+  opacity: 0.7;
+}
+.plan-meters {
+  display: grid;
+  gap: 22px;
+  width: 100%;
+}
+.monthly-layout .plan-meters {
+  min-width: 0;
+}
+.attention-items {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  width: 100%;
+}
+.attention-items .button {
+  white-space: normal;
+  text-align: left;
+  border: 1px solid var(--color-border);
+  font-size: 12px;
+}
+.focus-jump {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  margin: 16px 0;
+}
+.focus-jump > span {
+  margin-right: 10px;
+  color: var(--color-muted);
+}
+.focus-jump .button {
+  min-width: 38px;
+  min-height: 40px;
+  padding: 6px;
+}
+.focus-navigation .button {
+  max-width: 48%;
+  text-align: left;
+  white-space: normal;
+  min-width: 0;
+}
+.focus-navigation .button:last-child {
+  text-align: right;
+}
+.xr-category-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 12px 0;
+}
+.xr-category-tabs .button {
+  font-size: 12px;
+  white-space: normal;
+}
+.scenario[aria-pressed="true"] {
+  background: var(--color-control-glass);
+  box-shadow: inset 0 0 0 2px var(--color-focus);
+}
+@media (max-width: 1023px) {
+  .view-tabs {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    overflow: visible;
+  }
+  .view-tabs .button {
+    min-width: 0;
+    padding: 10px 4px;
+    justify-content: center;
+    font-size: 12px;
+  }
+  .view-tabs .button svg {
+    display: none;
+  }
+}
