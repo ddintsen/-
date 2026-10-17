@@ -1602,9 +1602,6 @@ textarea::placeholder {
   .equipment-gauges .gauge-label {
     font-size: 12px;
   }
-  .workspace-footer > span {
-    display: none;
-  }
 }
 @media (min-width: 761px) {
   .workspace-toolbar,
@@ -1927,7 +1924,8 @@ textarea::placeholder {
     padding-bottom: 24px;
   }
   .workspace-footer {
-    font-size: 8px;
+    flex-wrap: wrap;
+    font-size: 11px;
   }
   .workspace-footer > div {
     flex-wrap: wrap;
