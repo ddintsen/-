@@ -2,6 +2,14 @@ import { test, expect } from "@playwright/test";
 import AxeBuilder from "@axe-core/playwright";
 import data from "../../public/mock/dashboard-data.json" with { type: "json" };
 
+// Preserve the established Russian regressions; fresh UA/EN sessions live in localization.spec.ts.
+test.beforeEach(async ({ context }) => {
+  await context.addInitScript(() => {
+    if (!localStorage.getItem("orbita-locale"))
+      localStorage.setItem("orbita-locale", "ru");
+  });
+});
+
 test("all ten dashboards open, show exact data, close with focus restored", async ({
   page,
 }) => {
@@ -11,10 +19,14 @@ test("all ten dashboards open, show exact data, close with focus restored", asyn
   await page.getByRole("button", { name: "Вместе", exact: true }).click();
   await expect(page.locator("[data-dashboard-id]")).toHaveCount(10);
   for (let id = 1; id <= 10; id++) {
-    const trigger = page.locator(`[data-dashboard-id="${id}"] button`);
+    const trigger = page.locator(`[data-dashboard-id="${id}"] .focus-button`);
     await trigger.click();
     const dialog = page.getByRole("dialog");
     await expect(dialog).toBeVisible();
+    await expect(dialog.locator("details")).toHaveAttribute("open", "");
+    await expect(dialog.locator("tbody tr").first()).toBeVisible();
+    await dialog.locator("summary").click();
+    await expect(dialog.locator("tbody tr").first()).not.toBeVisible();
     await dialog.locator("summary").click();
     await expect(dialog.locator("tbody tr").first()).toBeVisible();
     await page.keyboard.press("Escape");
@@ -36,7 +48,7 @@ test("focused dashboards navigate without closing and restore the original trigg
   await dialog.locator("summary").click();
   await next.click();
   await expect(dialog.getByRole("heading")).toHaveText("Количество платежей");
-  await expect(dialog.locator("details")).not.toHaveAttribute("open");
+  await expect(dialog.locator("details")).toHaveAttribute("open", "");
   await previous.click();
   await expect(dialog.getByRole("heading")).toHaveText("Платежи по каналам");
   for (let id = 2; id <= 10; id++) await next.click();
@@ -61,7 +73,9 @@ test("navigation restores URL, browser back, theme and format controls work", as
   await expect(page.locator('[data-dashboard-id="5"]')).toBeVisible();
   await page.getByRole("button", { name: "Показать полные числа" }).click();
   await expect(page.locator('[data-dashboard-id="5"]')).toContainText(
-    "21 310 811",
+    new Intl.NumberFormat("ru-RU").format(
+      data.block2_cashDesk.dashboard5_operationTypes.types[0].count,
+    ),
   );
   await page.getByRole("button", { name: "Включить тёмное окружение" }).click();
   await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
@@ -99,14 +113,14 @@ test("scenario and quick editor sync demo data to another tab", async ({
   await page.goto("/?admin=1");
   const peer = await context.newPage();
   await peer.goto("/");
-  await page.getByRole("button", { name: "Демонстрация", exact: true }).click();
+  await page.getByRole("tab", { name: "Демонстрация", exact: true }).click();
   await page.getByRole("button", { name: /Сбой оборудования/ }).click();
   await expect(
     peer.locator('[data-dashboard-id="7"] .vacancy strong'),
   ).toContainText("38");
   await expect(
     peer.locator('[data-dashboard-id="10"] [data-tone="danger"]'),
-  ).toHaveCount(2);
+  ).toHaveCount(3);
   await page.getByLabel("Доля в ДБО, %").fill("91");
   await page.getByLabel("Вакансии кассиров").fill("12");
   await page.getByLabel("Простой АТМ, %").fill("1.5");
@@ -123,7 +137,7 @@ test("invalid JSON preserves data, valid JSON applies, unsaved edits are guarded
   page,
 }) => {
   await page.goto("/?admin=1");
-  await page.getByRole("button", { name: "Демонстрация", exact: true }).click();
+  await page.getByRole("tab", { name: "Демонстрация", exact: true }).click();
   const json = page.getByLabel("Редактор JSON");
   await json.fill("{");
   await page
@@ -159,6 +173,7 @@ test("API success, fallback, strict failure and token memory-only storage", asyn
     }),
   );
   await page.goto("/?admin=1");
+  await page.getByRole("tab", { name: "Подключение API", exact: true }).click();
   await page.getByLabel("Источник", { exact: true }).selectOption("hybrid");
   await page.getByLabel("Обновление", { exact: true }).selectOption("0");
   await page.getByLabel("Адрес API").fill("/api/test");
@@ -207,10 +222,11 @@ test("a stale API response cannot overwrite a newer demo scenario", async ({
       .catch(() => {});
   });
   await page.goto("/?admin=1");
+  await page.getByRole("tab", { name: "Подключение API", exact: true }).click();
   await page.getByLabel("Источник", { exact: true }).selectOption("hybrid");
   await page.getByLabel("Адрес API").fill("/api/slow");
   await page.getByRole("button", { name: "Сохранить подключение" }).click();
-  await page.getByRole("button", { name: "Демонстрация", exact: true }).click();
+  await page.getByRole("tab", { name: "Демонстрация", exact: true }).click();
   await page.getByRole("button", { name: /Закрытие года/ }).click();
   await page.getByRole("button", { name: "Закрыть", exact: true }).click();
   await page.waitForTimeout(1300);
@@ -223,7 +239,7 @@ test("empty data series render meaningful states", async ({ page }) => {
   empty.block2_cashDesk.dashboard7_operationsAndStaff.workingCashDesksByDay =
     [];
   await page.goto("/?admin=1");
-  await page.getByRole("button", { name: "Демонстрация", exact: true }).click();
+  await page.getByRole("tab", { name: "Демонстрация", exact: true }).click();
   await page.getByLabel("Редактор JSON").fill(JSON.stringify(empty));
   await page
     .getByRole("button", { name: "Применить демоданные", exact: true })
@@ -244,10 +260,11 @@ test("keyboard, reduced motion and mobile have no horizontal overflow", async ({
       () => document.documentElement.scrollWidth <= innerWidth,
     ),
   ).toBe(true);
-  await page.locator('[data-dashboard-id="1"] button').click();
+  await page.locator('[data-dashboard-id="1"] .focus-button').click();
   await expect(page.getByRole("dialog")).toBeVisible();
   await page.keyboard.press("Escape");
   await page.getByRole("button", { name: "Источники данных" }).click();
+  await page.getByRole("tab", { name: "Подключение API", exact: true }).click();
   await page.getByLabel("Адрес API").fill("http://insecure.example.com/data");
   await page
     .getByRole("button", { name: "Проверить соединение", exact: true })
@@ -268,7 +285,7 @@ test("accessibility audit on overview, focused values and settings", async ({
   await page.goto("/");
   for (const state of ["overview", "focus", "settings"]) {
     if (state === "focus")
-      await page.locator('[data-dashboard-id="1"] button').click();
+      await page.locator('[data-dashboard-id="1"] .focus-button').click();
     if (state === "settings") {
       await page.keyboard.press("Escape");
       await page
@@ -318,7 +335,7 @@ test("simulation can be stopped and JSON changes from another tab do not overwri
   context,
 }) => {
   await page.goto("/?admin=1");
-  await page.getByRole("button", { name: "Демонстрация", exact: true }).click();
+  await page.getByRole("tab", { name: "Демонстрация", exact: true }).click();
   await page.getByRole("button", { name: "Запустить", exact: true }).click();
   await expect(
     page.getByRole("button", { name: "Остановить", exact: true }),
@@ -331,7 +348,7 @@ test("simulation can be stopped and JSON changes from another tab do not overwri
   await editor.fill(original + " ");
   const peer = await context.newPage();
   await peer.goto("/?admin=1");
-  await peer.getByRole("button", { name: "Демонстрация", exact: true }).click();
+  await peer.getByRole("tab", { name: "Демонстрация", exact: true }).click();
   await peer.getByRole("button", { name: /Закрытие года/ }).click();
   await expect(
     page.getByText(/Данные изменились в другой вкладке/),
@@ -349,13 +366,14 @@ test("keyboard native settings select, quick validation and JSON download", asyn
   page,
 }) => {
   await page.goto("/?admin=1");
+  await page.getByRole("tab", { name: "Подключение API", exact: true }).click();
   const mode = page.getByLabel("Источник", { exact: true });
+  await expect(mode).toHaveValue("hybrid");
   await mode.focus();
   await page.keyboard.press("ArrowDown");
   await page.keyboard.press("Enter");
-  await expect(mode).toHaveValue("hybrid");
-  await mode.selectOption("mock");
-  await page.getByRole("button", { name: "Демонстрация", exact: true }).click();
+  await expect(mode).toHaveValue("live");
+  await page.getByRole("tab", { name: "Демонстрация", exact: true }).click();
   await page.getByLabel("Доля в ДБО, %").fill("120");
   await page
     .getByRole("button", { name: "Применить показатели", exact: true })
@@ -379,7 +397,7 @@ test("long API labels, full numbers, dark theme and mobile settings stay usable"
   long.block1_payments.dashboard1_channels.channels[0].name =
     "Корпоративный интернет-банк";
   await page.goto("/?admin=1");
-  await page.getByRole("button", { name: "Демонстрация", exact: true }).click();
+  await page.getByRole("tab", { name: "Демонстрация", exact: true }).click();
   await page.getByLabel("Редактор JSON").fill(JSON.stringify(long));
   await page.getByRole("button", { name: "Применить демоданные" }).click();
   await page.getByRole("button", { name: "Закрыть", exact: true }).click();
@@ -394,7 +412,7 @@ test("long API labels, full numbers, dark theme and mobile settings stay usable"
     ).toBe(true);
   }
   await page.getByRole("button", { name: "Источники данных" }).click();
-  await page.getByRole("button", { name: "Демонстрация", exact: true }).click();
+  await page.getByRole("tab", { name: "Демонстрация", exact: true }).click();
   const scan = await new AxeBuilder({ page })
     .withTags(["wcag2a", "wcag2aa", "wcag21aa", "wcag22aa"])
     .analyze();

@@ -1,5 +1,6 @@
 import type { DashboardData } from "./schema";
 import { formatNumber, formatPercent } from "./format";
+import { formatDelta, formatReportDate, t } from "../i18n";
 import tokens from "../styles/tokens.json";
 export const colors = tokens.colors;
 export const seriesColors = [colors.cyan, colors.purple, colors.orange];
@@ -57,7 +58,7 @@ export function dashboardModel(
     e = data.block3_atmTso;
   const m: DashboardModel = {
     id,
-    title: titles[id],
+    title: t(titles[id]),
     subtitle: "",
     kind: "gauges",
     gauges: [],
@@ -74,43 +75,50 @@ export function dashboardModel(
   ) =>
     items.map((x, i): Gauge => ({
       ...x,
+      label: t(x.label),
       mode: "plan",
       unit: currency(i) ? data.meta.currency : undefined,
     }));
   if (id === 1) {
     m.kind = "channels";
-    m.subtitle = "млн шт.";
+    m.subtitle = t("млн шт.");
     m.bars = p.dashboard1_channels.channels.map((x) => ({
-      label: x.name,
+      label: t(x.name),
       values: [x.jan, x.cur],
     }));
     m.share = p.dashboard1_channels.dboSharePercent;
     m.slices = [
-      { label: "В ДБО", value: m.share, color: colors.purple },
-      { label: "В отделениях", value: 100 - m.share, color: colors.border },
+      { label: t("В ДБО"), value: m.share, color: colors.purple },
+      { label: t("В отделениях"), value: 100 - m.share, color: colors.border },
     ];
     m.facts = m.bars.flatMap(
       (x) =>
         [
-          [`${x.label} · январь`, `${formatNumber(x.values[0])} млн шт.`],
           [
-            `${x.label} · отчётный месяц`,
-            `${formatNumber(x.values[1])} млн шт.`,
+            `${x.label} · ${t("январь")}`,
+            `${formatNumber(x.values[0])} ${t("млн шт.")}`,
+          ],
+          [
+            `${x.label} · ${t("отчётный месяц")}`,
+            `${formatNumber(x.values[1])} ${t("млн шт.")}`,
           ],
         ] as [string, string][],
     );
-    m.facts.push(["Доля в ДБО", formatPercent(m.share)]);
+    m.facts.push([t("Доля в ДБО"), formatPercent(m.share)]);
   }
   if (id === 2 || id === 3) {
     const d = id === 2 ? p.dashboard2_monthlyCount : p.dashboard3_monthlyVolume;
     m.kind = "monthly";
-    m.subtitle = "План на месяц";
-    m.unit = id === 3 ? data.meta.currency : "шт.";
-    m.bars = d.planBars.map((x) => ({ label: x.label, values: [x.percent] }));
+    m.subtitle = t("План на месяц");
+    m.unit = id === 3 ? data.meta.currency : t("шт.");
+    m.bars = d.planBars.map((x) => ({
+      label: t(x.label),
+      values: [x.percent],
+    }));
     m.metrics = d.cards.map((x, i) => ({
-      label: x.title.replace(/ \(₴\)/g, ""),
+      label: t(x.title.replace(/ \(₴\)/g, "")),
       value: x.value,
-      delta: x.delta,
+      delta: formatDelta(x.delta),
       spark: x.spark,
       color: seriesColors[i],
       unit: m.unit,
@@ -127,35 +135,42 @@ export function dashboardModel(
   }
   if (id === 4) {
     m.gauges = plans(p.dashboard4_ytdMain, (i) => i > 0);
-    m.subtitle = `План ${data.meta.ytdStartLabel}`;
+    m.subtitle = t("План {period}", {
+      period: formatReportDate(data.meta.ytdStartLabel),
+    });
   }
   if (id === 5) {
     m.kind = "cash";
-    m.subtitle = "За месяц";
+    m.subtitle = t("За месяц");
     m.slices = c.dashboard5_operationTypes.types.map((x) => ({
-      label: x.name,
+      label: t(x.name),
       value: x.count,
       color: x.color,
     }));
     m.gauges = [
       {
-        label: "Месячный план",
+        label: t("Месячный план"),
         percent: c.dashboard5_operationTypes.monthlyPlanPercent,
         mode: "plan",
       },
     ];
-    m.facts = m.slices.map((x) => [x.label, `${formatNumber(x.value)} шт.`]);
+    m.facts = m.slices.map((x) => [
+      x.label,
+      `${formatNumber(x.value)} ${t("шт.")}`,
+    ]);
   }
   if (id === 6) {
     m.gauges = plans(c.dashboard6_ytdMain, (i) => i > 0);
-    m.subtitle = `План ${data.meta.ytdStartLabel}`;
+    m.subtitle = t("План {period}", {
+      period: formatReportDate(data.meta.ytdStartLabel),
+    });
   }
   if (id === 7) {
     const d = c.dashboard7_operationsAndStaff;
     m.kind = "staff";
     m.series = [
       {
-        label: "Работающие кассы",
+        label: t("Работающие кассы"),
         points: d.workingCashDesksByDay,
         color: colors.cyan,
       },
@@ -165,39 +180,41 @@ export function dashboardModel(
     );
     m.metrics = [
       {
-        label: "Открытые вакансии",
+        label: t("Открытые вакансии"),
         value: d.staffShortageVacancies,
         color: d.staffShortageVacancies > 20 ? colors.danger : colors.warning,
       },
     ];
     m.gauges = [
       {
-        label: "Простой сегодня",
+        label: t("Простой сегодня"),
         percent: d.downtimeTodayPercent,
         mode: "downtime",
       },
     ];
-    m.facts = [["Открытые вакансии", formatNumber(d.staffShortageVacancies)]];
+    m.facts = [
+      [t("Открытые вакансии"), formatNumber(d.staffShortageVacancies)],
+    ];
   }
   if (id === 8 || id === 9) {
     m.gauges = plans(
       id === 8 ? e.dashboard8_operationsCount : e.dashboard9_operationsVolume,
       () => id === 9,
     );
-    m.subtitle = "Выполнение плана";
+    m.subtitle = t("Выполнение плана");
   }
   if (id === 10) {
     const d = e.dashboard10_workingEquipmentAndDowntime;
     m.kind = "equipment";
-    m.subtitle = "Работающие устройства";
+    m.subtitle = t("Работающие устройства");
     m.days = d.days;
     m.series = [
-      { label: "ТСО", points: d.tsoLine, color: colors.success },
-      { label: "АТМ", points: d.atmLine, color: colors.purple },
+      { label: t("ТСО"), points: d.tsoLine, color: colors.success },
+      { label: t("АТМ"), points: d.atmLine, color: colors.purple },
       { label: "Recycle", points: d.recLine, color: colors.cyan },
     ];
     m.gauges = d.downtime.map((x) => ({
-      label: x.name,
+      label: x.name === "Rec" ? "Recycle" : t(x.name),
       percent: x.percent,
       mode: "downtime",
     }));
@@ -207,15 +224,15 @@ export function dashboardModel(
       (x) =>
         [
           [
-            `${x.label} · ${x.mode === "plan" ? "выполнение плана" : "простой"}`,
+            `${x.label} · ${t(x.mode === "plan" ? "выполнение плана" : "простой")}`,
             formatPercent(x.percent),
           ],
           ...(x.value === undefined
             ? []
             : [
                 [
-                  `${x.label} · значение`,
-                  `${formatNumber(x.value)} ${x.unit ?? "шт."}`,
+                  `${x.label} · ${t("значение")}`,
+                  `${formatNumber(x.value)} ${x.unit ?? t("шт.")}`,
                 ],
               ]),
         ] as [string, string][],
@@ -225,7 +242,7 @@ export function dashboardModel(
     ...m.series.flatMap((s) =>
       s.points.map(
         (v, i) =>
-          [`${s.label} · день ${m.days[i]}`, formatNumber(v)] as [
+          [`${s.label} · ${t("день")} ${m.days[i]}`, formatNumber(v)] as [
             string,
             string,
           ],

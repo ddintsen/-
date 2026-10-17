@@ -1,0 +1,422 @@
+{
+  "checkedAt": "2026-10-17T19:45:44.707Z",
+  "matrix": [
+    {
+      "locale": "uk",
+      "width": 360,
+      "view": "overview",
+      "overflow": false,
+      "visibleNav": 1,
+      "meters": 15
+    },
+    {
+      "locale": "uk",
+      "width": 360,
+      "view": "payments",
+      "overflow": false,
+      "visibleNav": 1,
+      "meters": 3
+    },
+    {
+      "locale": "uk",
+      "width": 360,
+      "view": "cash",
+      "overflow": false,
+      "visibleNav": 1,
+      "meters": 5
+    },
+    {
+      "locale": "uk",
+      "width": 360,
+      "view": "equipment",
+      "overflow": false,
+      "visibleNav": 1,
+      "meters": 7
+    },
+    {
+      "locale": "uk",
+      "width": 390,
+      "view": "overview",
+      "overflow": false,
+      "visibleNav": 1,
+      "meters": 15
+    },
+    {
+      "locale": "uk",
+      "width": 390,
+      "view": "payments",
+      "overflow": false,
+      "visibleNav": 1,
+      "meters": 3
+    },
+    {
+      "locale": "uk",
+      "width": 390,
+      "view": "cash",
+      "overflow": false,
+      "visibleNav": 1,
+      "meters": 5
+    },
+    {
+      "locale": "uk",
+      "width": 390,
+      "view": "equipment",
+      "overflow": false,
+      "visibleNav": 1,
+      "meters": 7
+    },
+    {
+      "locale": "uk",
+      "width": 768,
+      "view": "overview",
+      "overflow": false,
+      "visibleNav": 1,
+      "meters": 15
+    },
+    {
+      "locale": "uk",
+      "width": 768,
+      "view": "payments",
+      "overflow": false,
+      "visibleNav": 1,
+      "meters": 3
+    },
+    {
+      "locale": "uk",
+      "width": 768,
+      "view": "cash",
+      "overflow": false,
+      "visibleNav": 1,
+      "meters": 5
+    },
+    {
+      "locale": "uk",
+      "width": 768,
+      "view": "equipment",
+      "overflow": false,
+      "visibleNav": 1,
+      "meters": 7
+    },
+    {
+      "locale": "uk",
+      "width": 1024,
+      "view": "overview",
+      "overflow": false,
+      "visibleNav": 1,
+      "meters": 15
+    },
+    {
+      "locale": "uk",
+      "width": 1024,
+      "view": "payments",
+      "overflow": false,
+      "visibleNav": 1,
+      "meters": 3
+    },
+    {
+      "locale": "uk",
+      "width": 1024,
+      "view": "cash",
+      "overflow": false,
+      "visibleNav": 1,
+      "meters": 5
+    },
+    {
+      "locale": "uk",
+      "width": 1024,
+      "view": "equipment",
+      "overflow": false,
+      "visibleNav": 1,
+      "meters": 7
+    },
+    {
+      "locale": "uk",
+      "width": 1280,
+      "view": "overview",
+      "overflow": false,
+      "visibleNav": 1,
+      "meters": 15
+    },
+    {
+      "locale": "uk",
+      "width": 1280,
+      "view": "payments",
+      "overflow": false,
+      "visibleNav": 1,
+      "meters": 3
+    },
+    {
+      "locale": "uk",
+      "width": 1280,
+      "view": "cash",
+      "overflow": false,
+      "visibleNav": 1,
+      "meters": 5
+    },
+    {
+      "locale": "uk",
+      "width": 1280,
+      "view": "equipment",
+      "overflow": false,
+      "visibleNav": 1,
+      "meters": 7
+    },
+    {
+      "locale": "uk",
+      "width": 1600,
+      "view": "overview",
+      "overflow": false,
+      "visibleNav": 1,
+      "meters": 15
+    },
+    {
+      "locale": "uk",
+      "width": 1600,
+      "view": "payments",
+      "overflow": false,
+      "visibleNav": 1,
+      "meters": 3
+    },
+    {
+      "locale": "uk",
+      "width": 1600,
+      "view": "cash",
+      "overflow": false,
+      "visibleNav": 1,
+      "meters": 5
+    },
+    {
+      "locale": "uk",
+      "width": 1600,
+      "view": "equipment",
+      "overflow": false,
+      "visibleNav": 1,
+      "meters": 7
+    },
+    {
+      "locale": "en",
+      "width": 360,
+      "view": "overview",
+      "overflow": false,
+      "visibleNav": 1,
+      "meters": 15
+    },
+    {
+      "locale": "en",
+      "width": 360,
+      "view": "payments",
+      "overflow": false,
+      "visibleNav": 1,
+      "meters": 3
+    },
+    {
+      "locale": "en",
+      "width": 360,
+      "view": "cash",
+      "overflow": false,
+      "visibleNav": 1,
+      "meters": 5
+    },
+    {
+      "locale": "en",
+      "width": 360,
+      "view": "equipment",
+      "overflow": false,
+      "visibleNav": 1,
+      "meters": 7
+    },
+    {
+      "locale": "en",
+      "width": 390,
+      "view": "overview",
+      "overflow": false,
+      "visibleNav": 1,
+      "meters": 15
+    },
+    {
+      "locale": "en",
+      "width": 390,
+      "view": "payments",
+      "overflow": false,
+      "visibleNav": 1,
+      "meters": 3
+    },
+    {
+      "locale": "en",
+      "width": 390,
+      "view": "cash",
+      "overflow": false,
+      "visibleNav": 1,
+      "meters": 5
+    },
+    {
+      "locale": "en",
+      "width": 390,
+      "view": "equipment",
+      "overflow": false,
+      "visibleNav": 1,
+      "meters": 7
+    },
+    {
+      "locale": "en",
+      "width": 768,
+      "view": "overview",
+      "overflow": false,
+      "visibleNav": 1,
+      "meters": 15
+    },
+    {
+      "locale": "en",
+      "width": 768,
+      "view": "payments",
+      "overflow": false,
+      "visibleNav": 1,
+      "meters": 3
+    },
+    {
+      "locale": "en",
+      "width": 768,
+      "view": "cash",
+      "overflow": false,
+      "visibleNav": 1,
+      "meters": 5
+    },
+    {
+      "locale": "en",
+      "width": 768,
+      "view": "equipment",
+      "overflow": false,
+      "visibleNav": 1,
+      "meters": 7
+    },
+    {
+      "locale": "en",
+      "width": 1024,
+      "view": "overview",
+      "overflow": false,
+      "visibleNav": 1,
+      "meters": 15
+    },
+    {
+      "locale": "en",
+      "width": 1024,
+      "view": "payments",
+      "overflow": false,
+      "visibleNav": 1,
+      "meters": 3
+    },
+    {
+      "locale": "en",
+      "width": 1024,
+      "view": "cash",
+      "overflow": false,
+      "visibleNav": 1,
+      "meters": 5
+    },
+    {
+      "locale": "en",
+      "width": 1024,
+      "view": "equipment",
+      "overflow": false,
+      "visibleNav": 1,
+      "meters": 7
+    },
+    {
+      "locale": "en",
+      "width": 1280,
+      "view": "overview",
+      "overflow": false,
+      "visibleNav": 1,
+      "meters": 15
+    },
+    {
+      "locale": "en",
+      "width": 1280,
+      "view": "payments",
+      "overflow": false,
+      "visibleNav": 1,
+      "meters": 3
+    },
+    {
+      "locale": "en",
+      "width": 1280,
+      "view": "cash",
+      "overflow": false,
+      "visibleNav": 1,
+      "meters": 5
+    },
+    {
+      "locale": "en",
+      "width": 1280,
+      "view": "equipment",
+      "overflow": false,
+      "visibleNav": 1,
+      "meters": 7
+    },
+    {
+      "locale": "en",
+      "width": 1600,
+      "view": "overview",
+      "overflow": false,
+      "visibleNav": 1,
+      "meters": 15
+    },
+    {
+      "locale": "en",
+      "width": 1600,
+      "view": "payments",
+      "overflow": false,
+      "visibleNav": 1,
+      "meters": 3
+    },
+    {
+      "locale": "en",
+      "width": 1600,
+      "view": "cash",
+      "overflow": false,
+      "visibleNav": 1,
+      "meters": 5
+    },
+    {
+      "locale": "en",
+      "width": 1600,
+      "view": "equipment",
+      "overflow": false,
+      "visibleNav": 1,
+      "meters": 7
+    }
+  ],
+  "accessibility": [
+    {
+      "locale": "uk",
+      "state": "overview",
+      "violations": []
+    },
+    {
+      "locale": "uk",
+      "state": "focus",
+      "violations": []
+    },
+    {
+      "locale": "uk",
+      "state": "settings",
+      "violations": []
+    },
+    {
+      "locale": "en",
+      "state": "overview",
+      "violations": []
+    },
+    {
+      "locale": "en",
+      "state": "focus",
+      "violations": []
+    },
+    {
+      "locale": "en",
+      "state": "settings",
+      "violations": []
+    }
+  ],
+  "errors": []
+}

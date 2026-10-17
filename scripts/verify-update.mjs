@@ -129,6 +129,8 @@ try {
     fs.readFileSync(path.join(root, "public/mock/dashboard-data.json"), "utf8"),
   );
   data.meta.reportDate = "Сохранённый период";
+  data.block3_atmTso.dashboard10_workingEquipmentAndDowntime.downtime[2].name =
+    "Rec";
   const saved = {
     "orbita-demo-v1": JSON.stringify(data),
     "orbita-config-v1": JSON.stringify({
@@ -143,6 +145,11 @@ try {
     phase = "legacy";
     const context = await browser.newContext({
       viewport: { width: 1440, height: 1000 },
+    });
+    // The legacy fixture is Russian; pin the same locale across the real upgrade.
+    await context.addInitScript(() => {
+      if (!localStorage.getItem("orbita-locale"))
+        localStorage.setItem("orbita-locale", "ru");
     });
     context.setDefaultTimeout(30000);
     const page = await context.newPage();
@@ -191,6 +198,9 @@ try {
     }
     await page.goto(`${baseURL}?orbita-update=1`);
     await expect(page.locator("h1")).toHaveText("Обзор", { timeout: 30000 });
+    await expect(page.locator(".card-10 .progress-label").nth(2)).toHaveText(
+      "Recycle",
+    );
     await expect(page).toHaveURL(baseURL);
     await expect(
       page.locator(".eyebrow, .dashboard-index, .wing-symbol"),
@@ -220,6 +230,9 @@ try {
       await page.bringToFront();
       await page
         .getByRole("button", { name: "Источники данных", exact: true })
+        .click();
+      await page
+        .getByRole("tab", { name: "Подключение API", exact: true })
         .click();
       const draft = "/api/unsaved-draft";
       await page.getByLabel("Адрес API").fill(draft);
@@ -293,6 +306,7 @@ try {
     realLegacyCachedUI: true,
     cleanOverview: true,
     savedDemoAndConfigPreserved: true,
+    legacyRecycleLabel: true,
     siblingNotReloaded: true,
     subsequentUpdateWaitsForClick: true,
     unsavedDraftAndGuardPreserved: true,

@@ -1,0 +1,10 @@
+{
+  "singleHtml": true,
+  "fileProtocolTested": false,
+  "dashboards": 10,
+  "focus": true,
+  "navigation": true,
+  "webgl": true,
+  "externalRequests": 0,
+  "errors": []
+}

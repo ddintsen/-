@@ -1,8 +1,10 @@
 import { useEffect, useRef, useState } from "react";
 import { Button } from "./ui";
+import { t, useLocale } from "../i18n";
 
 /** Updates are explicit: never reload another tab, a draft or an XR session automatically. */
 export function AppUpdate() {
+  useLocale();
   const registration = useRef<ServiceWorkerRegistration | null>(null);
   const applying = useRef(false);
   const [ready, setReady] = useState(false);
@@ -81,7 +83,7 @@ export function AppUpdate() {
   if (!ready) return null;
   return (
     <div className="app-update" role="status">
-      {error ? <p>Не удалось обновить. Повторите.</p> : null}
+      {error ? <p>{t("Не удалось обновить. Повторите.")}</p> : null}
       <Button
         variant="primary"
         busy={busy}
@@ -104,7 +106,7 @@ export function AppUpdate() {
           }
         }}
       >
-        Обновить приложение
+        {t("Обновить приложение")}
       </Button>
     </div>
   );

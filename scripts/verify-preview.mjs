@@ -1,8 +1,12 @@
-import { chromium } from "@playwright/test";
+import { chromium, expect } from "@playwright/test";
 import fs from "node:fs";
 import { createServer } from "node:http";
+import path from "node:path";
 
 const html = fs.readFileSync("standalone-dist/orbita-preview.html");
+const evidenceDirectory = path.resolve(
+  process.env.PREVIEW_EVIDENCE_DIR || "docs/evidence",
+);
 const server = createServer((request, response) => {
   response.writeHead(200, { "Content-Type": "text/html; charset=utf-8" });
   response.end(html);
@@ -17,6 +21,9 @@ try {
   const context = await browser.newContext({
     viewport: { width: 1440, height: 1000 },
   });
+  await context.addInitScript(() =>
+    localStorage.setItem("orbita-locale", "ru"),
+  );
   const page = await context.newPage();
   const errors = [],
     requests = [];
@@ -31,7 +38,13 @@ try {
   if ((await page.locator("[data-dashboard-id]").count()) !== 10)
     throw new Error("Standalone dashboards incomplete");
   await page.locator('[data-dashboard-id="1"] .focus-button').click();
-  await page.getByRole("dialog").locator("summary").click();
+  await expect(page.getByRole("dialog").locator("details")).toHaveAttribute(
+    "open",
+    "",
+  );
+  await expect(
+    page.getByRole("dialog").locator("tbody tr").first(),
+  ).toBeVisible();
   await page.keyboard.press("Escape");
   await page
     .getByRole("navigation", { name: "Вид аналитики" })
@@ -51,7 +64,10 @@ try {
   )
     throw new Error("Standalone XR navigation failed");
   await page.waitForTimeout(400);
-  await page.screenshot({ path: "docs/evidence/standalone-preview.png" });
+  fs.mkdirSync(evidenceDirectory, { recursive: true });
+  await page.screenshot({
+    path: path.join(evidenceDirectory, "standalone-preview.png"),
+  });
   const result = {
     singleHtml: true,
     fileProtocolTested: false,
@@ -63,7 +79,7 @@ try {
     errors,
   };
   fs.writeFileSync(
-    "docs/evidence/standalone-smoke.json",
+    path.join(evidenceDirectory, "standalone-smoke.json"),
     JSON.stringify(result, null, 2) + "\n",
   );
   console.log(result);

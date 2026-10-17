@@ -90,12 +90,60 @@ export type ApiConfig = {
   pollingSec: number;
 };
 export type Source = "mock" | "simulation" | "live" | "fallback" | "error";
+
+// Keep validation errors as controlled source copy. The UI translates on render
+// so a language change also updates errors already held in a form or store.
+function validationMessage(issue: z.core.$ZodIssue, input: unknown): string {
+  switch (issue.code) {
+    case "invalid_type": {
+      const types: Record<string, string> = {
+        string: "строка",
+        number: "число",
+        int: "целое число",
+        array: "массив",
+        object: "объект",
+        boolean: "логическое значение",
+        undefined: "отсутствующее значение",
+        bigint: "большое целое число",
+        symbol: "символ",
+      };
+      const actual = issue.path.reduce<unknown>(
+        (current, key) =>
+          current !== null && typeof current === "object"
+            ? (current as Record<PropertyKey, unknown>)[key]
+            : undefined,
+        input,
+      );
+      const received =
+        actual === null
+          ? "null"
+          : Array.isArray(actual)
+            ? "массив"
+            : typeof actual === "number" && !Number.isFinite(actual)
+              ? "нефинитное число"
+              : types[typeof actual];
+      return `Ожидается ${types[issue.expected] ?? "значение подходящего типа"}; получено: ${received}.`;
+    }
+    case "too_small":
+      return `Минимум: ${issue.minimum}.`;
+    case "too_big":
+      return `Максимум: ${issue.maximum}.`;
+    case "invalid_format":
+      return "Неверный формат значения.";
+    case "invalid_value":
+      return "Недопустимое значение.";
+    case "custom":
+      return issue.message;
+    default:
+      return "Некорректное значение.";
+  }
+}
 export function parseData(input: unknown): DashboardData {
   const result = dashboardSchema.safeParse(input);
   if (!result.success) {
     const issue = result.error.issues[0];
     throw new Error(
-      `Проверьте ${issue.path.join(".") || "корень JSON"}: ${issue.message}`,
+      `Проверьте ${issue.path.join(".") || "корень JSON"}: ${validationMessage(issue, input)}`,
     );
   }
   return result.data;

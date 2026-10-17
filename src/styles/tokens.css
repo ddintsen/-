@@ -20,7 +20,12 @@
   --color-scrollbar-hover: #c0bbcd;
   --color-scrollbar-active: #f1edf9;
   --color-glass: rgba(44, 45, 51, 0.76);
-  --color-card: rgba(38, 39, 46, 0.8);
+  --color-card: rgba(31, 34, 44, 0.88);
+  --color-material-top: rgba(38, 41, 52, 0.82);
+  --color-material-bottom: rgba(24, 26, 34, 0.93);
+  --color-rim-light: rgba(255, 255, 255, 0.22);
+  --color-rim-shadow: rgba(255, 255, 255, 0.05);
+  --color-control-glass: rgba(255, 255, 255, 0.07);
   --color-card-hover: rgba(45, 46, 54, 0.94);
   --color-glass-dark: rgba(28, 29, 39, 0.88);
   --color-card-dark: rgba(24, 26, 34, 0.95);

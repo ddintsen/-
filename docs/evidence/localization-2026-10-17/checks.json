@@ -1,0 +1,68 @@
+{
+  "checkedAt": "2026-10-17T19:51:38.802055+00:00",
+  "phase": "local-validation",
+  "unit": {
+    "passed": 53,
+    "failed": 0
+  },
+  "e2e": {
+    "passed": 29,
+    "failed": 0,
+    "skipped": 0
+  },
+  "deploymentUnit": {
+    "passed": 6,
+    "failed": 0
+  },
+  "build": "passed with VITE_BASE_PATH=/-/",
+  "typecheck": "passed in build",
+  "tokens": "passed",
+  "format": "passed",
+  "responsive": {
+    "cases": 48,
+    "languages": [
+      "uk",
+      "en"
+    ],
+    "widths": [
+      360,
+      390,
+      768,
+      1024,
+      1280,
+      1600
+    ],
+    "views": [
+      "overview",
+      "payments",
+      "cash",
+      "equipment"
+    ],
+    "overflow": 0,
+    "navigationProblems": 0
+  },
+  "accessibility": {
+    "scans": 6,
+    "violations": 0
+  },
+  "financialFullNumbers": {
+    "widths": [
+      360,
+      390,
+      768,
+      1024,
+      1280,
+      1440,
+      1600
+    ],
+    "outOfCardValues": 0
+  },
+  "production": "PWA,manifest,profiles,10offline dashboards,offline room/WebGL; errors=[]",
+  "legacyUpgrade": "Both activation orders; saved JSON/config,Rec display alias,sibling tab,unsaved draft,explicit future update,offline preserved; errors=[]",
+  "standalone": "10 dashboards,focus,navigation,WebGL; externalRequests=0; errors=[]; file:// not tested",
+  "limits": [
+    "Physical Quest not available/tested",
+    "Real API endpoint not provided/tested",
+    "Cloud snapshot publication and restoration not established by this coding task"
+  ]
+}

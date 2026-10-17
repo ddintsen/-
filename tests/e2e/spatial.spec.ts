@@ -2,6 +2,14 @@ import { test, expect, type Page } from "@playwright/test";
 import AxeBuilder from "@axe-core/playwright";
 import data from "../../public/mock/dashboard-data.json" with { type: "json" };
 
+// Keep the spatial regression language explicit; the app now defaults to Ukrainian.
+test.beforeEach(async ({ context }) => {
+  await context.addInitScript(() => {
+    if (!localStorage.getItem("orbita-locale"))
+      localStorage.setItem("orbita-locale", "ru");
+  });
+});
+
 async function openSpatial(page: Page) {
   await page.goto("/");
   await page.getByRole("button", { name: /Открыть в пространстве/ }).click();
@@ -142,6 +150,7 @@ test("spatial mode explains strict API failure and recovers without a reload", a
     }),
   );
   await page.goto("/?admin=1");
+  await page.getByRole("tab", { name: "Подключение API", exact: true }).click();
   await page.getByLabel("Источник", { exact: true }).selectOption("live");
   await page.getByLabel("Обновление", { exact: true }).selectOption("0");
   await page.getByLabel("Адрес API").fill("/api/spatial-test");

@@ -20,6 +20,10 @@ try {
     baseURL,
     viewport: { width: 1440, height: 1000 },
   });
+  // Keep the existing production assertions explicit while fresh UA/EN are covered by E2E.
+  await context.addInitScript(() =>
+    localStorage.setItem("orbita-locale", "ru"),
+  );
   const page = await context.newPage();
   const errors = [];
   page.on("pageerror", (e) => errors.push(e.message));

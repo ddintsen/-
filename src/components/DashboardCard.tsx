@@ -1,7 +1,9 @@
 import { Maximize2 } from "lucide-react";
+import type { ReactNode } from "react";
 import { type DashboardModel } from "../api/model";
 import { formatNumber, formatPercent } from "../api/format";
 import { useDashboardStore } from "../store/dashboard";
+import { t, useLocale } from "../i18n";
 import {
   ArcGauge,
   GroupedBars,
@@ -14,6 +16,7 @@ import { Button } from "./ui";
 
 /** @dashboard Д1–Д10. One shared card/view adapter drives overview and Deep Focus. */
 export function DashboardContent({ model: m }: { model: DashboardModel }) {
+  useLocale();
   const compact = useDashboardStore((s) => s.compact);
   if (m.kind === "channels")
     return (
@@ -23,10 +26,12 @@ export function DashboardContent({ model: m }: { model: DashboardModel }) {
           <Donut
             slices={m.slices}
             center={formatPercent(m.share ?? 0)}
-            label="доля в ДБО"
+            label={t("доля в ДБО")}
           />
           <div className="chart-legend">
-            <span>В отделениях {formatPercent(100 - (m.share ?? 0))}</span>
+            <span>
+              {t("В отделениях")} {formatPercent(100 - (m.share ?? 0))}
+            </span>
           </div>
         </div>
       </div>
@@ -60,7 +65,7 @@ export function DashboardContent({ model: m }: { model: DashboardModel }) {
               m.slices.reduce((a, b) => a + b.value, 0),
               true,
             )}
-            label="операций"
+            label={t("операций")}
           />
           <ArcGauge gauge={m.gauges[0]} small />
         </div>
@@ -69,7 +74,7 @@ export function DashboardContent({ model: m }: { model: DashboardModel }) {
             <div key={s.label}>
               <span>
                 <i style={{ background: s.color }} />
-                {s.label}
+                {t(s.label)}
               </span>
               <strong title={formatNumber(s.value)}>
                 {formatNumber(s.value, compact)}
@@ -87,7 +92,7 @@ export function DashboardContent({ model: m }: { model: DashboardModel }) {
           <div className="vacancy">
             <strong style={{ color: m.metrics[0].color }}>
               {m.metrics[0].value}
-              <span>вакансий</span>
+              <span>{t("вакансий")}</span>
             </strong>
           </div>
           <ArcGauge gauge={m.gauges[0]} small />
@@ -98,7 +103,7 @@ export function DashboardContent({ model: m }: { model: DashboardModel }) {
     <>
       <LineChart series={m.series} days={m.days} />
       <div className="equipment-downtime">
-        <p>Простой</p>
+        <p>{t("Простой")}</p>
         <div className="gauges-row equipment-gauges">
           {m.gauges.map((g) => (
             <ArcGauge key={g.label} gauge={g} small />
@@ -111,10 +116,13 @@ export function DashboardContent({ model: m }: { model: DashboardModel }) {
 export function DashboardCard({
   model,
   onFocus,
+  controls,
 }: {
   model: DashboardModel;
   onFocus: (id: number) => void;
+  controls?: ReactNode;
 }) {
+  useLocale();
   return (
     <article
       className={`dashboard-card card-${model.id}`}
@@ -123,40 +131,44 @@ export function DashboardCard({
       <header className="card-heading">
         <div>
           <div className="card-title">
-            <h3>{model.title}</h3>
+            <h3>{t(model.title)}</h3>
           </div>
-          {model.subtitle ? <p>{model.subtitle}</p> : null}
+          {model.subtitle ? <p>{t(model.subtitle)}</p> : null}
         </div>
         <Button
           className="focus-button icon-button"
-          aria-label={`В фокус: ${model.title}`}
-          title="В фокус"
+          aria-label={`${t("В фокус")}: ${t(model.title)}`}
+          title={t("В фокус")}
           onClick={() => onFocus(model.id)}
         >
           <Maximize2 size={15} />
         </Button>
       </header>
+      {controls ? <div className="card-controls">{controls}</div> : null}
       <DashboardContent model={model} />
     </article>
   );
 }
 export function DataTable({ model }: { model: DashboardModel }) {
+  useLocale();
   return (
-    <details className="data-details">
-      <summary>Точные значения</summary>
+    <details className="data-details" open>
+      <summary>{t("Точные значения")}</summary>
       <div className="table-scroll">
         <table>
-          <caption className="sr-only">{model.title}: точные значения</caption>
+          <caption className="sr-only">
+            {t(model.title)}: {t("Точные значения")}
+          </caption>
           <thead>
             <tr>
-              <th scope="col">Показатель</th>
-              <th scope="col">Значение</th>
+              <th scope="col">{t("Показатель")}</th>
+              <th scope="col">{t("Значение")}</th>
             </tr>
           </thead>
           <tbody>
             {model.facts.map(([label, value], i) => (
               <tr key={i}>
-                <th scope="row">{label}</th>
+                <th scope="row">{t(label)}</th>
                 <td>{value}</td>
               </tr>
             ))}

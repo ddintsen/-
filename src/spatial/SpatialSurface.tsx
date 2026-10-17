@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useThree } from "@react-three/fiber";
 import { Color, type CanvasTexture } from "three";
 import { drawLabel, drawWing } from "./drawPanel";
+import { useLocale } from "../i18n";
 
 const surfaceColor = new Color(1, 1, 1);
 const hoverColor = new Color(1.16, 1.16, 1.16);
@@ -89,9 +90,10 @@ export function SpatialWing({
   position: [number, number, number];
   opacity?: number;
 }) {
+  const locale = useLocale();
   const texture = useMemo(
     () => drawWing(title, width / height),
-    [title, width, height],
+    [title, width, height, locale],
   );
   useEffect(() => () => texture.dispose(), [texture]);
   return (
@@ -123,9 +125,10 @@ export function SpatialControl({
   disabled?: boolean;
   focused?: boolean;
 }) {
+  const locale = useLocale();
   const texture = useMemo(
     () => drawLabel(label, width / height),
-    [label, width, height],
+    [label, width, height, locale],
   );
   useEffect(() => () => texture.dispose(), [texture]);
   return (

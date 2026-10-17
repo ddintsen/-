@@ -31,6 +31,7 @@ import { drawPanel, drawOverviewPanel } from "./drawPanel";
 import { SpatialSurface, SpatialWing, SpatialControl } from "./SpatialSurface";
 import { ProceduralRoom } from "./ProceduralRoom";
 import { Button, NativeSelect } from "../components/ui";
+import { formatReportDate, t, useLocale } from "../i18n";
 
 // No remote hand/controller model download. Local profile JSON resolves controller buttons.
 const xrStore = createXRStore({
@@ -61,8 +62,9 @@ class GraphicsBoundary extends Component<
   render() {
     return this.state.failed ? (
       <div className="graphics-error">
-        Не удалось запустить WebGL. Включите аппаратное ускорение браузера;
-        обычные дашборды остаются доступны.
+        {t(
+          "Не удалось запустить WebGL. Включите аппаратное ускорение браузера; обычные дашборды остаются доступны.",
+        )}
       </div>
     ) : (
       this.props.children
@@ -85,9 +87,10 @@ function Panel({
   onSelect: () => void;
 }) {
   const compact = useDashboardStore((s) => s.compact);
+  const locale = useLocale();
   const texture = useMemo(
     () => (focused ? drawPanel(model, compact) : drawOverviewPanel(model)),
-    [model, compact, focused],
+    [model, compact, focused, locale],
   );
   useEffect(() => () => texture.dispose(), [texture]);
   return (
@@ -117,6 +120,7 @@ function Scene({
   setFocused: (v: number | null) => void;
 }) {
   const data = useDashboardStore((s) => s.data);
+  const locale = useLocale();
   const theme = useDashboardStore((s) => s.theme);
   const { camera, gl, size, invalidate, setFrameloop } = useThree();
   const mode = useXR((s) => s.mode);
@@ -128,11 +132,15 @@ function Scene({
       data
         ? Array.from({ length: 10 }, (_, i) => dashboardModel(data, i + 1))
         : [],
-    [data],
+    [data, locale],
   );
   useEffect(() => {
     gl.setClearColor(colors.background, mode === "immersive-ar" ? 0 : 1);
   }, [gl, mode]);
+  useEffect(() => {
+    // A language change redraws canvas textures even while the browser scene is idle.
+    invalidate();
+  }, [locale, invalidate]);
   useEffect(() => {
     // Static browser scenes redraw on interaction; head tracking needs every XR frame.
     setFrameloop(session ? "always" : "demand");
@@ -182,13 +190,13 @@ function Scene({
         {session ? (
           <>
             <SpatialControl
-              label="Данные недоступны"
+              label={t("Данные недоступны")}
               position={[0, 1.7, -1.1]}
               width={0.9}
               height={0.16}
             />
             <SpatialControl
-              label="Завершить XR-сеанс"
+              label={t("Завершить XR-сеанс")}
               position={[0, 1.45, -1.1]}
               onSelect={() => void session.end()}
             />
@@ -202,7 +210,7 @@ function Scene({
       {room}
       <group position={[0, 1.6, -1.8]}>
         <SpatialWing
-          title="Платежи"
+          title={t("Платежи")}
           width={2}
           height={1.66}
           position={[0, 0.04, -0.025]}
@@ -229,13 +237,13 @@ function Scene({
           ids: [5, 6, 7],
           x: -1.55,
           angle: 0.48,
-          title: "Кассовые операции",
+          title: t("Кассовые операции"),
         },
         {
           ids: [8, 9, 10],
           x: 1.55,
           angle: -0.48,
-          title: "Оборудование",
+          title: t("Оборудование"),
         },
       ].map((wing) => (
         <group
@@ -272,7 +280,7 @@ function Scene({
             onSelect={() => setFocused(null)}
           />
           <SpatialControl
-            label="← Назад"
+            label={t("← Назад")}
             position={[-0.45, -0.5, 0]}
             width={0.35}
             height={0.12}
@@ -281,7 +289,7 @@ function Scene({
             onSelect={() => setFocused(Math.max(1, focused - 1))}
           />
           <SpatialControl
-            label="Панорама"
+            label={t("Панорама")}
             position={[0, -0.5, 0]}
             width={0.43}
             height={0.12}
@@ -289,7 +297,7 @@ function Scene({
             onSelect={() => setFocused(null)}
           />
           <SpatialControl
-            label="Далее →"
+            label={t("Далее →")}
             position={[0.45, -0.5, 0]}
             width={0.35}
             height={0.12}
@@ -316,7 +324,7 @@ function Scene({
       ) : null}
       {session ? (
         <SpatialControl
-          label="Завершить XR-сеанс"
+          label={t("Завершить XR-сеанс")}
           position={[0, 0.56, -1.8]}
           onSelect={() => void session.end()}
         />
@@ -325,6 +333,7 @@ function Scene({
   );
 }
 export default function SpatialView() {
+  useLocale();
   const [yaw, setYaw] = useState(0),
     [focused, setFocused] = useState<number | null>(null),
     [support, setSupport] = useState({ ar: false, vr: false, checked: false });
@@ -385,10 +394,9 @@ export default function SpatialView() {
     }
   }
   const data = useDashboardStore((s) => s.data);
-  const dataContext = useDashboardStore(
-    (s) =>
-      `${formatSource(s.source, !!s.lastLive)} · ${s.data?.meta.reportDate ?? "Нет данных"}`,
-  );
+  const source = useDashboardStore((s) => s.source);
+  const hasLiveSnapshot = useDashboardStore((s) => !!s.lastLive);
+  const dataContext = `${formatSource(source, hasLiveSnapshot)} · ${data ? formatReportDate(data.meta.reportDate) : t("Нет данных")}`;
   const loading = useDashboardStore((s) => s.busy);
   const refresh = useDashboardStore((s) => s.refresh);
   useEffect(() => {
@@ -404,7 +412,7 @@ export default function SpatialView() {
             onClick={() => void enter("ar")}
           >
             <Glasses size={18} />
-            Войти в AR
+            {t("Войти в AR")}
           </Button>
           <Button
             variant="primary"
@@ -412,7 +420,7 @@ export default function SpatialView() {
             onClick={() => void enter("vr")}
             busy={busy}
           >
-            Войти в VR
+            {t("Войти в VR")}
           </Button>
         </div>
       </div>
@@ -420,7 +428,7 @@ export default function SpatialView() {
         <div
           className="xr-environments"
           role="group"
-          aria-label="Окружение предпросмотра"
+          aria-label={t("Окружение предпросмотра")}
         >
           <Button
             className={theme === "office" ? "selected" : ""}
@@ -428,7 +436,7 @@ export default function SpatialView() {
             onClick={() => useDashboardStore.setState({ theme: "office" })}
           >
             <Sun size={15} />
-            Кабинет
+            {t("Кабинет")}
           </Button>
           <Button
             className={theme === "dark" ? "selected" : ""}
@@ -436,7 +444,7 @@ export default function SpatialView() {
             onClick={() => useDashboardStore.setState({ theme: "dark" })}
           >
             <Moon size={15} />
-            Тёмное окружение
+            {t("Тёмное окружение")}
           </Button>
         </div>
         <div className="xr-preview-actions">
@@ -451,18 +459,18 @@ export default function SpatialView() {
             }}
           >
             {roomOnly ? <Eye size={16} /> : <EyeOff size={16} />}
-            {roomOnly ? "Вернуть аналитику" : "Осмотреть комнату"}
+            {t(roomOnly ? "Вернуть аналитику" : "Осмотреть комнату")}
           </Button>
           <Button
             className="xr-expand"
-            aria-label={
-              expanded ? "Свернуть 3D-просмотр" : "Развернуть 3D-просмотр"
-            }
+            aria-label={t(
+              expanded ? "Свернуть 3D-просмотр" : "Развернуть 3D-просмотр",
+            )}
             aria-pressed={expanded}
             onClick={() => setExpanded(!expanded)}
           >
             {expanded ? <Minimize2 size={16} /> : <Maximize2 size={16} />}
-            <span>{expanded ? "Свернуть" : "Развернуть"}</span>
+            <span>{t(expanded ? "Свернуть" : "Развернуть")}</span>
           </Button>
         </div>
       </div>
@@ -470,11 +478,11 @@ export default function SpatialView() {
         className={`xr-canvas ${expanded ? "expanded" : ""}`}
         data-environment={theme}
         role="group"
-        aria-label={
+        aria-label={t(
           roomOnly
             ? "Процедурный 3D-кабинет"
-            : "Интерактивный 3D-просмотр десяти дашбордов"
-        }
+            : "Интерактивный 3D-просмотр десяти дашбордов",
+        )}
       >
         <GraphicsBoundary>
           <Canvas
@@ -484,7 +492,7 @@ export default function SpatialView() {
             gl={{ alpha: true, antialias: true }}
             fallback={
               <div className="graphics-error">
-                WebGL недоступен. Используйте обычный обзор.
+                {t("WebGL недоступен. Используйте обычный обзор.")}
               </div>
             }
           >
@@ -503,9 +511,11 @@ export default function SpatialView() {
           <div className="xr-no-data">
             <Database size={30} />
             <h3>
-              {loading
-                ? "Загружаем аналитику"
-                : "Нет данных для пространственного просмотра"}
+              {t(
+                loading
+                  ? "Загружаем аналитику"
+                  : "Нет данных для пространственного просмотра",
+              )}
             </h3>
             <Button
               variant="primary"
@@ -513,7 +523,7 @@ export default function SpatialView() {
               disabled={loading}
               onClick={() => void refresh()}
             >
-              Повторить загрузку
+              {t("Повторить загрузку")}
             </Button>
           </div>
         ) : null}
@@ -521,14 +531,14 @@ export default function SpatialView() {
       {!roomOnly ? (
         <>
           <div className="xr-focus-picker">
-            <label htmlFor="xr-focus">Приблизить дашборд</label>
+            <label htmlFor="xr-focus">{t("Приблизить дашборд")}</label>
             <NativeSelect
               id="xr-focus"
               disabled={!data}
               value={focused ?? 0}
               onChange={(e) => setFocused(Number(e.target.value) || null)}
             >
-              <option value="0">Панорамный обзор</option>
+              <option value="0">{t("Панорамный обзор")}</option>
               {data
                 ? Array.from({ length: 10 }, (_, i) => {
                     const m = dashboardModel(data, i + 1);
@@ -544,15 +554,15 @@ export default function SpatialView() {
           <div className="xr-focus-navigation">
             <p role="status" className="xr-focus-status sr-only">
               {!data
-                ? "Данные недоступны"
+                ? t("Данные недоступны")
                 : focused
                   ? dashboardModel(data, focused).title
-                  : "Панорамный обзор"}
+                  : t("Панорамный обзор")}
             </p>
             <div className="xr-focus-actions">
               <Button
                 variant="outline"
-                aria-label="Предыдущий дашборд"
+                aria-label={t("Предыдущий дашборд")}
                 disabled={!focused || focused === 1}
                 onClick={() => focused && setFocused(focused - 1)}
               >
@@ -563,11 +573,12 @@ export default function SpatialView() {
                 disabled={!focused}
                 onClick={() => setFocused(null)}
               >
-                <LayoutGrid size={16} />К панораме
+                <LayoutGrid size={16} />
+                {t("К панораме")}
               </Button>
               <Button
                 variant="outline"
-                aria-label="Следующий дашборд"
+                aria-label={t("Следующий дашборд")}
                 disabled={!focused || focused === 10}
                 onClick={() => focused && setFocused(focused + 1)}
               >
@@ -579,16 +590,16 @@ export default function SpatialView() {
       ) : null}
       <div className="xr-controls">
         <MoveHorizontal size={18} />
-        <span>Поворот</span>
+        <span>{t("Поворот")}</span>
         <Button
           className="icon-button"
-          aria-label="Посмотреть на кассы"
+          aria-label={t("Посмотреть на кассы")}
           onClick={() => lookAt(32)}
         >
           <ArrowLeft size={17} />
         </Button>
         <input
-          aria-label="Поворот взгляда в градусах"
+          aria-label={t("Поворот взгляда в градусах")}
           type="range"
           min={roomOnly ? -180 : -45}
           max={roomOnly ? 180 : 45}
@@ -597,7 +608,7 @@ export default function SpatialView() {
         />
         <Button
           className="icon-button"
-          aria-label="Посмотреть на оборудование"
+          aria-label={t("Посмотреть на оборудование")}
           onClick={() => lookAt(-32)}
         >
           <ArrowRight size={17} />
@@ -609,17 +620,17 @@ export default function SpatialView() {
           }}
         >
           <RotateCcw size={16} />
-          Центр
+          {t("Центр")}
         </Button>
       </div>
       {error ? (
         <p role="alert" className="inline-warning">
-          {error}
+          {t(error)}
         </p>
       ) : null}
       {support.checked && !support.ar && !support.vr ? (
         <p className="xr-support">
-          Для AR и VR откройте сайт в Meta Quest Browser.
+          {t("Для AR и VR откройте сайт в Meta Quest Browser.")}
         </p>
       ) : null}
       <p className="sr-only">{dataContext}</p>

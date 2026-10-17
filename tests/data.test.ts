@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, afterEach } from "vitest";
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { baseline, makeScenario, simulateTick } from "../src/api/scenarios";
 import {
   dashboardSchema,
@@ -9,13 +9,16 @@ import {
 import { dashboardModel } from "../src/api/model";
 import { gaugeTone, formatNumber } from "../src/api/format";
 import { loadData, requestData } from "../src/api/client";
+import { setLocale } from "../src/i18n";
 const config: ApiConfig = {
   mode: "hybrid",
   url: "https://example.com/dashboard",
   token: "test-only",
   pollingSec: 0,
 };
+beforeEach(() => setLocale("ru"));
 afterEach(() => {
+  setLocale("uk");
   vi.restoreAllMocks();
   vi.useRealTimers();
 });
@@ -55,7 +58,50 @@ describe("Complete dashboard contract", () => {
   it("preserves periods, units and independently sourced monthly values", () => {
     expect(dashboardModel(baseline, 3).unit).toBe("₴");
     expect(dashboardModel(baseline, 2).metrics[0].value).toBe(55089470);
-    expect(dashboardModel(baseline, 4).gauges[1].value).toBe(80722842308);
+    expect(dashboardModel(baseline, 4).gauges[1].value).toBe(207722842308);
+  });
+  it.each(["baseline", "stress", "yearend"] as const)(
+    "keeps %s channel counts, monthly totals and digital share consistent",
+    (scenario) => {
+      const data = makeScenario(scenario);
+      const channels = data.block1_payments.dashboard1_channels;
+      const count = data.block1_payments.dashboard2_monthlyCount;
+      const volume = data.block1_payments.dashboard3_monthlyVolume;
+      for (const monthly of [count, volume])
+        expect(monthly.cards[0].value).toBe(
+          monthly.cards[1].value + monthly.cards[2].value,
+        );
+      const allChannels = channels.channels.reduce(
+        (sum, channel) => sum + channel.cur,
+        0,
+      );
+      expect(Math.round(allChannels * 1e6)).toBe(count.cards[0].value);
+      const cash = channels.channels.find(
+        (channel) => channel.name === "Кассы",
+      )!;
+      expect(channels.dboSharePercent).toBeCloseTo(
+        (1 - cash.cur / allChannels) * 100,
+        1,
+      );
+      expect(
+        data.block2_cashDesk.dashboard5_operationTypes.types[0].count,
+      ).toBe(Math.round(cash.cur * 1e6));
+    },
+  );
+  it("distinguishes monthly and year-to-date devices and all downtime risk bands", () => {
+    const devices = baseline.block3_atmTso;
+    for (const series of [
+      devices.dashboard8_operationsCount,
+      devices.dashboard9_operationsVolume,
+    ]) {
+      expect(series[1].value).toBeGreaterThan(series[0].value);
+      expect(series[0].percent).not.toBe(series[1].percent);
+    }
+    expect(
+      devices.dashboard10_workingEquipmentAndDowntime.downtime.map((item) =>
+        gaugeTone(item.percent, "downtime"),
+      ),
+    ).toEqual(["success", "warning", "danger"]);
   });
 });
 describe("Business semantics", () => {
@@ -84,10 +130,43 @@ describe("Business semantics", () => {
     ).toBe(102);
     expect(JSON.stringify(baseline)).toBe(before);
   });
+  it("reaches year-end targets while preserving the implied annual plan", () => {
+    const yearEnd = makeScenario("yearend");
+    const pairs = [
+      [
+        baseline.block1_payments.dashboard4_ytdMain,
+        yearEnd.block1_payments.dashboard4_ytdMain,
+      ],
+      [
+        baseline.block2_cashDesk.dashboard6_ytdMain,
+        yearEnd.block2_cashDesk.dashboard6_ytdMain,
+      ],
+      [
+        baseline.block3_atmTso.dashboard8_operationsCount,
+        yearEnd.block3_atmTso.dashboard8_operationsCount,
+      ],
+      [
+        baseline.block3_atmTso.dashboard9_operationsVolume,
+        yearEnd.block3_atmTso.dashboard9_operationsVolume,
+      ],
+    ];
+    for (const [before, after] of pairs)
+      for (let index = 0; index < before.length; index++) {
+        expect(after[index].percent).toBeGreaterThan(100);
+        expect(after[index].value / after[index].percent).toBeCloseTo(
+          before[index].value / before[index].percent,
+          0,
+        );
+      }
+  });
   it("simulation changes only mock values and keeps monthly total in sync", () => {
     const d = simulateTick(baseline);
     const cards = d.block1_payments.dashboard2_monthlyCount.cards;
     expect(cards[0].value).toBe(cards[1].value + cards[2].value);
+    const channels = d.block1_payments.dashboard1_channels.channels;
+    expect(
+      Math.round(channels.reduce((sum, channel) => sum + channel.cur, 0) * 1e6),
+    ).toBe(cards[0].value);
     expect(
       baseline.block1_payments.dashboard2_monthlyCount.cards[0].value,
     ).toBe(55089470);

@@ -8,6 +8,7 @@ import {
 import * as Dialog from "@radix-ui/react-dialog";
 import { X, LoaderCircle, Check } from "lucide-react";
 import { useDashboardStore } from "../store/dashboard";
+import { t, useLocale } from "../i18n";
 
 export function Button({
   children,
@@ -48,6 +49,7 @@ export function Modal({
   wide?: boolean;
   className?: string;
 }) {
+  useLocale();
   const returnFocus = useRef(document.activeElement as HTMLElement | null);
   return (
     <Dialog.Root
@@ -79,7 +81,7 @@ export function Modal({
             </div>
             <Button
               className="icon-button"
-              aria-label="Закрыть"
+              aria-label={t("Закрыть")}
               onClick={onClose}
             >
               <X size={20} />
@@ -122,6 +124,7 @@ export function NativeSelect(props: SelectHTMLAttributes<HTMLSelectElement>) {
   return <select {...props} />;
 }
 export function Toast() {
+  useLocale();
   const message = useDashboardStore((s) => s.notice);
   useEffect(() => {
     if (!message) return;
@@ -140,7 +143,7 @@ export function Toast() {
       {message ? (
         <>
           <Check size={17} />
-          <span>{message}</span>
+          <span>{t(message)}</span>
         </>
       ) : null}
     </div>
@@ -154,10 +157,11 @@ export function Empty({
 }: {
   text?: string;
 }) {
+  useLocale();
   return (
     <div className="empty-chart">
       <span>—</span>
-      <p>{text}</p>
+      <p>{t(text)}</p>
     </div>
   );
 }

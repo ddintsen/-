@@ -1,6 +1,7 @@
 import { CanvasTexture, SRGBColorSpace } from "three";
 import { type DashboardModel, colors, seriesColors } from "../api/model";
 import { formatNumber, formatPercent, gaugeTone } from "../api/format";
+import { t } from "../i18n";
 
 /** @dashboard Д1–Д10. Rasterize the same data model into the XR framebuffer, with Cyrillic fonts. */
 export function drawPanel(m: DashboardModel, compact: boolean): CanvasTexture {
@@ -19,7 +20,7 @@ export function drawPanel(m: DashboardModel, compact: boolean): CanvasTexture {
     ctx.font = `${size >= 36 ? 600 : 500} ${size}px "Inter Variable", sans-serif`;
     ctx.fillStyle = color;
     ctx.textAlign = align;
-    ctx.fillText(value, x, y);
+    ctx.fillText(t(value), x, y);
   };
   const line = (
     x: number,
@@ -282,7 +283,7 @@ export function drawLabel(label: string, aspect = 6.4): CanvasTexture {
   ctx.fillStyle = colors.text;
   ctx.textAlign = "center";
   ctx.textBaseline = "middle";
-  ctx.fillText(label, 512, c.height / 2, 930);
+  ctx.fillText(t(label), 512, c.height / 2, 930);
   const texture = new CanvasTexture(c);
   texture.colorSpace = SRGBColorSpace;
   return texture;
@@ -305,7 +306,7 @@ export function drawOverviewPanel(m: DashboardModel): CanvasTexture {
     ctx.font = `${size >= 60 ? 600 : 500} ${size}px "Inter Variable", sans-serif`;
     ctx.fillStyle = color;
     ctx.textAlign = align;
-    ctx.fillText(s, x, y, 1160);
+    ctx.fillText(t(s), x, y, 1160);
   };
   const fill = ctx.createLinearGradient(0, 0, 1280, 800);
   fill.addColorStop(0, colors.elevated);
@@ -473,7 +474,7 @@ export function drawWing(title: string, aspect: number): CanvasTexture {
   ctx.globalAlpha = 1;
   ctx.font = '600 64px "Manrope Variable", sans-serif';
   ctx.fillStyle = colors.text;
-  ctx.fillText(title, 60, 100, c.width - 120);
+  ctx.fillText(t(title), 60, 100, c.width - 120);
   const texture = new CanvasTexture(c);
   texture.colorSpace = SRGBColorSpace;
   return texture;

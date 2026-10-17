@@ -30,6 +30,7 @@ import {
 import { Button, Modal, Toast } from "./components/ui";
 import { Admin } from "./components/Admin";
 import { AppUpdate } from "./components/AppUpdate";
+import { t, useLocale, setLocale, formatReportDate, type Locale } from "./i18n";
 import "./styles/app.css";
 const SpatialView = lazy(() => import("./spatial/SpatialView"));
 type View = "overview" | "payments" | "cash" | "equipment";
@@ -47,6 +48,7 @@ const initialView = () => {
 
 export default function App() {
   const s = useDashboardStore();
+  const locale = useLocale();
   const [view, setView] = useState<View>(initialView),
     [admin, setAdmin] = useState(
       new URLSearchParams(location.search).get("admin") === "1",
@@ -60,7 +62,7 @@ export default function App() {
       s.data
         ? Array.from({ length: 10 }, (_, i) => dashboardModel(s.data!, i + 1))
         : [],
-    [s.data],
+    [s.data, locale],
   );
   useEffect(() => {
     const stop = startSync();
@@ -92,8 +94,9 @@ export default function App() {
     document.documentElement.dataset.theme = s.theme;
   }, [s.theme]);
   useEffect(() => {
-    document.title = `${viewConfig.find((x) => x.id === view)?.label} департамента · Орбита`;
-  }, [view]);
+    document.documentElement.lang = locale;
+    document.title = `${t(viewConfig.find((x) => x.id === view)!.label)} · ${t("Орбита")}`;
+  }, [view, locale]);
   useEffect(() => {
     const fn = () => {
       setView(initialView());
@@ -126,14 +129,48 @@ export default function App() {
       6.5
       ? 1
       : 0);
+  const monthlyControls = (
+    <div
+      className="monthly-switch"
+      role="group"
+      aria-label={t("Показатель платежей")}
+    >
+      <span>{t("За месяц")}</span>
+      <div>
+        {[
+          { id: "count" as const, label: "Количество" },
+          { id: "volume" as const, label: "Объём" },
+          { id: "both" as const, label: "Вместе" },
+        ].map((x) => (
+          <Button
+            key={x.id}
+            className={monthly === x.id ? "selected" : ""}
+            aria-pressed={monthly === x.id}
+            onClick={() => setMonthly(x.id)}
+          >
+            {t(x.label)}
+          </Button>
+        ))}
+      </div>
+    </div>
+  );
   const renderCard = (id: number) => (
-    <DashboardCard key={id} model={models[id - 1]} onFocus={setFocus} />
+    <DashboardCard
+      key={id}
+      model={models[id - 1]}
+      onFocus={setFocus}
+      controls={
+        id === 2 || (id === 3 && monthly === "volume")
+          ? monthlyControls
+          : undefined
+      }
+    />
   );
   const blockHeading = (title: string) => {
     if (view !== "overview") return null;
     return (
       <header className="wing-heading">
-        <h2>{title}</h2>
+        <h2>{t(title)}</h2>
       </header>
     );
   };
@@ -141,7 +178,7 @@ export default function App() {
     <>
       <div className="room-backdrop" aria-hidden="true" />
       <a href="#analytics" className="skip-link">
-        Перейти к аналитике
+        {t("Перейти к аналитике")}
       </a>
       <div className="app-shell">
         <aside className="side-dock">
@@ -152,40 +189,49 @@ export default function App() {
                 ? location.pathname
                 : import.meta.env.BASE_URL
             }
-            aria-label="Орбита — обзор"
+            aria-label={t("Орбита — обзор")}
           >
             <Orbit size={29} />
           </a>
-          <nav aria-label="Вид аналитики">
+          <nav aria-label={t("Вид аналитики")}>
             {viewConfig.map((x) => (
               <Button
                 key={x.id}
                 className={`dock-button ${view === x.id ? "active" : ""}`}
-                aria-label={x.label}
-                title={x.label}
+                aria-label={t(x.label)}
+                data-tooltip={t(x.label)}
                 aria-pressed={view === x.id}
                 onClick={() => navigate(x.id)}
               >
                 <x.icon size={22} />
+                <span className="dock-tooltip" aria-hidden="true">
+                  {t(x.label)}
+                </span>
               </Button>
             ))}
           </nav>
           <div className="dock-bottom">
             <Button
               className="dock-button"
-              aria-label="Как пользоваться"
-              title="Как пользоваться"
+              aria-label={t("Как пользоваться")}
+              data-tooltip={t("Как пользоваться")}
               onClick={() => setHelp(true)}
             >
               <CircleHelp size={21} />
+              <span className="dock-tooltip" aria-hidden="true">
+                {t("Как пользоваться")}
+              </span>
             </Button>
             <Button
               className="dock-button"
-              aria-label="Источники данных"
-              title="Источники данных"
+              aria-label={t("Источники данных")}
+              data-tooltip={t("Источники данных")}
               onClick={() => openAdmin(true)}
             >
               <Settings2 size={21} />
+              <span className="dock-tooltip" aria-hidden="true">
+                {t("Источники данных")}
+              </span>
             </Button>
           </div>
         </aside>
@@ -198,9 +244,9 @@ export default function App() {
                   ? location.pathname
                   : import.meta.env.BASE_URL
               }
-              aria-label="Орбита — обзор"
+              aria-label={t("Орбита — обзор")}
             >
-              Орбита
+              {t("Орбита")}
             </a>
             <div className="topbar-right">
               <div className="source-item source-pill" role="status">
@@ -209,14 +255,26 @@ export default function App() {
                 />
                 <strong>{sourceLabel}</strong>
               </div>
+              <label className="language-switch">
+                <span className="sr-only">{t("Язык")}</span>
+                <select
+                  aria-label={t("Язык")}
+                  value={locale}
+                  onChange={(event) => setLocale(event.target.value as Locale)}
+                >
+                  <option value="uk">UA</option>
+                  <option value="en">EN</option>
+                  <option value="ru">RU</option>
+                </select>
+              </label>
               <Button
                 className="icon-button"
                 aria-label={
                   s.theme === "office"
-                    ? "Включить тёмное окружение"
-                    : "Включить окружение кабинета"
+                    ? t("Включить тёмное окружение")
+                    : t("Включить окружение кабинета")
                 }
-                title="Сменить окружение"
+                title={t("Сменить окружение")}
                 onClick={() =>
                   useDashboardStore.setState({
                     theme: s.theme === "office" ? "dark" : "office",
@@ -227,16 +285,16 @@ export default function App() {
               </Button>
               <Button
                 className="icon-button utility-button"
-                aria-label="Как пользоваться"
-                title="Как пользоваться"
+                aria-label={t("Как пользоваться")}
+                data-tooltip={t("Как пользоваться")}
                 onClick={() => setHelp(true)}
               >
                 <CircleHelp size={19} />
               </Button>
               <Button
                 className="icon-button utility-button"
-                aria-label="Источники данных"
-                title="Источники данных"
+                aria-label={t("Источники данных")}
+                data-tooltip={t("Источники данных")}
                 onClick={() => openAdmin(true)}
               >
                 <Settings2 size={19} />
@@ -248,18 +306,23 @@ export default function App() {
               <div className="heading-copy">
                 <h1>
                   {view === "overview"
-                    ? "Обзор"
+                    ? t("Обзор")
                     : view === "payments"
-                      ? "Платежи"
+                      ? t("Платежи")
                       : view === "cash"
-                        ? "Кассовые операции"
-                        : "Оборудование"}
+                        ? t("Кассовые операции")
+                        : t("Оборудование")}
                 </h1>
-                <div className="report-period" aria-label="Отчётный период">
+                <div
+                  className="report-period"
+                  aria-label={t("Отчётный период")}
+                >
                   <CalendarDays size={14} />
                   <div>
                     <strong>
-                      {s.data?.meta.reportDate ?? "Данные не загружены"}
+                      {s.data
+                        ? formatReportDate(s.data.meta.reportDate)
+                        : t("Данные не загружены")}
                     </strong>
                   </div>
                 </div>
@@ -268,25 +331,27 @@ export default function App() {
                 <div className="view-tools">
                   <Button
                     aria-label={
-                      s.compact ? "Показать полные числа" : "Сократить числа"
+                      s.compact
+                        ? t("Показать полные числа")
+                        : t("Сократить числа")
                     }
                     aria-pressed={!s.compact}
                     onClick={() =>
                       useDashboardStore.setState({ compact: !s.compact })
                     }
                   >
-                    {s.compact ? "Кратко" : "Точно"}
+                    {s.compact ? t("Кратко") : t("Точно")}
                   </Button>
                   <span className="tool-divider" />
                   <Button
-                    aria-label="Обновить данные"
-                    title="Обновить данные"
+                    aria-label={t("Обновить данные")}
+                    title={t("Обновить данные")}
                     busy={s.busy}
                     disabled={s.busy || s.simulation}
                     onClick={() => void s.refresh()}
                   >
                     {!s.busy ? <RefreshCw size={16} /> : null}
-                    <span className="desktop-label">Обновить</span>
+                    <span className="desktop-label">{t("Обновить")}</span>
                   </Button>
                 </div>
                 <Button
@@ -295,13 +360,13 @@ export default function App() {
                   onClick={() => setSpatial(true)}
                 >
                   <Glasses size={21} />
-                  Открыть в пространстве
+                  {t("Открыть в пространстве")}
                   <ArrowUpRight size={16} />
                 </Button>
               </div>
             </div>
             <div className="workspace-toolbar">
-              <nav className="view-tabs" aria-label="Вид аналитики">
+              <nav className="view-tabs" aria-label={t("Вид аналитики")}>
                 {viewConfig.map((x) => (
                   <Button
                     key={x.id}
@@ -310,7 +375,7 @@ export default function App() {
                     onClick={() => navigate(x.id)}
                   >
                     <x.icon size={16} />
-                    {x.label}
+                    {t(x.label)}
                   </Button>
                 ))}
               </nav>
@@ -321,13 +386,13 @@ export default function App() {
                 <div>
                   <strong>
                     {s.source === "fallback"
-                      ? `${sourceLabel}. Обновление недоступно.`
-                      : "Данные API недоступны."}
+                      ? `${sourceLabel}. ${t("Обновление недоступно.")}`
+                      : t("Данные API недоступны.")}
                   </strong>
-                  <p>{s.error}</p>
+                  <p>{t(s.error)}</p>
                 </div>
                 <Button onClick={() => void s.refresh()} disabled={s.busy}>
-                  Повторить
+                  {t("Повторить")}
                 </Button>
               </div>
             ) : null}
@@ -335,10 +400,12 @@ export default function App() {
               <div className="empty-state">
                 <Database size={38} />
                 <h2>
-                  {s.busy ? "Загружаем аналитику" : "Нет доступных данных API"}
+                  {s.busy
+                    ? t("Загружаем аналитику")
+                    : t("Нет доступных данных API")}
                 </h2>
                 <Button variant="primary" onClick={() => openAdmin(true)}>
-                  Настроить источник
+                  {t("Настроить источник")}
                 </Button>
               </div>
             ) : (
@@ -346,7 +413,7 @@ export default function App() {
                 {view === "overview" || view === "cash" ? (
                   <section
                     className="wing cash-wing"
-                    aria-label="Кассовые операции"
+                    aria-label={t("Кассовые операции")}
                   >
                     {blockHeading("Кассовые операции")}
                     <div className="wing-cards">
@@ -355,33 +422,13 @@ export default function App() {
                   </section>
                 ) : null}
                 {view === "overview" || view === "payments" ? (
-                  <section className="wing payments-wing" aria-label="Платежи">
+                  <section
+                    className="wing payments-wing"
+                    aria-label={t("Платежи")}
+                  >
                     {blockHeading("Платежи")}
                     <div className="wing-cards">
                       {renderCard(1)}
-                      <div
-                        className="monthly-switch"
-                        role="group"
-                        aria-label="Показатель платежей"
-                      >
-                        <span>За месяц</span>
-                        <div>
-                          {[
-                            { id: "count" as const, label: "Количество" },
-                            { id: "volume" as const, label: "Объём" },
-                            { id: "both" as const, label: "Вместе" },
-                          ].map((x) => (
-                            <Button
-                              key={x.id}
-                              className={monthly === x.id ? "selected" : ""}
-                              aria-pressed={monthly === x.id}
-                              onClick={() => setMonthly(x.id)}
-                            >
-                              {x.label}
-                            </Button>
-                          ))}
-                        </div>
-                      </div>
                       {monthly === "count" || monthly === "both"
                         ? renderCard(2)
                         : null}
@@ -395,7 +442,7 @@ export default function App() {
                 {view === "overview" || view === "equipment" ? (
                   <section
                     className="wing equipment-wing"
-                    aria-label="Оборудование"
+                    aria-label={t("Оборудование")}
                   >
                     {blockHeading("Оборудование")}
                     <div className="wing-cards">
@@ -408,12 +455,16 @@ export default function App() {
             {s.lastLive || attention ? (
               <footer className="workspace-footer">
                 {s.lastLive && s.updatedAt ? (
-                  <div>Обновлено {formatTime(s.updatedAt)} · Киев</div>
+                  <div>
+                    {t("Обновлено {time} · Киев", {
+                      time: formatTime(s.updatedAt),
+                    })}
+                  </div>
                 ) : null}
                 {attention ? (
                   <span className="tone-danger">
                     <Activity size={13} />
-                    {attention} зоны внимания
+                    {t("Зоны внимания: {count}", { count: attention })}
                   </span>
                 ) : null}
               </footer>
@@ -424,26 +475,26 @@ export default function App() {
       {focus && s.data ? (
         <Modal
           title={models[focus - 1].title}
-          description={`${s.data.meta.reportDate} · ${sourceLabel}`}
+          description={`${formatReportDate(s.data.meta.reportDate)} · ${sourceLabel}`}
           onClose={() => setFocus(null)}
           wide
           className="focus-modal"
         >
-          <nav className="focus-navigation" aria-label="Дашборды в фокусе">
+          <nav className="focus-navigation" aria-label={t("Дашборды в фокусе")}>
             <Button
-              aria-label="Предыдущий дашборд"
+              aria-label={t("Предыдущий дашборд")}
               disabled={focus === 1}
               onClick={() => setFocus(focus - 1)}
             >
               <ArrowLeft size={17} />
-              Назад
+              {t("Назад")}
             </Button>
             <Button
-              aria-label="Следующий дашборд"
+              aria-label={t("Следующий дашборд")}
               disabled={focus === 10}
               onClick={() => setFocus(focus + 1)}
             >
-              Далее
+              {t("Далее")}
               <ArrowRight size={17} />
             </Button>
           </nav>
@@ -456,26 +507,30 @@ export default function App() {
       {admin ? <Admin onClose={() => openAdmin(false)} /> : null}
       {spatial ? (
         <Modal
-          title="Пространство"
+          title={t("Пространство")}
           onClose={() => setSpatial(false)}
           wide
           className="spatial-modal"
         >
-          <Suspense fallback={<div className="xr-loading">Загружаем 3D…</div>}>
+          <Suspense
+            fallback={<div className="xr-loading">{t("Загружаем 3D…")}</div>}
+          >
             <SpatialView />
           </Suspense>
         </Modal>
       ) : null}
       {help ? (
-        <Modal title="Как пользоваться" onClose={() => setHelp(false)}>
+        <Modal title={t("Как пользоваться")} onClose={() => setHelp(false)}>
           <div className="help-body">
             <p>
-              Значок разворота открывает график и точные значения. Escape
-              закрывает окно.
+              {t(
+                "Значок разворота открывает график и точные значения. Escape закрывает окно.",
+              )}
             </p>
             <p>
-              В Meta Quest Browser выберите AR или VR. Для выбора панели нажмите
-              курок или соедините большой и указательный пальцы.
+              {t(
+                "В Meta Quest Browser выберите AR или VR. Для выбора панели нажмите курок или соедините большой и указательный пальцы.",
+              )}
             </p>
           </div>
         </Modal>
