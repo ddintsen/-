@@ -50,3 +50,5 @@ GitHub больше не пуст: приложение отправлено в 
 Дополнительная сборка `npm run build:preview` создаёт standalone HTML; `npm run test:preview` проверил её через HTTP без дополнительных запросов. file:// managed Chromium блокирует. GitHub Actions сохраняет HTML в artifact orbita-preview. Постоянное правило commit/push сохраняется; новая работа должна быть отправлена в main после проверок.
 
 Код текущего этапа проверен: 38 unit + финальные 16 E2E, production subpath/PWA/offline, static audit, переносимый HTML через HTTP. Публикация сайта пока не подтверждена: начальное включение Source=GitHub Actions запрошено у пользователя, API/внешний сайт заблокированы сетью текущей среды. Продолжать с ответа на этот вопрос и статуса Publish ORBITA.
+
+Этап отправлен в GitHub: `a2b8fc0` (128 файлов), remote/main совпал с локальным HEAD; эта запись дополняет сохранённый результат. Следующая задача — подтвердить включение Pages и успешную онлайн-публикацию. Сама `.github/workflows/pages.yml` уже находится в main.
