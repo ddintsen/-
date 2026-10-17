@@ -15,7 +15,7 @@ export default defineConfig({
   },
   reporter: [
     ["list"],
-    ["json", { outputFile: "docs/evidence/e2e-results.json" }],
+    ["json", { outputFile: "test-results/e2e-results.json" }],
   ],
   webServer: {
     command: "npm run dev",

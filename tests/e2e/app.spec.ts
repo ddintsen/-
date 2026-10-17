@@ -23,6 +23,31 @@ test("all ten dashboards open, show exact data, close with focus restored", asyn
   }
   expect(errors).toEqual([]);
 });
+test("focused dashboards navigate without closing and restore the original trigger", async ({
+  page,
+}) => {
+  await page.goto("/");
+  const trigger = page.locator('[data-dashboard-id="1"] .focus-button');
+  await trigger.click();
+  const dialog = page.getByRole("dialog");
+  const previous = dialog.getByRole("button", { name: "Предыдущий дашборд" });
+  const next = dialog.getByRole("button", { name: "Следующий дашборд" });
+  await expect(previous).toBeDisabled();
+  await dialog.locator("summary").click();
+  await next.click();
+  await expect(dialog.getByRole("heading")).toHaveText("Количество платежей");
+  await expect(dialog.locator("details")).not.toHaveAttribute("open");
+  await previous.click();
+  await expect(dialog.getByRole("heading")).toHaveText("Платежи по каналам");
+  for (let id = 2; id <= 10; id++) await next.click();
+  await expect(dialog.getByRole("heading")).toHaveText(
+    "Состояние оборудования",
+  );
+  await expect(next).toBeDisabled();
+  await expect(previous).toBeEnabled();
+  await page.keyboard.press("Escape");
+  await expect(trigger).toBeFocused();
+});
 test("navigation restores URL, browser back, theme and format controls work", async ({
   page,
 }) => {
@@ -40,6 +65,32 @@ test("navigation restores URL, browser back, theme and format controls work", as
   );
   await page.getByRole("button", { name: "Включить тёмное окружение" }).click();
   await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
+});
+test("each section reflows on narrow phones with one visible navigation", async ({
+  page,
+}) => {
+  await page.goto("/");
+  for (const width of [360, 390]) {
+    await page.setViewportSize({ width, height: 844 });
+    const navigation = page.getByRole("navigation", { name: "Вид аналитики" });
+    await expect(navigation).toHaveCount(1);
+    for (const name of ["Обзор", "Платежи", "Кассы", "Оборудование"]) {
+      const tab = navigation.getByRole("button", { name, exact: true });
+      await tab.click();
+      await expect(tab).toHaveAttribute("aria-pressed", "true");
+      expect(
+        await page.evaluate(
+          () => document.documentElement.scrollWidth <= innerWidth,
+        ),
+      ).toBe(true);
+    }
+    await expect(
+      page.getByRole("button", { name: "Источники данных" }),
+    ).toBeVisible();
+    await expect(
+      page.getByRole("button", { name: "Как пользоваться" }),
+    ).toBeVisible();
+  }
 });
 test("scenario and quick editor sync demo data to another tab", async ({
   page,
@@ -196,7 +247,7 @@ test("keyboard, reduced motion and mobile have no horizontal overflow", async ({
   await page.locator('[data-dashboard-id="1"] button').click();
   await expect(page.getByRole("dialog")).toBeVisible();
   await page.keyboard.press("Escape");
-  await page.getByRole("button", { name: "Настроить пространство" }).click();
+  await page.getByRole("button", { name: "Источники данных" }).click();
   await page.getByLabel("Адрес API").fill("http://insecure.example.com/data");
   await page
     .getByRole("button", { name: "Проверить соединение", exact: true })
@@ -237,11 +288,15 @@ test("accessibility audit on overview, focused values and settings", async ({
 });
 test("real WebGL preview renders and unsupported immersive mode is explained", async ({
   page,
-}) => {
+}, testInfo) => {
   const errors: string[] = [];
   page.on("pageerror", (e) => errors.push(e.message));
   await page.goto("/");
   await page.getByRole("button", { name: /Открыть в пространстве/ }).click();
+  // The lazy scene must finish its first software-WebGL compilation before its support message mounts.
+  await expect(page.locator(".xr-canvas canvas")).toBeVisible({
+    timeout: 15000,
+  });
   await expect(
     page.getByText("Для AR и VR откройте сайт в Meta Quest Browser."),
   ).toBeVisible();
@@ -254,7 +309,7 @@ test("real WebGL preview renders and unsupported immersive mode is explained", a
     .fill("32");
   await page.getByRole("button", { name: "Центр", exact: true }).click();
   await expect(page.getByRole("slider")).toHaveValue("0");
-  await page.screenshot({ path: "docs/evidence/spatial.png" });
+  await page.screenshot({ path: testInfo.outputPath("spatial.png") });
   expect(errors).toEqual([]);
 });
 
@@ -338,7 +393,7 @@ test("long API labels, full numbers, dark theme and mobile settings stay usable"
       ),
     ).toBe(true);
   }
-  await page.getByRole("button", { name: "Настроить пространство" }).click();
+  await page.getByRole("button", { name: "Источники данных" }).click();
   await page.getByRole("button", { name: "Демонстрация", exact: true }).click();
   const scan = await new AxeBuilder({ page })
     .withTags(["wcag2a", "wcag2aa", "wcag21aa", "wcag22aa"])

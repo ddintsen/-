@@ -193,12 +193,7 @@ export function PlanBars({ bars }: { bars: Bar[] }) {
           y2={base - (100 / max) * plot}
           className="plan-target"
         />
-        <text
-          x="252"
-          y={base - (100 / max) * plot - 8}
-          textAnchor="end"
-          className="chart-label"
-        >
+        <text x="10" y="14" className="chart-label">
           план 100%
         </text>
         {bars.map((b, i) => {
@@ -271,7 +266,6 @@ export function MetricRow({ metric }: { metric: Metric }) {
   const compact = useDashboardStore((s) => s.compact);
   return (
     <div className="metric-row">
-      <i style={{ background: metric.color }} />
       <div className="metric-info">
         <span>{metric.label}</span>
         <strong title={`${formatNumber(metric.value)} ${metric.unit ?? ""}`}>

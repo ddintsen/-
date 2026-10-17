@@ -2,6 +2,8 @@ import { Suspense, lazy, useEffect, useMemo, useState } from "react";
 import {
   Activity,
   ArrowUpRight,
+  ArrowLeft,
+  ArrowRight,
   Building2,
   CalendarDays,
   CircleHelp,
@@ -154,7 +156,7 @@ export default function App() {
           >
             <Orbit size={29} />
           </a>
-          <nav aria-label="Основные разделы">
+          <nav aria-label="Вид аналитики">
             {viewConfig.map((x) => (
               <Button
                 key={x.id}
@@ -189,7 +191,17 @@ export default function App() {
         </aside>
         <div className="workspace">
           <header className="topbar">
-            <div className="wordmark">Орбита</div>
+            <a
+              className="wordmark"
+              href={
+                location.protocol === "file:"
+                  ? location.pathname
+                  : import.meta.env.BASE_URL
+              }
+              aria-label="Орбита — обзор"
+            >
+              Орбита
+            </a>
             <div className="topbar-right">
               <div className="source-item source-pill" role="status">
                 <span
@@ -213,11 +225,27 @@ export default function App() {
               >
                 {s.theme === "office" ? <Moon size={19} /> : <Sun size={19} />}
               </Button>
+              <Button
+                className="icon-button utility-button"
+                aria-label="Как пользоваться"
+                title="Как пользоваться"
+                onClick={() => setHelp(true)}
+              >
+                <CircleHelp size={19} />
+              </Button>
+              <Button
+                className="icon-button utility-button"
+                aria-label="Источники данных"
+                title="Источники данных"
+                onClick={() => openAdmin(true)}
+              >
+                <Settings2 size={19} />
+              </Button>
             </div>
           </header>
           <main id="analytics">
             <div className="page-heading">
-              <div>
+              <div className="heading-copy">
                 <h1>
                   {view === "overview"
                     ? "Обзор"
@@ -227,15 +255,39 @@ export default function App() {
                         ? "Кассовые операции"
                         : "Оборудование"}
                 </h1>
-              </div>
-              <div className="page-actions">
                 <div className="report-period" aria-label="Отчётный период">
-                  <CalendarDays size={18} />
+                  <CalendarDays size={14} />
                   <div>
                     <strong>
                       {s.data?.meta.reportDate ?? "Данные не загружены"}
                     </strong>
                   </div>
+                </div>
+              </div>
+              <div className="page-actions">
+                <div className="view-tools">
+                  <Button
+                    aria-label={
+                      s.compact ? "Показать полные числа" : "Сократить числа"
+                    }
+                    aria-pressed={!s.compact}
+                    onClick={() =>
+                      useDashboardStore.setState({ compact: !s.compact })
+                    }
+                  >
+                    {s.compact ? "Кратко" : "Точно"}
+                  </Button>
+                  <span className="tool-divider" />
+                  <Button
+                    aria-label="Обновить данные"
+                    title="Обновить данные"
+                    busy={s.busy}
+                    disabled={s.busy || s.simulation}
+                    onClick={() => void s.refresh()}
+                  >
+                    {!s.busy ? <RefreshCw size={16} /> : null}
+                    <span className="desktop-label">Обновить</span>
+                  </Button>
                 </div>
                 <Button
                   variant="outline"
@@ -262,30 +314,6 @@ export default function App() {
                   </Button>
                 ))}
               </nav>
-              <div className="view-tools">
-                <Button
-                  aria-label={
-                    s.compact ? "Показать полные числа" : "Сократить числа"
-                  }
-                  aria-pressed={!s.compact}
-                  onClick={() =>
-                    useDashboardStore.setState({ compact: !s.compact })
-                  }
-                >
-                  {s.compact ? "Кратко" : "Точно"}
-                </Button>
-                <span className="tool-divider" />
-                <Button
-                  aria-label="Обновить данные"
-                  title="Обновить данные"
-                  busy={s.busy}
-                  disabled={s.busy || s.simulation}
-                  onClick={() => void s.refresh()}
-                >
-                  {!s.busy ? <RefreshCw size={16} /> : null}
-                  <span className="desktop-label">Обновить</span>
-                </Button>
-              </div>
             </div>
             {s.error ? (
               <div className="data-warning" role="status">
@@ -391,27 +419,6 @@ export default function App() {
               </footer>
             ) : null}
           </main>
-          <div className="environment-dock">
-            <span>
-              <span className="environment-dot" />
-              {s.theme === "office" ? "Кабинет" : "Тёмное окружение"}
-            </span>
-            <span className="tool-divider" />
-            <Button
-              onClick={() => setSpatial(true)}
-              aria-label="Открыть 3D-пространство"
-              title="Открыть 3D-пространство"
-            >
-              <Glasses size={18} />
-            </Button>
-            <span className="tool-divider" />
-            <Button
-              onClick={() => openAdmin(true)}
-              aria-label="Настроить пространство"
-            >
-              <Settings2 size={17} />
-            </Button>
-          </div>
         </div>
       </div>
       {focus && s.data ? (
@@ -422,7 +429,25 @@ export default function App() {
           wide
           className="focus-modal"
         >
-          <div className="focus-content">
+          <nav className="focus-navigation" aria-label="Дашборды в фокусе">
+            <Button
+              aria-label="Предыдущий дашборд"
+              disabled={focus === 1}
+              onClick={() => setFocus(focus - 1)}
+            >
+              <ArrowLeft size={17} />
+              Назад
+            </Button>
+            <Button
+              aria-label="Следующий дашборд"
+              disabled={focus === 10}
+              onClick={() => setFocus(focus + 1)}
+            >
+              Далее
+              <ArrowRight size={17} />
+            </Button>
+          </nav>
+          <div className="focus-content" key={focus}>
             <DashboardContent model={models[focus - 1]} />
             <DataTable model={models[focus - 1]} />
           </div>
