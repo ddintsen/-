@@ -14,6 +14,8 @@ Workflow использует Node 22, npm ci, проверку типов/то�
 
 Если сохранённая старая PWA показывает «Всё в поле зрения.», recovery-переход после публикации исправления: **https://ddintsen.github.io/-/?orbita-update=1**. Он обновляет выбранную вкладку без удаления demo/config; актуальный обзор имеет h1 «Обзор», без eyebrow и декоративной нумерации. Старый worker мог обслуживать cached index даже при query, поскольку prompt не имел UI применения. Новый worker однократно мигрирует этот протокол. Следующие сборки показывают «Обновить приложение», применяются явно и не перезагружают другие вкладки. Регрессия `npm run test:update` после production build требует историю commit552750e (CI fetch-depth:0), браузер и локальный HTTP server; она воспроизводит реальный старый кэш и последующий обычный update. Артефакт CI — orbita-update-smoke, отдельный от live smoke.
 
+Исправление опубликовано и проверено: run [39032197645](https://github.com/ddintsen/-/actions/runs/39032197645), source4b4b543, build/deploy/browser verification success. [Receipt](evidence/pwa-update-published-2026-10-17.json) подтверждает HTML и текущие assets200. Upgrade-регрессия выполняется до deploy, fresh-browser live smoke после него; эти проверки дополняют друг друга. Физический Quest остаётся непроверенным.
+
 ## StackBlitz: публичная main
 
 Пользователь сообщил «сделал паблик» 17 октября 2026. Анонимные GET страницы https://github.com/ddintsen/- и raw main/.stackblitzrc вернули HTTP 200: прежняя закрытость больше не является препятствием чтению GitHub.
