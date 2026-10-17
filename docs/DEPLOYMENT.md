@@ -25,3 +25,11 @@ Workflow использует Node 22, npm ci, проверку типов/то�
 - Production build по /-/ проверяется локальным preview и `PREVIEW_URL=.../-/ npm run test:production`: контролируемый service worker, manifest, controller profiles, новый фон, все 10 карточек и WebGL в offline.
 - GitHub API и github.io в текущей среде возвращают Forbidden / CONNECT 403. Даже запуск разрешённой эскалацией не дал доступа к API. Это не доказывает, что сайт недоступен в браузере пользователя.
 - Анонимный HTTP-запрос страницы репозитория вернул 404; доступ через настроенный Git proxy работает. Видимость репозитория и тариф без API не установлены.
+
+## Статус без доступа к API из cloud
+
+Jobs `inspect` и `receipt` сохраняют `deployment-status.json` в служебной ветке [deployment-status](https://github.com/ddintsen/-/blob/deployment-status/deployment-status.json). Фаза preflight — состояние до deploy; complete содержит buildResult/deployResult. sourceCommit связывает отчёт с исходным коммитом. Чтение: `git fetch origin deployment-status`, затем `git show FETCH_HEAD:deployment-status.json` без переключения main.
+
+Проверяются API Pages, HTML по ожидаемому адресу и до четырёх same-origin JS/CSS. Токен передаётся только api.github.com; сайт и отчёт его не получают. Запись ветки использует отдельные permissions contents:write и обычный push без force. Она не запускает новый workflow main. Доступность HTML/ресурсов сама по себе не подтверждает deploy именно текущего коммита: проверяйте также phase, sourceCommit и результаты jobs. Если Actions запрещён, ожидает допуска или не может записать ветку, отчёт может не появиться.
+
+Это проверка публикации, а не повышение прав: стандартный Actions token по-прежнему не позволяет впервые включить Pages. В текущей cloud-среде `gh auth status` отдельно сообщил недействительную авторизацию GH_TOKEN; Git proxy при этом читает и пишет репозиторий.

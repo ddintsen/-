@@ -20,7 +20,7 @@ jobs:
           node-version: "22"
           cache: npm
       - run: npm ci
-      - run: npm run tokens:check && npm run typecheck && npm run test
+      - run: npm run tokens:check && npm run typecheck && npm run test && npm run test:deployment
       - name: Build website
         run: npm run build
         env:
@@ -45,3 +45,59 @@ jobs:
       - name: Deploy website
         id: deployment
         uses: actions/deploy-pages@v4
+  inspect:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pages: read
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check publication before deployment
+        run: node scripts/deployment-status.mjs
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          DEPLOYMENT_PHASE: preflight
+          DEPLOYMENT_STATUS_OUTPUT: ${{ runner.temp }}/orbita-deployment.json
+      - name: Save publication receipt
+        env:
+          RECEIPT: ${{ runner.temp }}/orbita-deployment.json
+        run: |
+          if git ls-remote --exit-code --heads origin deployment-status > /dev/null; then
+            git fetch origin deployment-status
+            git switch --detach FETCH_HEAD
+          fi
+          cp "$RECEIPT" deployment-status.json
+          git add deployment-status.json
+          if git diff --cached --quiet; then exit 0; fi
+          git -c user.name='github-actions[bot]' -c user.email='41898282+github-actions[bot]@users.noreply.github.com' commit -m 'Record Pages publication preflight'
+          git push origin HEAD:deployment-status
+  receipt:
+    if: always()
+    needs: [build, deploy, inspect]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pages: read
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check completed publication
+        run: node scripts/deployment-status.mjs
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          DEPLOYMENT_PHASE: complete
+          BUILD_RESULT: ${{ needs.build.result }}
+          DEPLOY_RESULT: ${{ needs.deploy.result }}
+          DEPLOYMENT_STATUS_OUTPUT: ${{ runner.temp }}/orbita-deployment.json
+      - name: Save publication receipt
+        env:
+          RECEIPT: ${{ runner.temp }}/orbita-deployment.json
+        run: |
+          if git ls-remote --exit-code --heads origin deployment-status > /dev/null; then
+            git fetch origin deployment-status
+            git switch --detach FETCH_HEAD
+          fi
+          cp "$RECEIPT" deployment-status.json
+          git add deployment-status.json
+          if git diff --cached --quiet; then exit 0; fi
+          git -c user.name='github-actions[bot]' -c user.email='41898282+github-actions[bot]@users.noreply.github.com' commit -m 'Record completed Pages publication'
+          git push origin HEAD:deployment-status
