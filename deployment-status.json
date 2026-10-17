@@ -1,12 +1,21 @@
 {
-  "checkedAt": "2026-10-17T07:29:49.075Z",
+  "checkedAt": "2026-10-17T07:30:51.142Z",
   "repository": "ddintsen/-",
   "sourceCommit": "631a23a724a41323960fb85deda05ea37db1e5f2",
   "runId": "39013836292",
-  "phase": "preflight",
-  "buildResult": null,
-  "deployResult": null,
-  "artifacts": [],
+  "phase": "complete",
+  "buildResult": "success",
+  "deployResult": "failure",
+  "artifacts": [
+    {
+      "name": "orbita-stackblitz",
+      "url": "https://github.com/ddintsen/-/actions/runs/39013836292/artifacts/12093703480"
+    },
+    {
+      "name": "orbita-preview",
+      "url": "https://github.com/ddintsen/-/actions/runs/39013836292/artifacts/12094230939"
+    }
+  ],
   "repositoryAccess": {
     "status": 200,
     "visibility": "public",
