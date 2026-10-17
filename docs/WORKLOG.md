@@ -167,3 +167,11 @@
 - Реальный GitHub run 39011423496 для 8a96e4f завершил build success и upload обоих artifacts. Completed receipt сохранён в docs/evidence/stackblitz-artifacts-2026-10-17.json. Deploy Pages всё ещё failure/404 и не объявляется рабочим сайтом.
 - StackBlitz import ZIP: https://github.com/ddintsen/-/actions/runs/39011423496/artifacts/12091939954 . Готовый preview ZIP: https://github.com/ddintsen/-/actions/runs/39011423496/artifacts/12092918111 . Это реальные загрузки с приватного GitHub для пользователя с доступом, а не опубликованные сайты.
 - Внешний запуск StackBlitz остаётся непроверенным. Следующее пользовательское действие: скачать artifact, открыть HTML, нажать кнопку импорта и дождаться Preview; готовый HTML — отдельный способ увидеть демоприложение без npm. Не возвращать ошибочную GitHub import ссылку и не обещать live-sync снимка.
+
+## 2026-10-17 — пользователь открыл репозиторий
+- Пользователь самостоятельно сделал репозиторий public. Проверены анонимные GitHub page и raw main/.stackblitzrc: оба HTTP 200. Main на GitHub совпала с локальной 4ba2bb9; tree исходно чист.
+- Обновлены актуальные README/DEPLOYMENT/AGENTS: прежнее private/404 больше не является текущим статусом. Добавлена явная main URL с startScript=dev; сохранены файловая альтернатива и distinction snapshot/живой среды.
+- StackBlitz/github.io по-прежнему CONNECT 403 из cloud; gh api Pages возвращает Forbidden. Public не выдано за успешный запуск внешнего приложения. Пользователю задан async-вопрос о результате открытия StackBlitz.
+- Уточнён запуск для руководителя: WebXR Meta Quest 3S, HTTPS-сайт и VR-вход; APK не входит в эту веб-сборку, physical Quest непроверен.
+- Сетевые команды require_escalated разрешены и отработали для GitHub; это не auto-review rejection. При стандартном restricted запуске proxy:8080 недоступен. Политики не отключались. Изменения только docs/evidence: git diff --check, без повторных UI-тестов.
+- Push документации запускает штатную повторную сборку/Pages deploy/receipt; после него нужно проверить реальный результат для нового sourceCommit.

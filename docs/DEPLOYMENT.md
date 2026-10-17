@@ -12,9 +12,17 @@ Workflow использует Node 22, npm ci, проверку типов/то�
 
 Проектный base — `/-/`, задаётся VITE_BASE_PATH. CSS-ресурсы, PWA manifest/service worker, ссылка на обзор и XR controller profiles учитывают этот путь. Навигация использует query parameters, поэтому отдельные server rewrites для вкладок не нужны. API остаётся внешним GET-источником; по умолчанию доступны явно помеченные демоданные.
 
+## StackBlitz: публичная main
+
+Пользователь сообщил «сделал паблик» 17 октября 2026. Анонимные GET страницы https://github.com/ddintsen/- и raw main/.stackblitzrc вернули HTTP 200: прежняя закрытость больше не является препятствием чтению GitHub.
+
+[Повторить импорт main в StackBlitz](https://stackblitz.com/github/ddintsen/-/tree/main?view=preview&startScript=dev). Откройте эту ссылку в новой вкладке, дождитесь установки npm-зависимостей и автоматического запуска, затем смотрите Preview. Явная ветка main и startScript=dev указаны в URL. Для следующих обновлений нужно заново импортировать свежую main; сохранённая копия не является live mirror cloud workspace.
+
+Доступность исходников не подтверждает полный запуск StackBlitz: cloud-сеть по-прежнему отвечает CONNECT 403 для его домена. Пользователю задан вопрос о результате открытия. Публичный репозиторий также сам по себе не означает опубликованный HTTPS-сайт для Quest; состояние Pages проверяется отдельно.
+
 ## StackBlitz: импорт файлами
 
-Прежняя ссылка GitHub import у пользователя возвращает **Repository not found**. Причина доступа установлена: GitHub CI подтвердил visibility=private, defaultBranch=main. Авторизация Git cloud-среды не передаётся StackBlitz. Не повторяйте эту ссылку как готовый просмотр; публичность репозитория автоматически не меняется.
+Исторически до изменения публичности GitHub import возвращал Repository not found; CI подтверждал private/main. После явного изменения пользователем и проверки HTTP 200 этот барьер снят. Файловый импорт остаётся дополнительным вариантом, независимым от чтения GitHub сервисом.
 
 1. Получите **orbita-stackblitz.html** из artifact **orbita-stackblitz** успешного build в [Actions](https://github.com/ddintsen/-/actions/workflows/pages.yml), либо создайте файл командой `npm run export:stackblitz`.
 2. Откройте HTML в обычном браузере и нажмите **Открыть проект в StackBlitz**. Кнопка передаст исходники непосредственно StackBlitz через официальный POST /run с template=node.
@@ -33,7 +41,7 @@ Workflow использует Node 22, npm ci, проверку типов/то�
 - [Скачать импорт в StackBlitz](https://github.com/ddintsen/-/actions/runs/39011423496/artifacts/12091939954) — ZIP с orbita-stackblitz.html.
 - [Скачать готовый HTML-просмотр](https://github.com/ddintsen/-/actions/runs/39011423496/artifacts/12092918111) — ZIP с orbita-preview.html.
 
-Для приватных artifacts нужен вход GitHub с доступом к репозиторию. Загрузки имеют стандартный срок хранения Actions и представляют конкретную версию; для новых изменений используйте artifacts новой сборки. Это ссылки на файлы, а не на запущенный сайт.
+Загрузка Actions artifacts может потребовать входа в GitHub. Загрузки имеют стандартный срок хранения Actions и представляют конкретную версию; для новых изменений используйте artifacts новой сборки. Это ссылки на файлы, а не на запущенный сайт.
 
 ## Переносимый просмотр
 
@@ -43,7 +51,7 @@ Workflow использует Node 22, npm ci, проверку типов/то�
 
 - Production build по /-/ проверяется локальным preview и `PREVIEW_URL=.../-/ npm run test:production`: контролируемый service worker, manifest, controller profiles, новый фон, все 10 карточек и WebGL в offline.
 - GitHub API и github.io в текущей среде возвращают Forbidden / CONNECT 403. Даже запуск разрешённой эскалацией не дал доступа к API. Это не доказывает, что сайт недоступен в браузере пользователя.
-- Анонимный HTTP-запрос страницы репозитория вернул 404; доступ через настроенный Git proxy работает. Позже CI подтвердил private; тариф по-прежнему не установлен.
+- Анонимный HTTP-запрос страницы репозитория вернул 404; доступ через настроенный Git proxy работает. Исторически CI подтвердил private; затем пользователь изменил видимость, и анонимный GET дал 200. Тариф не установлен.
 
 ## Статус без доступа к API из cloud
 

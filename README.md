@@ -14,9 +14,11 @@ React + TypeScript приложение по предоставленному Т
 
 ## Открыть онлайн
 
-Репозиторий закрытый: это подтверждено GitHub API из CI. Прямой GitHub import в StackBlitz у пользователя возвращает **Repository not found**; ссылка не является работающим просмотром.
+17 октября 2026 пользователь сделал репозиторий публичным. Анонимный доступ к странице GitHub и файлу `.stackblitzrc` из main подтверждён HTTP 200.
 
-Для передачи исходников непосредственно в StackBlitz: `npm run export:stackblitz` → `stackblitz-export/orbita-stackblitz.html`. Скачайте/откройте файл в браузере и нажмите **Открыть проект в StackBlitz**. Импорт отправляет файлы через официальный POST /run, без чтения закрытого GitHub сервисом. Внешнее создание проекта пока не проверено: cloud-сеть блокирует StackBlitz. Workflow сохраняет этот файл в artifact **orbita-stackblitz**. Это снимок: новый экспорт нужен после обновлений; сохранённый StackBlitz-проект сам из GitHub не обновляется.
+[Открыть ОРБИТУ в StackBlitz — main](https://stackblitz.com/github/ddintsen/-/tree/main?view=preview&startScript=dev). Дождитесь установки зависимостей и автозапуска `npm run dev`, затем откройте Preview. После следующих push открывайте ссылку импорта заново, чтобы получить свежую main. Полный запуск на стороне StackBlitz из cloud по-прежнему не проверен: сеть блокирует его домен; у пользователя запрошен результат повторного открытия.
+
+Дополнительный способ передачи исходников непосредственно в StackBlitz: `npm run export:stackblitz` → `stackblitz-export/orbita-stackblitz.html`. Скачайте/откройте файл в браузере и нажмите **Открыть проект в StackBlitz**. Импорт отправляет файлы через официальный POST /run, без чтения закрытого GitHub сервисом. Внешнее создание проекта пока не проверено: cloud-сеть блокирует StackBlitz. Workflow сохраняет этот файл в artifact **orbita-stackblitz**. Это снимок: новый экспорт нужен после обновлений; сохранённый StackBlitz-проект сам из GitHub не обновляется.
 
 Готовый просмотр без установки: standalone HTML из artifact **orbita-preview**. Подробные инструкции и ограничения — [DEPLOYMENT.md](docs/DEPLOYMENT.md).
 

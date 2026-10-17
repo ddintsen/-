@@ -1,0 +1,12 @@
+{
+  "checkedAt": "2026-10-17T07:27:10.492378+00:00",
+  "repository": "ddintsen/-",
+  "visibility": "public",
+  "verification": "anonymous GET without authentication",
+  "repositoryHttp": 200,
+  "rawMainStackblitzConfigHttp": 200,
+  "mainBeforeDocs": "4ba2bb902614445a12b46dd1f65bb433197c45c7",
+  "stackblitz": "not verified: cloud proxy CONNECT 403",
+  "pagesDirect": "not verified: cloud proxy CONNECT 403",
+  "githubPagesApi": "Forbidden"
+}

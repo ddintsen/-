@@ -77,3 +77,10 @@ GitHub Actions run 39011089929/sourceCommit 52e706c подтвердил reposit
 Run 39011423496, source 8a96e4f: build success, orbita-stackblitz artifact 12091939954, orbita-preview artifact 12092918111. Snapshot receipt — docs/evidence/stackblitz-artifacts-2026-10-17.json. Ссылки /actions/runs/39011423496/artifacts/{id} — скачивание ZIP для владельца/читателя private repo, не hosted URL. Пользователь может открыть HTML импорта и передать файлы через POST /run; внешнее создание StackBlitz проекта не подтверждено. Pages по-прежнему 404/failure.
 
 Локальный дополнительный архив /workspace/orbita-view.zip содержит оба HTML и README, ZIP проверен. Все source-изменения отправлены в GitHub, секреты/приватность репозитория не менялись. Не заявляйте, что StackBlitz онлайн-просмотр уже работает, до пользовательского подтверждения или реальной browser-проверки.
+
+## Актуально: пользователь сделал репозиторий public
+Пользователь сообщил «сделал паблик» после обсуждения изменения видимости. Это действие выполнено пользователем, не cloud API. Анонимные GET GitHub page и raw main/.stackblitzrc дали 200; public подтверждено. Удалённая main перед изменениями документации совпала с локальным 4ba2bb9. Старые private/404 инструкции исторические.
+
+Повторный импорт: https://stackblitz.com/github/ddintsen/-/tree/main?view=preview&startScript=dev . Полный запуск StackBlitz из среды не проверен (CONNECT 403), поэтому пользователю задан async-вопрос о результате открытия. Прямой github.io и GitHub REST API также блокируются; API повторно Forbidden. Для сетевых проверок в текущем restricted профиле потребовалась разрешённая эскалация; стандартный запуск не мог подключиться к proxy:8080. Настройки прокси/политики не обходились.
+
+Руководитель планируется как пользователь WebXR на Meta Quest 3S: опубликованный HTTPS-сайт → Meta Quest Browser → VR. APK и аккаунт GitHub не нужны для демосайта. Физический Quest остаётся непроверенным; StackBlitz development preview не выдаётся за готовую ссылку для шлема. Публикация Pages перепроверяется штатным workflow после push этих docs.
