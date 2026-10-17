@@ -273,7 +273,7 @@ export function drawPanel(
     m.gauges.forEach((g, i) => gauge(g, 150 + i * 360, 510, 230));
   }
   text(
-    "Выберите панель, чтобы приблизить · повторное нажатие — назад",
+    "Нажмите на панель, чтобы вернуться к обзору",
     640,
     765,
     22,
@@ -285,22 +285,23 @@ export function drawPanel(
   texture.anisotropy = 4;
   return texture;
 }
-export function drawLabel(label: string): CanvasTexture {
+export function drawLabel(label: string, aspect = 6.4): CanvasTexture {
   const c = document.createElement("canvas");
   c.width = 1024;
-  c.height = 160;
+  c.height = Math.round(c.width / aspect);
   const ctx = c.getContext("2d")!;
   ctx.fillStyle = colors.elevated;
   ctx.beginPath();
-  ctx.roundRect(0, 0, 1024, 160, 70);
+  ctx.roundRect(2, 2, 1020, c.height - 4, c.height / 2 - 2);
   ctx.fill();
   ctx.strokeStyle = colors.border;
   ctx.lineWidth = 4;
   ctx.stroke();
-  ctx.font = '500 46px "Inter Variable", sans-serif';
+  ctx.font = `500 ${Math.round(c.height * 0.3)}px "Inter Variable", sans-serif`;
   ctx.fillStyle = colors.text;
   ctx.textAlign = "center";
-  ctx.fillText(label, 512, 98);
+  ctx.textBaseline = "middle";
+  ctx.fillText(label, 512, c.height / 2, 930);
   const texture = new CanvasTexture(c);
   texture.colorSpace = SRGBColorSpace;
   return texture;
@@ -328,10 +329,15 @@ export function drawOverviewPanel(
     ctx.textAlign = align;
     ctx.fillText(s, x, y, 1160);
   };
-  ctx.fillStyle = colors.background;
+  const fill = ctx.createLinearGradient(0, 0, 1280, 800);
+  fill.addColorStop(0, colors.elevated);
+  fill.addColorStop(1, colors.background);
+  ctx.fillStyle = fill;
+  ctx.globalAlpha = 0.94;
   ctx.beginPath();
   ctx.roundRect(3, 3, 1274, 794, 35);
   ctx.fill();
+  ctx.globalAlpha = 1;
   ctx.strokeStyle = colors.border;
   ctx.lineWidth = 3;
   ctx.stroke();
@@ -473,5 +479,45 @@ export function drawOverviewPanel(
   const texture = new CanvasTexture(c);
   texture.colorSpace = SRGBColorSpace;
   texture.anisotropy = 4;
+  return texture;
+}
+
+/** @dashboard Д1–Д10. Decorative group material; headings encode the real data groups. */
+export function drawWing(
+  title: string,
+  subtitle: string,
+  aspect: number,
+): CanvasTexture {
+  const c = document.createElement("canvas");
+  c.width = 1280;
+  c.height = Math.round(c.width / aspect);
+  const ctx = c.getContext("2d")!;
+  const fill = ctx.createLinearGradient(0, 0, c.width, c.height);
+  fill.addColorStop(0, colors.elevated);
+  fill.addColorStop(1, colors.background);
+  ctx.fillStyle = fill;
+  ctx.globalAlpha = 0.78;
+  ctx.beginPath();
+  ctx.roundRect(3, 3, c.width - 6, c.height - 6, 58);
+  ctx.fill();
+  ctx.globalAlpha = 1;
+  ctx.strokeStyle = colors.border;
+  ctx.lineWidth = 3;
+  ctx.stroke();
+  ctx.font = '600 64px "Manrope Variable", sans-serif';
+  ctx.fillStyle = colors.text;
+  ctx.fillText(title, 60, 100, c.width - 120);
+  ctx.font = '400 32px "Inter Variable", sans-serif';
+  ctx.fillStyle = colors.muted;
+  ctx.fillText(subtitle, 60, 153, c.width - 120);
+  ctx.strokeStyle = colors.purple;
+  ctx.globalAlpha = 0.65;
+  ctx.lineWidth = 4;
+  ctx.beginPath();
+  ctx.moveTo(60, 190);
+  ctx.lineTo(220, 190);
+  ctx.stroke();
+  const texture = new CanvasTexture(c);
+  texture.colorSpace = SRGBColorSpace;
   return texture;
 }

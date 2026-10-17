@@ -65,3 +65,13 @@ Rollup сообщает о большом отдельном XR-chunk (~1,05 М�
 - `npm run test:production`: PASS; offline room.png decode, 10 dashboards, WebGL, manifest/profiles, 0 page errors. `evidence/production-smoke.json`.
 - Strict static UI audit: 0 findings (`evidence/premium-audit.json`). DESIGN lint: 0 errors, 20 orphan-token warnings; runtime adapter drift check PASS.
 - Browser images inspected: desktop-v2, dark-v2, mobile-v2, settings-v2, equipment-v2, focus-v2. No mobile horizontal overflow. Физический Quest остаётся за пределами проверки.
+
+
+## 2026-10-17 — пространственная навигация и публикация
+- Unit: 38/38 PASS. Финальный E2E: 16/16 PASS, 0 skipped/flaky. Добавлены реальные raycast-клики карточки и mesh-кнопки «Далее», границы 1/10, native keyboard parity, окружения, разворот canvas, mobile/axe и strict API recovery.
+- Typecheck, format:check, tokens:check: PASS. Strict premium audit: 0 findings. DESIGN lint: 0 errors / прежние 20 orphan-token warnings; токены не изменялись.
+- Production build c VITE_BASE_PATH=/-/: PASS. Smoke по /-/: PWA controller, manifest, локальные profiles, room.png, 10 карточек и WebGL offline; 0 page errors.
+- Standalone build + test:preview через HTTP: PASS, 10 карточек, фокус, навигация, WebGL, 0 дополнительных ресурсов, 0 page errors. file:// navigation заблокирована политикой managed Chromium и не заявляется проверенной.
+- Скриншоты: spatial-before-next (исходное состояние), spatial-next, spatial-focus-next, spatial-mobile-next, spatial-mobile-expanded-next. Mobile FOV исправлен по фактическому обрезанию карточки; WebXR projection не менялась.
+- Workflow YAML разобран yaml-парсером; публикация требует первоначального Source=GitHub Actions в настройках Pages. Доступ к внешнему Actions API/github.io в cloud заблокирован; реальная публикация здесь не подтверждена. См. DEPLOYMENT.md.
+- Physical Quest: по-прежнему не проверен. При переходе preview↔XR фокус сбрасывается, чтобы поза карточки из одного viewing space не переносилась в другой.

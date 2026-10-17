@@ -161,7 +161,15 @@ export default function App() {
       </a>
       <div className="app-shell">
         <aside className="side-dock">
-          <a className="brand-mark" href="/" aria-label="ОРБИТА — обзор">
+          <a
+            className="brand-mark"
+            href={
+              location.protocol === "file:"
+                ? location.pathname
+                : import.meta.env.BASE_URL
+            }
+            aria-label="ОРБИТА — обзор"
+          >
             <Orbit size={29} />
           </a>
           <nav aria-label="Основные разделы">

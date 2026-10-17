@@ -5,6 +5,17 @@ import basicSsl from "@vitejs/plugin-basic-ssl";
 import { VitePWA } from "vite-plugin-pwa";
 
 export default defineConfig(({ mode }) => ({
+  base: mode === "standalone" ? "./" : process.env.VITE_BASE_PATH || "/",
+  build:
+    mode === "standalone"
+      ? {
+          outDir: "standalone-dist",
+          copyPublicDir: false,
+          assetsInlineLimit: Number.MAX_SAFE_INTEGER,
+          cssCodeSplit: false,
+          rollupOptions: { output: { inlineDynamicImports: true } },
+        }
+      : {},
   define: {
     __INITIAL_DASHBOARD_DATA__: readFileSync(
       new URL("./public/mock/dashboard-data.json", import.meta.url),
@@ -14,46 +25,52 @@ export default defineConfig(({ mode }) => ({
   plugins: [
     react(),
     ...(mode === "https" ? [basicSsl()] : []),
-    VitePWA({
-      registerType: "prompt",
-      includeAssets: ["icon.svg", "icon-192.png", "icon-512.png"],
-      manifest: {
-        name: "ОРБИТА — аналитика департамента",
-        short_name: "ОРБИТА",
-        description: "Пространственная аналитика платежей, касс и оборудования",
-        lang: "ru",
-        start_url: "/",
-        display: "standalone",
-        background_color: "#24262b",
-        theme_color: "#24262b",
-        icons: [
-          {
-            src: "icon-192.png",
-            sizes: "192x192",
-            type: "image/png",
-            purpose: "any",
-          },
-          {
-            src: "icon-512.png",
-            sizes: "512x512",
-            type: "image/png",
-            purpose: "any",
-          },
-        ],
-      },
-      workbox: {
-        globPatterns: ["**/*.{js,css,html,svg,png,woff2,json}"],
-        globIgnores: [
-          "**/emulate-*.js",
-          "**/office_*.js",
-          "**/meeting_room-*.js",
-          "**/living_room-*.js",
-          "**/music_room-*.js",
-        ],
-        maximumFileSizeToCacheInBytes: 5000000,
-        navigateFallbackDenylist: [/^\/api\//],
-      },
-    }),
+    ...(mode === "standalone"
+      ? []
+      : [
+          VitePWA({
+            registerType: "prompt",
+            includeAssets: ["icon.svg", "icon-192.png", "icon-512.png"],
+            manifest: {
+              name: "ОРБИТА — аналитика департамента",
+              short_name: "ОРБИТА",
+              description:
+                "Пространственная аналитика платежей, касс и оборудования",
+              lang: "ru",
+              start_url: ".",
+              scope: ".",
+              display: "standalone",
+              background_color: "#24262b",
+              theme_color: "#24262b",
+              icons: [
+                {
+                  src: "icon-192.png",
+                  sizes: "192x192",
+                  type: "image/png",
+                  purpose: "any",
+                },
+                {
+                  src: "icon-512.png",
+                  sizes: "512x512",
+                  type: "image/png",
+                  purpose: "any",
+                },
+              ],
+            },
+            workbox: {
+              globPatterns: ["**/*.{js,css,html,svg,png,woff2,json}"],
+              globIgnores: [
+                "**/emulate-*.js",
+                "**/office_*.js",
+                "**/meeting_room-*.js",
+                "**/living_room-*.js",
+                "**/music_room-*.js",
+              ],
+              maximumFileSizeToCacheInBytes: 5000000,
+              navigateFallbackDenylist: [/^\/api\//],
+            },
+          }),
+        ]),
   ],
   server: {
     port: 5173,

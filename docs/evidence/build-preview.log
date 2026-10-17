@@ -1,0 +1,36 @@
+
+> orbita-spatial-analytics@0.1.0 build:preview
+> tsc -b && vite build --mode standalone && node scripts/standalone.mjs
+
+vite v7.3.7 building client environment for standalone...
+transforming...
+node_modules/zod/v4/core/util.js (400:0): A comment
+
+"// Wrapped in a `@__PURE__` IIFE: esbuild never tree-shakes a top-level initializer that contains a member access on `Number`, so the bare object literal survived into every bundle."
+
+in "node_modules/zod/v4/core/util.js" contains an annotation that Rollup cannot interpret due to the position of the comment. The comment will be removed to avoid issues.
+node_modules/zod/v4/core/regexes.js (74:0): A comment
+
+"/** Anchors a pattern source. The interpolation lives here rather than at the call site because
+ * esbuild will not drop a `@__PURE__` call whose own argument interpolates a variable, but it
+ * will drop `anchor(dateSource)`. Keeping it inline pinned `date` into every bundle. */"
+
+in "node_modules/zod/v4/core/regexes.js" contains an annotation that Rollup cannot interpret due to the position of the comment. The comment will be removed to avoid issues.
+✓ 2062 modules transformed.
+rendering chunks...
+computing gzip size...
+standalone-dist/index.html                     0.74 kB │ gzip:     0.47 kB
+standalone-dist/assets/style-Bj2Ftw01.css    434.96 kB │ gzip:   305.03 kB
+standalone-dist/assets/index-OUpIy7xr.js   7,480.56 kB │ gzip: 2,387.17 kB
+
+(!) Some chunks are larger than 500 kB after minification. Consider:
+- Using dynamic import() to code-split the application
+- Use build.rollupOptions.output.manualChunks to improve chunking: https://rollupjs.org/configuration-options/#output-manualchunks
+- Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.
+✓ built in 10.42s
+{"file":"/workspace/-/standalone-dist/orbita-preview.html","bytes":20894194}
+npm notice
+npm notice New major version of npm available! 11.9.0 -> 12.2.0
+npm notice Changelog: https://github.com/npm/cli/releases/tag/v12.2.0
+npm notice To update run: npm install -g npm@12.2.0
+npm notice

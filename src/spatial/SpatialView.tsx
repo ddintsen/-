@@ -8,17 +8,24 @@ import {
 } from "react";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { XR, XROrigin, createXRStore, useXR } from "@react-three/xr";
-import { Quaternion, Vector3, type Group } from "three";
+import { PerspectiveCamera, Quaternion, Vector3, type Group } from "three";
 import {
   Glasses,
   RotateCcw,
   ArrowLeft,
   ArrowRight,
   MoveHorizontal,
+  Sun,
+  Moon,
+  Maximize2,
+  Minimize2,
+  LayoutGrid,
+  Database,
 } from "lucide-react";
 import { useDashboardStore } from "../store/dashboard";
 import { colors, dashboardModel, type DashboardModel } from "../api/model";
-import { drawLabel, drawPanel, drawOverviewPanel } from "./drawPanel";
+import { drawPanel, drawOverviewPanel } from "./drawPanel";
+import { SpatialSurface, SpatialWing, SpatialControl } from "./SpatialSurface";
 import { Button, NativeSelect } from "../components/ui";
 
 // No remote hand/controller model download. Local profile JSON resolves controller buttons.
@@ -29,7 +36,10 @@ const xrStore = createXRStore({
   handTracking: true,
   hand: { model: false },
   controller: { model: false },
-  baseAssetPath: new URL("/xr-profiles/", window.location.href).href,
+  baseAssetPath: new URL(
+    `${import.meta.env.BASE_URL}xr-profiles/`,
+    window.location.href,
+  ).href,
   anchors: false,
   meshDetection: false,
   planeDetection: false,
@@ -91,47 +101,16 @@ function Panel({
   );
   useEffect(() => () => texture.dispose(), [texture]);
   return (
-    <mesh
-      position={position}
-      scale={scale}
-      onClick={(e) => {
-        e.stopPropagation();
-        onSelect();
-      }}
-    >
-      <planeGeometry args={[1.28, 0.8]} />
-      <meshBasicMaterial
-        map={texture}
-        transparent
+    <group position={position} scale={scale}>
+      <SpatialSurface
+        texture={texture}
+        width={1.28}
+        height={0.8}
         opacity={opacity}
-        toneMapped={false}
-        depthTest={!focused}
+        focused={focused}
+        onSelect={onSelect}
       />
-    </mesh>
-  );
-}
-function Control({
-  label,
-  position,
-  onClick,
-}: {
-  label: string;
-  position: [number, number, number];
-  onClick: () => void;
-}) {
-  const texture = useMemo(() => drawLabel(label), [label]);
-  useEffect(() => () => texture.dispose(), [texture]);
-  return (
-    <mesh
-      position={position}
-      onClick={(e) => {
-        e.stopPropagation();
-        onClick();
-      }}
-    >
-      <planeGeometry args={[0.9, 0.14]} />
-      <meshBasicMaterial map={texture} transparent toneMapped={false} />
-    </mesh>
+    </group>
   );
 }
 function Scene({
@@ -144,7 +123,7 @@ function Scene({
   setFocused: (v: number | null) => void;
 }) {
   const data = useDashboardStore((s) => s.data);
-  const { camera, gl } = useThree();
+  const { camera, gl, size } = useThree();
   const mode = useXR((s) => s.mode);
   const session = useXR((s) => s.session);
   const focusGroup = useRef<Group>(null);
@@ -157,14 +136,24 @@ function Scene({
     [data],
   );
   useEffect(() => {
-    gl.setClearColor(colors.background, mode === "immersive-ar" ? 0 : 1);
+    gl.setClearColor(colors.background, mode === "immersive-vr" ? 1 : 0);
   }, [gl, mode]);
   useEffect(() => {
     if (!session) {
       camera.position.set(0, 1.6, 0.7);
       camera.rotation.set(0, (yaw * Math.PI) / 180, 0);
+      if (camera instanceof PerspectiveCamera) {
+        // Keep the whole 1.28m focus card visible in a narrow or expanded browser preview.
+        // The headset projection is owned by WebXR and is never changed here.
+        camera.fov = Math.max(
+          68,
+          (2 * Math.atan(0.72 / ((1.1 * size.width) / size.height)) * 180) /
+            Math.PI,
+        );
+        camera.updateProjectionMatrix();
+      }
     }
-  }, [camera, yaw, session]);
+  }, [camera, yaw, session, size.width, size.height]);
   useEffect(() => {
     if (focused) {
       const p = camera.getWorldPosition(new Vector3());
@@ -179,33 +168,51 @@ function Scene({
       focusGroup.current.quaternion.copy(focusPose.current.q);
     }
   });
-  if (!data) return null;
+  if (!data)
+    return session ? (
+      <>
+        <XROrigin />
+        <SpatialControl
+          label="Данные недоступны"
+          position={[0, 1.7, -1.1]}
+          width={0.9}
+          height={0.16}
+        />
+        <SpatialControl
+          label="Завершить XR-сеанс"
+          position={[0, 1.45, -1.1]}
+          onSelect={() => void session.end()}
+        />
+      </>
+    ) : null;
   return (
     <>
       <XROrigin />
-      {mode !== "immersive-ar" ? (
-        <>
-          <gridHelper
-            args={[16, 32, colors.scrollbar, colors.elevated]}
-            position={[0, -0.1, 0]}
-          />
-          <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.11, 0]}>
-            <planeGeometry args={[30, 30]} />
-            <meshBasicMaterial color={colors.background} />
-          </mesh>
-        </>
+      {mode === "immersive-vr" ? (
+        <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.11, 0]}>
+          <planeGeometry args={[30, 30]} />
+          <meshBasicMaterial color={colors.background} />
+        </mesh>
       ) : null}
       <group position={[0, 1.6, -1.8]}>
+        <SpatialWing
+          title="Платежи"
+          subtitle="4 дашборда · каналы и выполнение плана"
+          width={2}
+          height={1.66}
+          position={[0, 0.04, -0.025]}
+          opacity={focused ? 0.35 : 1}
+        />
         {[1, 2, 3, 4].map((id, i) => (
           <Panel
             key={id}
             model={models[id - 1]}
             position={[
-              ((i % 2) - 0.5) * 0.82,
-              0.28 - Math.floor(i / 2) * 0.53,
+              ((i % 2) - 0.5) * 0.94,
+              0.28 - Math.floor(i / 2) * 0.6,
               0,
             ]}
-            scale={0.62}
+            scale={0.7}
             opacity={focused ? 0.25 : 1}
             focused={false}
             onSelect={() => setFocused(id)}
@@ -213,14 +220,34 @@ function Scene({
         ))}
       </group>
       {[
-        { ids: [5, 6, 7], x: -1.55, angle: 0.48 },
-        { ids: [8, 9, 10], x: 1.55, angle: -0.48 },
+        {
+          ids: [5, 6, 7],
+          x: -1.55,
+          angle: 0.48,
+          title: "Кассовые операции",
+          subtitle: "3 дашборда · операции и команда",
+        },
+        {
+          ids: [8, 9, 10],
+          x: 1.55,
+          angle: -0.48,
+          title: "Оборудование",
+          subtitle: "3 дашборда · АТМ, ТСО и Recycle",
+        },
       ].map((wing) => (
         <group
           key={wing.x}
           position={[wing.x, 1.6, -1.45]}
           rotation={[0, wing.angle, 0]}
         >
+          <SpatialWing
+            title={wing.title}
+            subtitle={wing.subtitle}
+            width={1.08}
+            height={2.24}
+            position={[0, 0.08, -0.025]}
+            opacity={focused ? 0.35 : 1}
+          />
           {wing.ids.map((id, i) => (
             <Panel
               key={id}
@@ -242,17 +269,45 @@ function Scene({
             focused
             onSelect={() => setFocused(null)}
           />
-          <Control
-            label="Вернуть панель"
-            position={[0, -0.53, 0]}
-            onClick={() => setFocused(null)}
+          <SpatialControl
+            label="← Назад"
+            position={[-0.45, -0.5, 0]}
+            width={0.35}
+            height={0.12}
+            focused
+            disabled={focused === 1}
+            onSelect={() => setFocused(Math.max(1, focused - 1))}
+          />
+          <SpatialControl
+            label="Панорама"
+            position={[0, -0.5, 0]}
+            width={0.43}
+            height={0.12}
+            focused
+            onSelect={() => setFocused(null)}
+          />
+          <SpatialControl
+            label="Далее →"
+            position={[0.45, -0.5, 0]}
+            width={0.35}
+            height={0.12}
+            focused
+            disabled={focused === 10}
+            onSelect={() => setFocused(Math.min(10, focused + 1))}
+          />
+          <SpatialControl
+            label={`Д${focused} / 10`}
+            position={[0, -0.66, 0]}
+            width={0.3}
+            height={0.09}
+            focused
           />
         </group>
       ) : null}
-      <Control
+      <SpatialControl
         label={session ? "Завершить XR-сеанс" : "Выберите панель для фокуса"}
         position={[0, 0.78, -1.8]}
-        onClick={() => {
+        onSelect={() => {
           if (session) void session.end();
           else setFocused(1);
         }}
@@ -264,9 +319,20 @@ export default function SpatialView() {
   const [yaw, setYaw] = useState(0),
     [focused, setFocused] = useState<number | null>(null),
     [support, setSupport] = useState({ ar: false, vr: false, checked: false });
+  function lookAt(nextYaw: number) {
+    setFocused(null);
+    setYaw(nextYaw);
+  }
+  const [expanded, setExpanded] = useState(false);
+  const theme = useDashboardStore((s) => s.theme);
   const [error, setError] = useState(""),
     [busy, setBusy] = useState(false),
     [sessionActive, setSessionActive] = useState(false);
+  useEffect(() => {
+    // A focus pose belongs to its current viewing space; start each XR/preview transition in panorama.
+    setFocused(null);
+    setYaw(0);
+  }, [sessionActive]);
   useEffect(() => {
     let active = true;
     async function check() {
@@ -308,6 +374,11 @@ export default function SpatialView() {
     }
   }
   const data = useDashboardStore((s) => s.data);
+  const loading = useDashboardStore((s) => s.busy);
+  const refresh = useDashboardStore((s) => s.refresh);
+  useEffect(() => {
+    if (!data) setFocused(null);
+  }, [data]);
   return (
     <div className="spatial-view">
       <div className="xr-toolbar">
@@ -318,7 +389,7 @@ export default function SpatialView() {
         <div>
           <Button
             variant="outline"
-            disabled={!support.ar || busy || sessionActive}
+            disabled={!data || !support.ar || busy || sessionActive}
             onClick={() => void enter("ar")}
           >
             <Glasses size={18} />
@@ -326,7 +397,7 @@ export default function SpatialView() {
           </Button>
           <Button
             variant="primary"
-            disabled={!support.vr || busy || sessionActive}
+            disabled={!data || !support.vr || busy || sessionActive}
             onClick={() => void enter("vr")}
             busy={busy}
           >
@@ -334,7 +405,47 @@ export default function SpatialView() {
           </Button>
         </div>
       </div>
-      <div className="xr-canvas">
+      <div className="xr-preview-toolbar">
+        <div
+          className="xr-environments"
+          role="group"
+          aria-label="Окружение предпросмотра"
+        >
+          <Button
+            className={theme === "office" ? "selected" : ""}
+            aria-pressed={theme === "office"}
+            onClick={() => useDashboardStore.setState({ theme: "office" })}
+          >
+            <Sun size={15} />
+            Кабинет
+          </Button>
+          <Button
+            className={theme === "dark" ? "selected" : ""}
+            aria-pressed={theme === "dark"}
+            onClick={() => useDashboardStore.setState({ theme: "dark" })}
+          >
+            <Moon size={15} />
+            Тёмное окружение
+          </Button>
+        </div>
+        <Button
+          className="xr-expand"
+          aria-label={
+            expanded ? "Свернуть 3D-просмотр" : "Развернуть 3D-просмотр"
+          }
+          aria-pressed={expanded}
+          onClick={() => setExpanded(!expanded)}
+        >
+          {expanded ? <Minimize2 size={16} /> : <Maximize2 size={16} />}
+          <span>{expanded ? "Свернуть" : "Развернуть"}</span>
+        </Button>
+      </div>
+      <div
+        className={`xr-canvas ${expanded ? "expanded" : ""}`}
+        data-environment={theme}
+        role="group"
+        aria-label="Интерактивный 3D-просмотр десяти дашбордов"
+      >
         <GraphicsBoundary>
           <Canvas
             camera={{ position: [0, 1.6, 0.7], fov: 68 }}
@@ -351,11 +462,31 @@ export default function SpatialView() {
             </XR>
           </Canvas>
         </GraphicsBoundary>
+        {!data ? (
+          <div className="xr-no-data">
+            <Database size={30} />
+            <h3>
+              {loading
+                ? "Загружаем аналитику"
+                : "Нет данных для пространственного просмотра"}
+            </h3>
+            <p>Проверьте источник данных и повторите загрузку.</p>
+            <Button
+              variant="primary"
+              busy={loading}
+              disabled={loading}
+              onClick={() => void refresh()}
+            >
+              Повторить загрузку
+            </Button>
+          </div>
+        ) : null}
       </div>
       <div className="xr-focus-picker">
         <label htmlFor="xr-focus">Приблизить дашборд</label>
         <NativeSelect
           id="xr-focus"
+          disabled={!data}
           value={focused ?? 0}
           onChange={(e) => setFocused(Number(e.target.value) || null)}
         >
@@ -372,13 +503,47 @@ export default function SpatialView() {
             : null}
         </NativeSelect>
       </div>
+      <div className="xr-focus-navigation">
+        <p role="status" className="xr-focus-status">
+          {!data
+            ? "Данные недоступны"
+            : focused
+              ? `Д${focused} · ${dashboardModel(data, focused).title}`
+              : "Панорама · 10 дашбордов"}
+        </p>
+        <div className="xr-focus-actions">
+          <Button
+            variant="outline"
+            aria-label="Предыдущий дашборд"
+            disabled={!focused || focused === 1}
+            onClick={() => focused && setFocused(focused - 1)}
+          >
+            <ArrowLeft size={16} />
+          </Button>
+          <Button
+            variant="outline"
+            disabled={!focused}
+            onClick={() => setFocused(null)}
+          >
+            <LayoutGrid size={16} />К панораме
+          </Button>
+          <Button
+            variant="outline"
+            aria-label="Следующий дашборд"
+            disabled={!focused || focused === 10}
+            onClick={() => focused && setFocused(focused + 1)}
+          >
+            <ArrowRight size={16} />
+          </Button>
+        </div>
+      </div>
       <div className="xr-controls">
         <MoveHorizontal size={18} />
         <span>Поворот взгляда</span>
         <Button
           className="icon-button"
           aria-label="Посмотреть на кассы"
-          onClick={() => setYaw(32)}
+          onClick={() => lookAt(32)}
         >
           <ArrowLeft size={17} />
         </Button>
@@ -388,12 +553,12 @@ export default function SpatialView() {
           min="-45"
           max="45"
           value={yaw}
-          onChange={(e) => setYaw(Number(e.target.value))}
+          onChange={(e) => lookAt(Number(e.target.value))}
         />
         <Button
           className="icon-button"
           aria-label="Посмотреть на оборудование"
-          onClick={() => setYaw(-32)}
+          onClick={() => lookAt(-32)}
         >
           <ArrowRight size={17} />
         </Button>
@@ -414,7 +579,7 @@ export default function SpatialView() {
       ) : null}
       <p className="xr-support">
         {support.checked && !support.ar && !support.vr
-          ? "Этот браузер не поддерживает immersive WebXR. Выше работает 3D-просмотр; вход в AR/VR доступен в совместимом шлеме по HTTPS."
+          ? "Этот браузер не поддерживает immersive WebXR. Просматривайте панели здесь или откройте приложение в совместимом шлеме по HTTPS."
           : "В шлеме: луч контроллера + курок или луч руки + pinch. Повторное нажатие возвращает панель."}
       </p>
     </div>

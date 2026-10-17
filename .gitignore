@@ -13,3 +13,4 @@ playwright-report/
 *.key
 *.p12
 *.pfx
+standalone-dist/

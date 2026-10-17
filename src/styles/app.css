@@ -1614,6 +1614,7 @@ textarea::placeholder {
   gap: 10px;
 }
 .xr-canvas {
+  position: relative;
   height: min(55vh, 580px);
   min-height: 300px;
   background: var(--color-background);
@@ -2523,4 +2524,110 @@ textarea::placeholder {
     display: block;
     margin-bottom: 10px;
   }
+}
+
+/* Spatial preview shares the room and smoked-glass language of the browser cockpit. */
+.xr-preview-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 12px;
+}
+.xr-environments {
+  display: flex;
+  gap: 3px;
+  padding: 3px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-pill);
+  background: var(--color-card);
+}
+.xr-environments .button {
+  border-radius: var(--radius-pill);
+  padding: 8px 13px;
+  min-height: 34px;
+}
+.xr-environments .button.selected {
+  background: var(--color-primary);
+  color: var(--color-on-primary);
+}
+.xr-canvas {
+  background:
+    linear-gradient(rgba(26, 25, 34, 0.24), rgba(26, 25, 34, 0.4)),
+    url("/images/room.png") center/cover no-repeat;
+  box-shadow: inset 0 1px rgba(255, 255, 255, 0.15);
+}
+.xr-canvas[data-environment="dark"] {
+  background:
+    linear-gradient(rgba(20, 21, 31, 0.85), rgba(20, 21, 31, 0.92)),
+    url("/images/room.png") center/cover no-repeat;
+}
+.xr-canvas.expanded {
+  height: min(75vh, 820px);
+}
+.xr-focus-navigation {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  margin-top: 14px;
+  padding-top: 14px;
+  border-top: 1px solid var(--color-border);
+}
+.xr-focus-status {
+  font-size: 12px;
+  line-height: 1.5;
+}
+.xr-focus-actions {
+  display: flex;
+  gap: 7px;
+  flex-shrink: 0;
+}
+.xr-focus-actions .button {
+  min-height: 38px;
+}
+@media (max-width: 760px) {
+  .xr-preview-toolbar {
+    gap: 8px;
+  }
+  .xr-environments .button {
+    font-size: 10px;
+    padding: 8px 9px;
+    gap: 6px;
+  }
+  .xr-expand {
+    padding: 9px;
+  }
+  .xr-expand > span {
+    display: none;
+  }
+  .xr-focus-navigation {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .xr-focus-actions {
+    width: 100%;
+    justify-content: space-between;
+  }
+}
+
+.xr-no-data {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  padding: 24px;
+  text-align: center;
+  background: var(--color-glass-dark);
+}
+.xr-no-data h3 {
+  font-size: 17px;
+}
+.xr-no-data p {
+  color: var(--color-muted);
+  font-size: 12px;
+  line-height: 1.6;
 }
