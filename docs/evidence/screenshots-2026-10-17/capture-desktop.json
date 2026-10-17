@@ -1,0 +1,82 @@
+{
+  "capturedAt": "2026-10-17T20:19:27.669Z",
+  "source": "Local production build, matching published runtime assets. These are not fresh live-site captures.",
+  "baseURL": "http://127.0.0.1:4173/-/",
+  "publishedURL": "https://ddintsen.github.io/-/",
+  "publishedRuntime": "0f21d879fd5ffd1150de46ec8cc6abe7b9b71d6d",
+  "publishedVerificationRun": "39064544873",
+  "liveAccess": "CONNECT403 from this cloud environment",
+  "assets": [
+    "index-BY9oka8h.css",
+    "index-Ck3O_dOr.js"
+  ],
+  "captures": [
+    {
+      "file": "desktop-ua.png",
+      "state": "desktop-ua",
+      "language": "uk",
+      "viewport": {
+        "width": 1600,
+        "height": 1100
+      },
+      "fullPage": true,
+      "title": "Огляд · Орбіта"
+    },
+    {
+      "file": "desktop-en.png",
+      "state": "desktop-en",
+      "language": "en",
+      "viewport": {
+        "width": 1600,
+        "height": 1100
+      },
+      "fullPage": true,
+      "title": "Overview · Orbita"
+    },
+    {
+      "file": "desktop-dark-ua.png",
+      "state": "desktop-dark-ua",
+      "language": "uk",
+      "viewport": {
+        "width": 1600,
+        "height": 1100
+      },
+      "fullPage": true,
+      "title": "Огляд · Орбіта"
+    },
+    {
+      "file": "focus-ua.png",
+      "state": "focus-ua",
+      "language": "uk",
+      "viewport": {
+        "width": 1600,
+        "height": 1100
+      },
+      "fullPage": false,
+      "title": "Огляд · Орбіта"
+    },
+    {
+      "file": "settings-api-ua.png",
+      "state": "settings-api-ua",
+      "language": "uk",
+      "viewport": {
+        "width": 1600,
+        "height": 1100
+      },
+      "fullPage": false,
+      "title": "Огляд · Орбіта"
+    },
+    {
+      "file": "settings-demo-ua.png",
+      "state": "settings-demo-ua",
+      "language": "uk",
+      "viewport": {
+        "width": 1600,
+        "height": 1100
+      },
+      "fullPage": false,
+      "title": "Огляд · Орбіта"
+    }
+  ],
+  "errors": []
+}

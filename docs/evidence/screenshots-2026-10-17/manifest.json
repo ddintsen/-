@@ -1,0 +1,63 @@
+{
+  "capturedAt": "2026-10-17T20:20:11.253007+00:00",
+  "count": 14,
+  "source": "Local production with JS/CSS identical to published runtime 0f21d87; live Pages access blocked by CONNECT403 in this environment",
+  "screenshots": {
+    "desktop-dark-ua.png": [
+      1600,
+      1752
+    ],
+    "desktop-en.png": [
+      1600,
+      1752
+    ],
+    "desktop-ua.png": [
+      1600,
+      1752
+    ],
+    "focus-ua.png": [
+      1600,
+      1100
+    ],
+    "mobile-en-390x844.png": [
+      390,
+      844
+    ],
+    "mobile-en-fullpage.png": [
+      390,
+      4333
+    ],
+    "mobile-uk-390x844.png": [
+      390,
+      844
+    ],
+    "mobile-uk-fullpage.png": [
+      390,
+      4333
+    ],
+    "settings-api-ua.png": [
+      1600,
+      1100
+    ],
+    "settings-demo-ua.png": [
+      1600,
+      1100
+    ],
+    "spatial-panorama-canvas-uk.png": [
+      1214,
+      550
+    ],
+    "spatial-panorama-uk-1600x1000.png": [
+      1600,
+      1000
+    ],
+    "spatial-room-canvas-uk.png": [
+      1214,
+      551
+    ],
+    "spatial-room-uk-1600x1000.png": [
+      1600,
+      1000
+    ]
+  }
+}

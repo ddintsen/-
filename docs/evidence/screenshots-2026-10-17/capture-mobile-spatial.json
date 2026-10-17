@@ -1,0 +1,117 @@
+{
+  "capturedAt": "2026-10-17T20:19:23.856Z",
+  "sourceURL": "http://127.0.0.1:4173/-/",
+  "publishedURL": "https://ddintsen.github.io/-/",
+  "sourceDescription": "Local production build with entry JS/CSS filenames identical to verified published runtime 0f21d879fd5ffd1150de46ec8cc6abe7b9b71d6d. These are fresh local browser captures, not new captures from the public URL.",
+  "publishedRuntime": "0f21d879fd5ffd1150de46ec8cc6abe7b9b71d6d",
+  "deploymentRun": "39064544873",
+  "matchedEntryAssets": [
+    "/-/assets/index-Ck3O_dOr.js",
+    "/-/assets/index-BY9oka8h.css"
+  ],
+  "liveNetworkBlockedReportedByRoot": "CONNECT tunnel failed, response 403",
+  "screenshots": [
+    {
+      "file": "mobile-uk-390x844.png",
+      "url": "http://127.0.0.1:4173/-/",
+      "locale": "uk",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "fullPage": false
+    },
+    {
+      "file": "mobile-uk-fullpage.png",
+      "url": "http://127.0.0.1:4173/-/",
+      "locale": "uk",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "fullPage": true
+    },
+    {
+      "file": "mobile-en-390x844.png",
+      "url": "http://127.0.0.1:4173/-/",
+      "locale": "en",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "fullPage": false
+    },
+    {
+      "file": "mobile-en-fullpage.png",
+      "url": "http://127.0.0.1:4173/-/",
+      "locale": "en",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "fullPage": true
+    },
+    {
+      "file": "spatial-panorama-uk-1600x1000.png",
+      "url": "http://127.0.0.1:4173/-/",
+      "locale": "uk",
+      "viewport": {
+        "width": 1600,
+        "height": 1000
+      },
+      "fullPage": false
+    },
+    {
+      "file": "spatial-panorama-canvas-uk.png",
+      "url": "http://127.0.0.1:4173/-/",
+      "locale": "uk",
+      "element": ".xr-canvas",
+      "webGL": true
+    },
+    {
+      "file": "spatial-room-uk-1600x1000.png",
+      "url": "http://127.0.0.1:4173/-/",
+      "locale": "uk",
+      "viewport": {
+        "width": 1600,
+        "height": 1000
+      },
+      "fullPage": false
+    },
+    {
+      "file": "spatial-room-canvas-uk.png",
+      "url": "http://127.0.0.1:4173/-/",
+      "locale": "uk",
+      "element": ".xr-canvas",
+      "roomInspectionYawDegrees": -30,
+      "webGL": true
+    }
+  ],
+  "contexts": [
+    {
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "errors": [],
+      "failedRequests": [],
+      "initialLanguage": "uk",
+      "mobileOverflow": false,
+      "finalLanguage": "en"
+    },
+    {
+      "viewport": {
+        "width": 1600,
+        "height": 1000
+      },
+      "errors": [],
+      "failedRequests": [],
+      "canvasDimensions": {
+        "width": 1214,
+        "height": 550
+      },
+      "roomInspectionRange": "180"
+    }
+  ],
+  "failures": []
+}
