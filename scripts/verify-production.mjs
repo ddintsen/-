@@ -62,7 +62,18 @@ try {
     throw new Error("Offline dashboard 3 unavailable");
   await page.getByRole("button", { name: /Открыть в пространстве/ }).click();
   await page.locator(".xr-canvas canvas").waitFor();
-  await page.waitForTimeout(500);
+  await page.getByRole("button", { name: "Осмотреть комнату" }).click();
+  const roomTurn = page.getByLabel("Поворот взгляда в градусах");
+  if ((await roomTurn.getAttribute("max")) !== "180")
+    throw new Error("Offline procedural room inspection unavailable");
+  await roomTurn.fill("-30");
+  await page.waitForTimeout(300);
+  await page.locator(".xr-canvas").screenshot({
+    path: path.join(evidenceDirectory, "procedural-room.png"),
+  });
+  await page.getByRole("button", { name: "Вернуть аналитику" }).click();
+  if ((await roomTurn.inputValue()) !== "0")
+    throw new Error("Room inspection did not restore the panorama");
   await page.getByLabel("Приблизить дашборд").selectOption("1");
   await page.waitForTimeout(300);
   await page.screenshot({
@@ -76,6 +87,7 @@ try {
     questControllerProfiles: true,
     offlineDemo: true,
     offlineRoom,
+    offlineProceduralRoom: true,
     offlineWebGL: true,
     offlineDashboardCount: 10,
     errors,

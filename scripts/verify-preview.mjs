@@ -47,7 +47,7 @@ try {
     !(await page
       .locator(".xr-focus-status")
       .innerText()
-      .then((s) => s.startsWith("Д4")))
+      .then((s) => s === "Платежи с начала года"))
   )
     throw new Error("Standalone XR navigation failed");
   await page.waitForTimeout(400);

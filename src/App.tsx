@@ -90,7 +90,7 @@ export default function App() {
     document.documentElement.dataset.theme = s.theme;
   }, [s.theme]);
   useEffect(() => {
-    document.title = `${viewConfig.find((x) => x.id === view)?.label} департамента · ОРБИТА`;
+    document.title = `${viewConfig.find((x) => x.id === view)?.label} департамента · Орбита`;
   }, [view]);
   useEffect(() => {
     const fn = () => {
@@ -133,23 +133,13 @@ export default function App() {
   const renderCard = (id: number) => (
     <DashboardCard key={id} model={models[id - 1]} onFocus={setFocus} />
   );
-  const blockHeading = (
-    title: string,
-    sub: string,
-    icon: typeof Wallet,
-    number: string,
-  ) => {
-    const Icon = icon;
+  const blockHeading = (title: string, sub: string) => {
     return (
       <header className="wing-heading">
-        <div className="wing-symbol">
-          <Icon size={19} />
-        </div>
         <div>
           <h2>{title}</h2>
           <p>{sub}</p>
         </div>
-        <span>{number}</span>
       </header>
     );
   };
@@ -168,7 +158,7 @@ export default function App() {
                 ? location.pathname
                 : import.meta.env.BASE_URL
             }
-            aria-label="ОРБИТА — обзор"
+            aria-label="Орбита — обзор"
           >
             <Orbit size={29} />
           </a>
@@ -203,16 +193,12 @@ export default function App() {
             >
               <Settings2 size={21} />
             </Button>
-            <span className="profile-badge" aria-label="Профиль: демонстрация">
-              Д
-            </span>
           </div>
         </aside>
         <div className="workspace">
           <header className="topbar">
             <div className="wordmark">
-              ОРБИТА
-              <span className="brand-divider" />
+              Орбита
               <span>Аналитика департамента</span>
             </div>
             <div className="topbar-right">
@@ -243,13 +229,10 @@ export default function App() {
           <main id="analytics">
             <div className="page-heading">
               <div>
-                <div className="eyebrow">
-                  <span />
-                  ОПЕРАЦИОННЫЙ ОБЗОР
-                </div>
+                <div className="eyebrow">Операционный обзор</div>
                 <h1>
                   {view === "overview"
-                    ? "Всё в поле зрения."
+                    ? "Обзор департамента"
                     : view === "payments"
                       ? "Платежи"
                       : view === "cash"
@@ -258,7 +241,7 @@ export default function App() {
                 </h1>
                 <p>
                   {view === "overview"
-                    ? "Платежи, кассы и оборудование. Вся аналитика перед вами."
+                    ? "Платежи, кассовая сеть и оборудование."
                     : view === "payments"
                       ? "Каналы, месячный план и результаты с начала года."
                       : view === "cash"
@@ -311,10 +294,7 @@ export default function App() {
                     useDashboardStore.setState({ compact: !s.compact })
                   }
                 >
-                  <span className="number-icon">123</span>
-                  <span className="desktop-label">
-                    {s.compact ? "Кратко" : "Точно"}
-                  </span>
+                  {s.compact ? "Кратко" : "Точно"}
                 </Button>
                 <span className="tool-divider" />
                 <Button
@@ -368,12 +348,7 @@ export default function App() {
                     className="wing cash-wing"
                     aria-label="Кассовые операции"
                   >
-                    {blockHeading(
-                      "Кассовые операции",
-                      "Операции и команда",
-                      Building2,
-                      "02",
-                    )}
+                    {blockHeading("Кассовые операции", "Операции и команда")}
                     <div className="wing-cards">
                       {[5, 6, 7].map(renderCard)}
                     </div>
@@ -381,12 +356,7 @@ export default function App() {
                 ) : null}
                 {view === "overview" || view === "payments" ? (
                   <section className="wing payments-wing" aria-label="Платежи">
-                    {blockHeading(
-                      "Платежи",
-                      "Каналы и выполнение плана",
-                      Wallet,
-                      "01",
-                    )}
+                    {blockHeading("Платежи", "Каналы и выполнение плана")}
                     <div className="wing-cards">
                       {renderCard(1)}
                       <div
@@ -427,12 +397,7 @@ export default function App() {
                     className="wing equipment-wing"
                     aria-label="Оборудование"
                   >
-                    {blockHeading(
-                      "Оборудование",
-                      "АТМ · ТСО · Recycle",
-                      Monitor,
-                      "03",
-                    )}
+                    {blockHeading("Оборудование", "АТМ · ТСО · Recycle")}
                     <div className="wing-cards">
                       {[8, 9, 10].map(renderCard)}
                     </div>
@@ -451,12 +416,12 @@ export default function App() {
                   ? `Обновлено ${formatTime(s.updatedAt)} · Киев`
                   : "Данные из исходного среза"}
               </div>
-              <span className={attention ? "tone-danger" : ""}>
-                <Activity size={13} />
-                {attention
-                  ? `${attention} зоны внимания`
-                  : "10 дашбордов · 3 блока аналитики"}
-              </span>
+              {attention ? (
+                <span className="tone-danger">
+                  <Activity size={13} />
+                  {attention} зоны внимания
+                </span>
+              ) : null}
             </footer>
           </main>
           <div className="environment-dock">
@@ -483,7 +448,7 @@ export default function App() {
       {focus && s.data ? (
         <Modal
           title={models[focus - 1].title}
-          description={`Д${focus} · ${s.data.meta.reportDate} · ${sourceLabel}`}
+          description={`${s.data.meta.reportDate} · ${sourceLabel}`}
           onClose={() => setFocus(null)}
           wide
           className="focus-modal"
@@ -497,7 +462,7 @@ export default function App() {
       {admin ? <Admin onClose={() => openAdmin(false)} /> : null}
       {spatial ? (
         <Modal
-          title="Пространство ОРБИТА"
+          title="Пространство Орбита"
           description="WebXR · Meta Quest 3S"
           onClose={() => setSpatial(false)}
           wide

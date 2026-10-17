@@ -124,9 +124,6 @@ export function DashboardCard({
       <header className="card-heading">
         <div>
           <div className="card-title">
-            <span className="dashboard-index">
-              {String(model.id).padStart(2, "0")}
-            </span>
             <h3>{model.title}</h3>
           </div>
           <p>{model.subtitle}</p>

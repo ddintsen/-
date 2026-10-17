@@ -1,0 +1,27 @@
+{
+  "revision": "working tree based on 552750e",
+  "desktopViewport": [
+    1600,
+    1050
+  ],
+  "mobileViewport": [
+    390,
+    844
+  ],
+  "mobileOverflow": false,
+  "spatialMobileOverflow": false,
+  "render": {
+    "roomMaterialBatches": 11,
+    "roomTriangles": 16590,
+    "panoramaCalls": 25,
+    "panoramaTriangles": 16618,
+    "geometries": 25,
+    "textures": 19,
+    "frame": 1,
+    "frameloop": "demand"
+  },
+  "idleFrame": 1,
+  "staticPreviewStopped": true,
+  "realQuestTested": false,
+  "errors": []
+}

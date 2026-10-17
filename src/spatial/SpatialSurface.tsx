@@ -1,31 +1,12 @@
 import { useEffect, useMemo, useState } from "react";
 import { useThree } from "@react-three/fiber";
-import { Path, Shape, ShapeGeometry, type CanvasTexture } from "three";
-import { colors } from "../api/model";
+import { Color, type CanvasTexture } from "three";
 import { drawLabel, drawWing } from "./drawPanel";
 
-function roundedPath<T extends Path>(
-  path: T,
-  w: number,
-  h: number,
-  r: number,
-): T {
-  const x = -w / 2,
-    y = -h / 2;
-  path.moveTo(x + r, y);
-  path.lineTo(x + w - r, y);
-  path.quadraticCurveTo(x + w, y, x + w, y + r);
-  path.lineTo(x + w, y + h - r);
-  path.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
-  path.lineTo(x + r, y + h);
-  path.quadraticCurveTo(x, y + h, x, y + h - r);
-  path.lineTo(x, y + r);
-  path.quadraticCurveTo(x, y, x + r, y);
-  path.closePath();
-  return path;
-}
+const surfaceColor = new Color(1, 1, 1);
+const hoverColor = new Color(1.16, 1.16, 1.16);
 
-/** @dashboard Д1–Д10. Shared XR surface: cursor, hover frame and disabled controls. */
+/** @dashboard Д1–Д10. Shared XR surface: fill feedback, pointer and disabled controls. */
 export function SpatialSurface({
   texture,
   position = [0, 0, 0],
@@ -48,20 +29,6 @@ export function SpatialSurface({
   const [hovered, setHovered] = useState(false);
   const { gl } = useThree();
   const interactive = !!onSelect && !disabled;
-  const frame = useMemo(() => {
-    const r = Math.min(width, height) * 0.045;
-    const shape = roundedPath(new Shape(), width, height, r);
-    shape.holes.push(
-      roundedPath(
-        new Path(),
-        width - 0.008,
-        height - 0.008,
-        Math.max(0.001, r - 0.004),
-      ),
-    );
-    return new ShapeGeometry(shape);
-  }, [width, height]);
-  useEffect(() => () => frame.dispose(), [frame]);
   useEffect(() => {
     if (!hovered || !interactive) return;
     const canvas = gl.domElement;
@@ -97,33 +64,18 @@ export function SpatialSurface({
           map={texture}
           transparent
           opacity={opacity * (disabled ? 0.4 : 1)}
+          // Brighten the whole surface on hover, without a decorative rim or scale jump.
+          color={hovered && interactive ? hoverColor : surfaceColor}
           toneMapped={false}
           depthTest={!focused}
           depthWrite={false}
         />
       </mesh>
-      {hovered && interactive ? (
-        <mesh
-          geometry={frame}
-          position={[0, 0, 0.002]}
-          renderOrder={focused ? 11 : 1}
-          raycast={() => {}}
-        >
-          <meshBasicMaterial
-            color={colors.purple}
-            transparent
-            opacity={opacity}
-            toneMapped={false}
-            depthTest={!focused}
-            depthWrite={false}
-          />
-        </mesh>
-      ) : null}
     </group>
   );
 }
 
-/** @dashboard Д1–Д10. Group frame gives the cockpit three named glass wings. */
+/** @dashboard Д1–Д10. The shared group surface carries its subject heading. */
 export function SpatialWing({
   title,
   subtitle,

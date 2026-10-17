@@ -6,6 +6,7 @@
   "questControllerProfiles": true,
   "offlineDemo": true,
   "offlineRoom": true,
+  "offlineProceduralRoom": true,
   "offlineWebGL": true,
   "offlineDashboardCount": 10,
   "errors": []

@@ -72,7 +72,7 @@ console.log('Preview images restored');
     2,
   );
   return {
-    title: `ОРБИТА · ${revision.slice(0, 7)}`,
+    title: `Орбита · ${revision.slice(0, 7)}`,
     description:
       "Аналитика департамента · демонстрационные данные · снимок разработки",
     template: "node",
@@ -88,8 +88,8 @@ export function renderLauncher(project) {
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="referrer" content="no-referrer">
-<title>Открыть ОРБИТУ в StackBlitz</title>
-<h1>ОРБИТА в StackBlitz</h1>
+<title>Открыть Орбиту в StackBlitz</title>
+<h1>Орбита в StackBlitz</h1>
 <p>Нажмите кнопку, затем дождитесь установки зависимостей и откройте Preview.</p>
 <p>В StackBlitz будут переданы исходники приложения и демоданные. Доступ к GitHub не требуется для передачи файлов.</p>
 <form id="launch" method="post" action="https://stackblitz.com/run?view=preview&amp;startScript=dev">

@@ -32,8 +32,8 @@ export default defineConfig(({ mode }) => ({
             registerType: "prompt",
             includeAssets: ["icon.svg", "icon-192.png", "icon-512.png"],
             manifest: {
-              name: "ОРБИТА — аналитика департамента",
-              short_name: "ОРБИТА",
+              name: "Орбита — аналитика департамента",
+              short_name: "Орбита",
               description:
                 "Пространственная аналитика платежей, касс и оборудования",
               lang: "ru",

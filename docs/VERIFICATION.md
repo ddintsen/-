@@ -113,3 +113,11 @@ Rollup сообщает о большом отдельном XR-chunk (~1,05 М�
 - test:production выполнен именно против deployment HTTPS URL: service-worker control, manifest, Quest profiles, offline room, 10 дашбордов и WebGL, отсутствие page errors.
 - [Completed receipt](evidence/live-site-verified-2026-10-17.json); свежие overview/spatial screenshots и production-smoke.json — [orbita-live-smoke](https://github.com/ddintsen/-/actions/runs/39025574329/artifacts/12098855173). Это browser CI, не аппаратная проверка шлема.
 - Итоговая правка HANDOFF/документации/evidence не меняет приложение; проверки UI заново не перезапускались.
+
+## 2026-10-17 — deslop и процедурный кабинет
+- 38/38 unit, 17/17 E2E, typecheck/format/tokens/build PASS. Последний полный E2E — [JSON](evidence/e2e-results.json).
+- Premium strict 0 findings; DESIGN lint 0 errors/32 orphan-token warnings (runtime adapters проверены tokens:check).
+- Production subpath/PWA/offline PASS, включая новую комнату и возврат к аналитике: [smoke](evidence/production-smoke.json). Standalone HTTP — 0 внешних запросов; StackBlitz snapshot77 файлов/сборка/restore/POST PASS.
+- [Геометрия и визуальная проверка](evidence/deslop-visual-check.json): 11 batches комнаты, 16590 triangles, вся панорама25 draw calls/16618 triangles; browser demand останавливается в простое. Desktop/mobile overflow=false, page errors=[]. Это не замер аппаратного FPS.
+- [Обзор](evidence/desktop-deslop.png), [мобильный](evidence/mobile-deslop.png), [панорама](evidence/spatial-deslop.png), [3D на телефоне](evidence/spatial-mobile-deslop.png), [комната днём](evidence/procedural-room-day.png), [вечером](evidence/procedural-room-night.png). В обычном 2D остаётся фотография, в browser3D/VR — геометрия; AR исключает непрозрачный кабинет.
+- Новый live deploy проверяется после push. Физический Quest 3S, passthrough/контроллеры/оптика/FPS и реальный API остаются отдельной приёмкой.

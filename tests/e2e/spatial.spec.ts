@@ -5,7 +5,9 @@ import data from "../../public/mock/dashboard-data.json" with { type: "json" };
 async function openSpatial(page: Page) {
   await page.goto("/");
   await page.getByRole("button", { name: /Открыть в пространстве/ }).click();
-  await expect(page.locator(".xr-canvas canvas")).toBeVisible();
+  await expect(page.locator(".xr-canvas canvas")).toBeVisible({
+    timeout: 15000,
+  });
 }
 
 // Project known world-space targets to the browser camera; this exercises actual Three.js raycasts.
@@ -38,7 +40,7 @@ test("WebGL panel and in-scene controls navigate focus, with keyboard parity and
   await clickWorld(page, -0.47, 0.28, 2.5);
   await expect(picker).toHaveValue("1");
   await expect(page.locator(".xr-focus-status")).toHaveText(
-    "Д1 · Платежи по каналам",
+    "Платежи по каналам",
   );
   await expect(
     page.getByRole("button", { name: "Предыдущий дашборд" }),
@@ -56,9 +58,7 @@ test("WebGL panel and in-scene controls navigate focus, with keyboard parity and
   ).toBeDisabled();
   await page.getByRole("button", { name: "К панораме", exact: true }).click();
   await expect(picker).toHaveValue("0");
-  await expect(page.locator(".xr-focus-status")).toHaveText(
-    "Панорама · 10 дашбордов",
-  );
+  await expect(page.locator(".xr-focus-status")).toHaveText("Панорамный обзор");
   expect(errors).toEqual([]);
 });
 
@@ -91,7 +91,7 @@ test("spatial environments, expanded viewport and mobile focus controls stay acc
   await page.getByLabel("Приблизить дашборд").selectOption("7");
   await page.getByRole("button", { name: "Следующий дашборд" }).click();
   await expect(page.locator(".xr-focus-status")).toHaveText(
-    "Д8 · Операции устройств",
+    "Операции устройств",
   );
   expect(
     await page.evaluate(
@@ -111,6 +111,23 @@ test("spatial environments, expanded viewport and mobile focus controls stay acc
       nodes: v.nodes.map((n) => n.target),
     })),
   ).toEqual([]);
+});
+
+test("room inspection rotates freely and restores the analytics panorama", async ({
+  page,
+}) => {
+  await openSpatial(page);
+  await page.getByLabel("Приблизить дашборд").selectOption("7");
+  await page.getByRole("button", { name: "Осмотреть комнату" }).click();
+  await expect(page.getByLabel("Приблизить дашборд")).toHaveCount(0);
+  const turn = page.getByLabel("Поворот взгляда в градусах");
+  await expect(turn).toHaveAttribute("max", "180");
+  await turn.fill("135");
+  await page.getByRole("button", { name: "Вернуть аналитику" }).click();
+  await expect(turn).toHaveValue("0");
+  await expect(turn).toHaveAttribute("max", "45");
+  await expect(page.getByLabel("Приблизить дашборд")).toHaveValue("0");
+  await expect(page.locator(".xr-focus-status")).toHaveText("Панорамный обзор");
 });
 
 test("spatial mode explains strict API failure and recovers without a reload", async ({
@@ -153,5 +170,7 @@ test("spatial mode explains strict API failure and recovers without a reload", a
   await expect(page.locator(".xr-no-data")).toHaveCount(0, { timeout: 10000 });
   await expect(page.getByLabel("Приблизить дашборд")).toBeEnabled();
   await page.getByLabel("Приблизить дашборд").selectOption("10");
-  await expect(page.locator(".xr-focus-status")).toContainText("Д10");
+  await expect(page.locator(".xr-focus-status")).toHaveText(
+    "Состояние оборудования",
+  );
 });

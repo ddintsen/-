@@ -47,13 +47,9 @@ export function drawPanel(
   ctx.beginPath();
   ctx.roundRect(3, 3, 1274, 794, 34);
   ctx.fill();
-  ctx.strokeStyle = colors.border;
-  ctx.lineWidth = 3;
-  ctx.stroke();
-  text(`Д${m.id}  ·  ${m.title}`, 45, 64, 34);
+  text(m.title, 45, 64, 34);
   text(m.subtitle, 45, 108, 23, colors.muted);
   text(source, 1235, 108, 21, colors.muted, "right");
-  line(45, 132, 1235, 132);
   const gauge = (
     g: DashboardModel["gauges"][number],
     x: number,
@@ -294,9 +290,6 @@ export function drawLabel(label: string, aspect = 6.4): CanvasTexture {
   ctx.beginPath();
   ctx.roundRect(2, 2, 1020, c.height - 4, c.height / 2 - 2);
   ctx.fill();
-  ctx.strokeStyle = colors.border;
-  ctx.lineWidth = 4;
-  ctx.stroke();
   ctx.font = `500 ${Math.round(c.height * 0.3)}px "Inter Variable", sans-serif`;
   ctx.fillStyle = colors.text;
   ctx.textAlign = "center";
@@ -338,10 +331,7 @@ export function drawOverviewPanel(
   ctx.roundRect(3, 3, 1274, 794, 35);
   ctx.fill();
   ctx.globalAlpha = 1;
-  ctx.strokeStyle = colors.border;
-  ctx.lineWidth = 3;
-  ctx.stroke();
-  text(`Д${m.id} · ${m.title}`, 55, 87, 48);
+  text(m.title, 55, 87, 48);
   text(source, 55, 145, 32, colors.muted);
   const metric = (
     label: string,
@@ -475,7 +465,6 @@ export function drawOverviewPanel(
       ctx.stroke();
     } else text("Нет данных по работающим кассам", 65, 580, 36, colors.muted);
   }
-  text("Открыть подробный график  ↗", 65, 735, 36, colors.muted);
   const texture = new CanvasTexture(c);
   texture.colorSpace = SRGBColorSpace;
   texture.anisotropy = 4;
@@ -501,22 +490,12 @@ export function drawWing(
   ctx.roundRect(3, 3, c.width - 6, c.height - 6, 58);
   ctx.fill();
   ctx.globalAlpha = 1;
-  ctx.strokeStyle = colors.border;
-  ctx.lineWidth = 3;
-  ctx.stroke();
   ctx.font = '600 64px "Manrope Variable", sans-serif';
   ctx.fillStyle = colors.text;
   ctx.fillText(title, 60, 100, c.width - 120);
   ctx.font = '400 32px "Inter Variable", sans-serif';
   ctx.fillStyle = colors.muted;
   ctx.fillText(subtitle, 60, 153, c.width - 120);
-  ctx.strokeStyle = colors.purple;
-  ctx.globalAlpha = 0.65;
-  ctx.lineWidth = 4;
-  ctx.beginPath();
-  ctx.moveTo(60, 190);
-  ctx.lineTo(220, 190);
-  ctx.stroke();
   const texture = new CanvasTexture(c);
   texture.colorSpace = SRGBColorSpace;
   return texture;
