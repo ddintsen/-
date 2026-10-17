@@ -12,6 +12,7 @@ export async function collectDeploymentStatus(
     phase,
     buildResult,
     deployResult,
+    verificationResult,
     artifactIds = {},
   },
   fetchImpl = fetch,
@@ -28,10 +29,13 @@ export async function collectDeploymentStatus(
     phase,
     buildResult,
     deployResult,
+    verificationResult,
     artifacts: Object.entries(artifactIds)
       .filter(
         ([name, id]) =>
-          ["orbita-stackblitz", "orbita-preview"].includes(name) &&
+          ["orbita-stackblitz", "orbita-preview", "orbita-live-smoke"].includes(
+            name,
+          ) &&
           /^\d+$/.test(id) &&
           /^\d+$/.test(runId),
       )
@@ -147,9 +151,11 @@ async function main() {
     phase: process.env.DEPLOYMENT_PHASE,
     buildResult: process.env.BUILD_RESULT || null,
     deployResult: process.env.DEPLOY_RESULT || null,
+    verificationResult: process.env.VERIFY_RESULT || null,
     artifactIds: {
       "orbita-stackblitz": process.env.STACKBLITZ_ARTIFACT_ID,
       "orbita-preview": process.env.PREVIEW_ARTIFACT_ID,
+      "orbita-live-smoke": process.env.LIVE_SMOKE_ARTIFACT_ID,
     },
   });
   const output = process.env.DEPLOYMENT_STATUS_OUTPUT;

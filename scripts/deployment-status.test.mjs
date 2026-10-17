@@ -75,6 +75,7 @@ test("includes fixed GitHub download links only for known artifact names and num
       artifactIds: {
         "orbita-stackblitz": "12345",
         "orbita-preview": "not-an-id",
+        "orbita-live-smoke": "23456",
         arbitrary: "6789",
       },
     },
@@ -84,6 +85,10 @@ test("includes fixed GitHub download links only for known artifact names and num
     {
       name: "orbita-stackblitz",
       url: "https://github.com/ddintsen/-/actions/runs/1/artifacts/12345",
+    },
+    {
+      name: "orbita-live-smoke",
+      url: "https://github.com/ddintsen/-/actions/runs/1/artifacts/23456",
     },
   ]);
 });

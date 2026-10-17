@@ -16,17 +16,15 @@ React + TypeScript приложение по предоставленному Т
 
 ## Открыть онлайн
 
-17 октября 2026 пользователь сделал репозиторий публичным. Анонимный доступ к странице GitHub и файлу `.stackblitzrc` из main подтверждён HTTP 200.
+**[Открыть ОРБИТУ](https://ddintsen.github.io/-/)** — опубликованное приложение с демоданными. GitHub подтвердил успешные build/deploy и ответы HTML/JS/CSS 200; [receipt](docs/evidence/published-site-2026-10-17.json). Установка и GitHub/StackBlitz-аккаунт для просмотра сайта не требуются.
 
-[Открыть ОРБИТУ в StackBlitz — main](https://stackblitz.com/github/ddintsen/-/tree/main?view=preview&startScript=dev). Дождитесь установки зависимостей и автозапуска `npm run dev`, затем откройте Preview. После следующих push открывайте ссылку импорта заново, чтобы получить свежую main. Последний пользовательский скриншот показывает Cloning repo from GitHub; Preview ещё не подтверждён. Полный запуск на стороне StackBlitz из cloud также не проверен: сеть блокирует его домен.
+В Meta Quest 3S откройте этот адрес в Meta Quest Browser и выберите вход в VR. Физический шлем ещё не проверен; браузерный WebGL не заменяет такую приёмку.
 
-Дополнительный способ передачи исходников непосредственно в StackBlitz: `npm run export:stackblitz` → `stackblitz-export/orbita-stackblitz.html`. Скачайте/откройте файл в браузере и нажмите **Открыть проект в StackBlitz**. Импорт отправляет файлы через официальный POST /run, без чтения закрытого GitHub сервисом. Внешнее создание проекта пока не проверено: cloud-сеть блокирует StackBlitz. Workflow сохраняет этот файл в artifact **orbita-stackblitz**. Это снимок: новый экспорт нужен после обновлений; сохранённый StackBlitz-проект сам из GitHub не обновляется.
+Каждый push main собирается и публикуется через `.github/workflows/pages.yml`; после deploy добавлена browser verify job (PWA/10 карточек/offline/WebGL) с artifact orbita-live-smoke. Проверяйте её отдельный результат и sourceCommit; первая проверка новой job ещё ожидается.
 
-Готовый просмотр без установки: standalone HTML из artifact **orbita-preview**. Подробные инструкции и ограничения — [DEPLOYMENT.md](docs/DEPLOYMENT.md).
+Для разработки есть [импорт main в StackBlitz](https://stackblitz.com/github/ddintsen/-/tree/main?view=preview&startScript=dev) и [новая копия](https://stackblitz.com/fork/github/ddintsen/-?view=preview&startScript=dev). Репозиторий public; последний скриншот пользователя показывает Cloning repo from GitHub, Preview не подтверждён. Уже открытая копия не подтягивает новые GitHub-коммиты автоматически.
 
-Автоматическая публикация обычного сайта настроена в `.github/workflows/pages.yml`. После успешного workflow адрес — `https://ddintsen.github.io/-/`. Для первой публикации в Settings → Pages → Build and deployment выберите **GitHub Actions**, затем перезапустите **Publish ORBITA**. Статус публикации нужно проверять в Actions, наличие workflow само по себе не означает работающий сайт.
-
-Отдельный автономный файл: `npm run build:preview` → `standalone-dist/orbita-preview.html`. Он содержит приложение, данные, шрифты и фон. HTTP-просмотр проверен без дополнительных запросов; file:// управляемый браузер этой среды блокирует, поэтому прямое открытие здесь не проверено. Настоящий WebXR в шлеме требует HTTPS, поэтому его проверяют на опубликованном сайте.
+Дополнительные файлы: `npm run export:stackblitz` → HTML импорта без GitHub clone, `npm run build:preview` → самостоятельный orbita-preview.html. Workflow сохраняет artifacts orbita-stackblitz и orbita-preview. Они являются снимками версии. Подробности и ограничения прямого file:// — [DEPLOYMENT.md](docs/DEPLOYMENT.md).
 
 ## Быстрый запуск
 

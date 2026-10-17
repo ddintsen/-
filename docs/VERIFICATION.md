@@ -100,3 +100,9 @@ Rollup сообщает о большом отдельном XR-chunk (~1,05 М�
 - Реальный run 39013695211/source 8846f30: metadata public/main, build success, deploy failure; Pages API/site 404. [Completed receipt](evidence/public-deployment-2026-10-17.json).
 - StackBlitz import на явную main предложен для повторного открытия после изменения доступа. Полный внешний запуск пока не подтверждён (cloud CONNECT 403, пользовательский ответ ожидается).
 - Изменения только документации/evidence: git diff --check PASS. Новые UI-тесты не запускались.
+
+## 2026-10-17 — сайт опубликован
+
+- Run 39014468288/source a1cdf58: build/deploy success, Pages API 200/configured workflow, HTML/JS/CSS/registerSW 200. [Receipt](evidence/published-site-2026-10-17.json), сайт https://ddintsen.github.io/-/.
+- Добавлена post-deploy verify job с браузером против deployment URL и свежим evidence вне checkout. Проверяет PWA/manifest/profiles, offline room/10 карточек/WebGL, создаёт screenshots и orbita-live-smoke artifact. Первый CI результат ещё ожидается.
+- IO-настройка PRODUCTION_EVIDENCE_DIR не меняет код приложения. Node syntax check/Prettier/YAML/git diff --check PASS. Deployment assertions 6/6 PASS при прямом Node запуске и --test-isolation=none; process-isolation локально отчитался одним file-level PASS, эта особенность не выдана за шесть выполненных cases без дополнительной проверки.

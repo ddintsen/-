@@ -2,9 +2,9 @@
 
 ## Обычный сайт
 
-Адрес после успешной публикации: **https://ddintsen.github.io/-/**.
+Опубликованный сайт: **https://ddintsen.github.io/-/**.
 
-Один раз в [Settings → Pages](https://github.com/ddintsen/-/settings/pages) выберите **Build and deployment → Source → GitHub Actions**. Настройка должна быть доступна владельцу репозитория; если GitHub показывает ограничение тарифа или прав, публикация Pages этим аккаунтом пока недоступна. Публичность репозитория автоматически не меняется.
+Первоначальная настройка уже выполнена владельцем. Для нового репозитория/повторной настройки один раз в [Settings → Pages](https://github.com/ddintsen/-/settings/pages) выберите **Build and deployment → Source → GitHub Actions**. Настройка должна быть доступна владельцу репозитория; если GitHub показывает ограничение тарифа или прав, публикация Pages этим аккаунтом пока недоступна. Публичность репозитория автоматически не меняется.
 
 После настройки каждый push в main запускает [Publish ORBITA](https://github.com/ddintsen/-/actions/workflows/pages.yml). При необходимости выберите **Run workflow → main** либо повторите неудачный deploy. Публикация подтверждена только после зелёного deploy и открывающегося сайта. Настроенный workflow сам по себе не подтверждает развёртывание.
 
@@ -61,7 +61,7 @@ Jobs `inspect` и `receipt` сохраняют `deployment-status.json` в сл�
 
 Это проверка публикации, а не повышение прав: стандартный Actions token по-прежнему не позволяет впервые включить Pages. В текущей cloud-среде `gh auth status` отдельно сообщил недействительную авторизацию GH_TOKEN; Git proxy при этом читает и пишет репозиторий.
 
-## Последний подтверждённый результат — 17 октября 2026
+## Первая неудачная попытка — 17 октября 2026
 
 [Run 39009913265](https://github.com/ddintsen/-/actions/runs/39009913265), коммит 4f16cc7: сборка success, deploy failure. Завершённый receipt получен через Git, его снимок — [deployment-2026-10-17.json](evidence/deployment-2026-10-17.json). В 06:27:46 UTC API Pages и публичный адрес вернули 404. Сайт не опубликован.
 
@@ -80,3 +80,9 @@ Jobs `inspect` и `receipt` сохраняют `deployment-status.json` в сл�
 ### Настройка сообщена выполненной
 
 После конкретных шагов Source → GitHub Actions пользователь ответил «готово». Новый push передачи запускает проверку публикации; результат нужно подтвердить completed receipt и доступными HTML/assets, не выдавать одно сообщение о настройке за готовый сайт.
+
+## Успешная публикация
+
+**https://ddintsen.github.io/-/** опубликован. Run [39014468288](https://github.com/ddintsen/-/actions/runs/39014468288), source a1cdf58: build/deploy success, API Pages 200/configured workflow, HTML/JS/CSS/registerSW 200. [Receipt](evidence/published-site-2026-10-17.json). Включать Source повторно не требуется.
+
+Добавлена verify job после deploy: npm ci, доступный Chrome/Chromium (с установкой Playwright Chromium при отсутствии), test:production против deployment URL, screenshots и PWA/offline/10-card/WebGL smoke. Artifact orbita-live-smoke содержит свежие файлы из runner.temp; receipt ждёт verify и записывает verificationResult и download URL. Первый результат новой job ещё проверяется. PRODUCTION_EVIDENCE_DIR можно использовать для отдельной папки evidence при локальном прогоне.

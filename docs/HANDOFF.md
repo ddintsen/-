@@ -11,16 +11,16 @@
 
 ## 2. Состояние в момент передачи
 
-| Область               | Подтверждённый факт                                                                                                                 | Что ещё не подтверждено                                                                                                               |
-| --------------------- | ----------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------- |
-| Исходники             | Репозиторий `ddintsen/-`, основная ветка `main`, приложение и документация отправлены в GitHub                                      | Новые изменения после этой записи нужно получать и проверять                                                                          |
-| Публичность           | Пользователь сам сделал репозиторий public; анонимные GitHub page и raw main/.stackblitzrc дали HTTP 200; CI подтвердил public/main | Это не подтверждает запуск приложения в стороннем сервисе                                                                             |
-| StackBlitz            | Ссылка импорта настроена, `.stackblitzrc` запускает `npm run dev`                                                                   | Полный запуск Preview не подтверждён; последний скриншот показывает **Cloning repo from GitHub**, Mounting environment ещё не начался |
-| GitHub Actions        | Последний прочитанный completed run **39013836292**, source **631a23a**, build success                                              | Deploy failure; API Pages и сайт 404. Публикация не завершена                                                                         |
-| Браузерное приложение | Реализованы все 10 дашбордов, настройки, доступный DOM/SVG, пространственный WebGL/WebXR, PWA                                       | Пользователь пока не подтвердил, что увидел его в StackBlitz                                                                          |
-| Meta Quest 3S         | Есть настоящая mesh-сцена и вход в WebXR с feature detection                                                                        | Физический шлем, passthrough, pinch, контроллеры, читаемость и FPS не проверены                                                       |
-| Данные                | Канонический mock, Zod-контракт, GET API-клиент, hybrid/strict live                                                                 | Реальный backend, боевой endpoint и производственная авторизация не предоставлены                                                     |
-| Переносимый просмотр  | Standalone HTML и прямой файловый импорт в StackBlitz собраны; GitHub artifacts созданы                                             | Прямой file:// заблокирован политикой cloud Chromium; внешний POST в сам StackBlitz не проверен                                       |
+| Область               | Подтверждённый факт                                                                                                                 | Что ещё не подтверждено                                                                                                                         |
+| --------------------- | ----------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
+| Исходники             | Репозиторий `ddintsen/-`, основная ветка `main`, приложение и документация отправлены в GitHub                                      | Новые изменения после этой записи нужно получать и проверять                                                                                    |
+| Публичность           | Пользователь сам сделал репозиторий public; анонимные GitHub page и raw main/.stackblitzrc дали HTTP 200; CI подтвердил public/main | Это не подтверждает запуск приложения в стороннем сервисе                                                                                       |
+| StackBlitz            | Ссылка импорта настроена, `.stackblitzrc` запускает `npm run dev`                                                                   | Полный запуск Preview не подтверждён; последний скриншот показывает **Cloning repo from GitHub**, Mounting environment ещё не начался           |
+| GitHub Actions        | Первая успешная публикация: run **39014468288**, source **a1cdf58**, build/deploy success                                           | API Pages/HTML/JS/CSS/registerSW 200, сайт **https://ddintsen.github.io/-/**. Добавленная browser verification job ещё проходит первую проверку |
+| Браузерное приложение | Реализованы все 10 дашбордов, настройки, доступный DOM/SVG, пространственный WebGL/WebXR, PWA                                       | На опубликованном URL browser smoke дополняется отдельной CI job; физический Quest не проверен                                                  |
+| Meta Quest 3S         | Есть настоящая mesh-сцена и вход в WebXR с feature detection                                                                        | Физический шлем, passthrough, pinch, контроллеры, читаемость и FPS не проверены                                                                 |
+| Данные                | Канонический mock, Zod-контракт, GET API-клиент, hybrid/strict live                                                                 | Реальный backend, боевой endpoint и производственная авторизация не предоставлены                                                               |
+| Переносимый просмотр  | Standalone HTML и прямой файловый импорт в StackBlitz собраны; GitHub artifacts созданы                                             | Прямой file:// заблокирован политикой cloud Chromium; внешний POST в сам StackBlitz не проверен                                                 |
 
 Последний проверенный main перед созданием этой передачи: `631a23a724a41323960fb85deda05ea37db1e5f2`. Сам HANDOFF будет в следующем коммите; узнавайте текущую ревизию через Git.
 
@@ -60,7 +60,7 @@
 
 Русский интерфейс, числа ru-RU, временные метки Europe/Kyiv. Данные могут содержать украинский текст; валюта берётся из контракта, исходно ₴. Японские/корейские подписи на референсах не являются запросом на локализацию.
 
-Руководитель должен в итоге открыть **доверенную HTTPS-ссылку сайта** в Meta Quest Browser, выбрать вход в VR и разрешить сессию. Для демоверсии не требуется GitHub/StackBlitz-аккаунт. Пока сайт не опубликован и реальный Quest не проверен, этот путь нельзя объявлять готовым. Desktop preview не является аппаратной проверкой.
+Руководитель может открыть **https://ddintsen.github.io/-/** в Meta Quest Browser, выбрать вход в VR и разрешить сессию. Для демоверсии не требуется GitHub/StackBlitz-аккаунт. HTTPS-сайт опубликован; физический Quest ещё не проверен. Desktop preview не является аппаратной проверкой.
 
 ## 5. Источники и история реализации
 
@@ -77,6 +77,8 @@
 9. **Пользователь сделал public.** Проверены анонимные GitHub/raw HTTP 200 и CI public/main. Ссылку импорта повторили. Последний пользовательский скриншот всё ещё на этапе клонирования; интерфейс не подтверждён. Pages по-прежнему не включены.
 
 Основные коммиты для навигации: `d55e7c1` — первая отправка приложения; `fbecedd`/`744bc0b` — sync/upstream; `a2b8fc0` — spatial/online delivery; `4f16cc7` — CI receipt; `52e706c` — visibility; `8a96e4f` — прямой StackBlitz export; `4ba2bb9` — artifacts; `8846f30`/`631a23a` — public verification. Полную историю смотреть через git log.
+
+10. **Pages включены владельцем.** После пошаговой инструкции пользователь сообщил «готово». Следующий push запустил run 39014468288: build/deploy success, Pages workflow configured, HTML/JS/CSS/registerSW 200. Внешний сайт опубликован. Добавлена проверка именно опубликованного URL в браузере после deploy; её первый результат ещё ожидается.
 
 ## 6. Архитектура и карта файлов
 
@@ -191,7 +193,9 @@ HTTPS dev: `npm run dev:https -- --port 5174`; локальный cert в node_m
 
 ## 11. Что делать дальше, в порядке приоритета
 
-### A. Довести просмотр пользователя до приложения
+### A. Открыть опубликованное приложение; StackBlitz — дополнительная разработка
+
+Основной просмотр теперь **https://ddintsen.github.io/-/** — сайт опубликован и отвечает 200. Пользователь может увидеть приложение без ожидания GitHub clone в StackBlitz. Для шлема использовать этот HTTPS URL. Ниже сохранён дополнительный путь разработки и диагностика незавершённого импорта.
 
 Основной импорт: https://stackblitz.com/github/ddintsen/-/tree/main?view=preview&startScript=dev . Для новой отдельной копии предложен https://stackblitz.com/fork/github/ddintsen/-?view=preview&startScript=dev . Официальная документация подтверждает оба формата и fork; источник: https://github.com/stackblitz/docs/blob/main/docs/guides/integration/open-from-github.md .
 
@@ -203,15 +207,15 @@ HTTPS dev: `npm run dev:https -- --port 5174`; локальный cert в node_m
 
 После появления Preview проверить хотя бы обзор, «Вместе»/10 карточек, focus и WebGL. Записать отдельно факт пользовательского запуска; не выдать свой локальный тест за его браузер. Импорт main показывает отправленный код; saved fork/open session не является live mirror каждой правки cloud workspace.
 
-### B. Завершить HTTPS-сайт для руководителя
+### B. Проверить и поддерживать уже опубликованный сайт
 
-Публикация разрешена. Пользователю уже задан async-вопрос: выбрать **Source → GitHub Actions** в https://github.com/ddintsen/-/settings/pages . Пользователь сначала ответил «я не понимаю»; ему даны три конкретных шага (открыть Settings/Pages → Build and deployment/Source → Deploy from a branch → GitHub Actions). Затем он сообщил **«готово»** в ответ на эти шаги: настройка выполнена со слов пользователя. Новый push передачи запускает проверку/публикацию. Сначала проверить новый CI receipt, не просить повторно выполнить уже сообщённую настройку. Это техническое действие владельца, а не повторное согласие на публикацию. Не считать смену public ответом на этот вопрос.
+Первоначальная настройка Source=GitHub Actions выполнена: пользователь сообщил «готово», затем run 39014468288/source a1cdf58 подтвердил Pages status 200/configured workflow, build/deploy success и сайт/assets 200. Snapshot — [published-site-2026-10-17.json](evidence/published-site-2026-10-17.json). Не просить владельца снова включать Pages.
 
-Сборка/официальные Pages actions готовы. После фактического включения Source запустить workflow обычным разрешённым способом и прочитать completed receipt. Новый содержательный push также запускает build/deploy. Не создавать цепочку пустых коммитов и не обходить role/network ограничения.
+В workflow добавлена verify job после deploy: настоящий браузер открывает именно deployment URL, проверяет manifest/SW/profiles, сохраняет обзор, отключает сеть и проверяет 10 карточек/фон/WebGL. Она создаёт artifact orbita-live-smoke; receipt ждёт её и записывает verificationResult. Первый результат этой новой job ещё проверяется.
 
-Ожидаемый адрес: **https://ddintsen.github.io/-/**. Объявлять опубликованным только после успешного deploy соответствующего sourceCommit, HTML и ресурсов 200. При возможности проверить реальный browser flow на внешнем URL. Только эту подтверждённую HTTPS-ссылку передавать руководителю для Quest; StackBlitz import/artifact/localhost её не заменяют.
+При новых изменениях проверять completed receipt соответствующего sourceCommit, результаты build/deploy/verify и HTML/assets. При ошибке verify читать job log/artifact; build/deploy success не подменяет результат браузерной проверки. Опубликованный сайт и физический Quest остаются разными подтверждениями.
 
-Стандартный GITHUB_TOKEN не позволяет впервые включить Pages: официальный configure-pages требует отдельные права для enablement. Его неподходящий enablement:true уже рассматривался и удалён. Не извлекать Git proxy credentials для другого API; не просить секреты в чате. Доступ к Git сам по себе не даёт право менять настройки через REST. Если в следующей среде появится легитимный административный инструмент, уже выданное поручение разрешает обычную настройку публикации; повторное согласие не нужно. Историческая блокировка текущего API не является вечным запретом пользоваться новым авторизованным доступом.
+Исторически включить Pages через стандартный GITHUB_TOKEN было нельзя; это уже решено владельцем. Доступ к Git сам по себе не даёт права менять настройки REST. Если в следующей среде доступен легитимный административный инструмент, обычная публикация уже разрешена пользователем — не запрашивать согласие заново.
 
 ### C. Аппаратная приёмка Quest 3S
 
@@ -227,11 +231,11 @@ HTTPS dev: `npm run dev:https -- --port 5174`; локальный cert в node_m
 
 ## 12. Доставка, CI и ограничения доступа
 
-Workflow `Publish ORBITA`: Node 22 → npm ci → tokens/typecheck/unit/deployment tests → Pages build с VITE_BASE_PATH → upload-pages-artifact → StackBlitz HTML artifact → standalone HTML artifact → configure/deploy Pages. Inspect и receipt используют отдельные permissions для записи безопасного статуса.
+Workflow `Publish ORBITA`: Node 22 → npm ci → tokens/typecheck/unit/deployment tests → Pages build с VITE_BASE_PATH → upload-pages-artifact → StackBlitz HTML artifact → standalone HTML artifact → configure/deploy Pages → browser verify опубликованного URL → artifact orbita-live-smoke. Inspect и receipt используют отдельные permissions для записи безопасного статуса.
 
 Base проекта **/-/**: Vite, manifest start_url/scope, fonts/assets, home link и XR profiles уже учитывают subpath. Не заменять всё абсолютными `/assets` при правках. Навигация через query, server rewrites не требуются. Standalone base `./`, без PWA и с inline lazy XR/fonts/image.
 
-`deployment-status` — служебная ветка, не источник приложения. Отчёт содержит sourceCommit/runId/phase/results, visibility, Pages status, публичные HTML/до четырёх same-origin JS/CSS и URLs artifacts. Токен идёт только api.github.com; в отчёт не попадает. Чтение без переключения main:
+`deployment-status` — служебная ветка, не источник приложения. Отчёт содержит sourceCommit/runId/phase/results/verificationResult, visibility, Pages status, публичные HTML/до четырёх same-origin JS/CSS и URLs artifacts. Токен идёт только api.github.com; в отчёт не попадает. Чтение без переключения main:
 
 ```sh
 git fetch origin refs/heads/deployment-status:refs/remotes/origin/deployment-status
@@ -263,4 +267,4 @@ Artifacts конкретной сборки имеют срок хранения
 
 ## 14. Короткое задание следующему агенту
 
-> Продолжай ОРБИТУ в ddintsen/-, main. Сначала прочитай AGENTS.md и docs/HANDOFF.md, проверь GitHub/working tree. Не теряй подтверждённое состояние: репозиторий public; пользователь пока видит StackBlitz на Cloning repo, Preview не подтверждён; Pages build успешен, deploy 404/failure, пользователь сообщил «готово» после шагов Source=GitHub Actions; теперь нужно проверить новый CI deploy, а не снова просить эту настройку. Доведи просмотр и HTTPS-сайт до фактической проверки, затем аппаратный Quest 3S и согласованный API. Сохраняй текущий визуальный v2 и точные исходные данные, используй общую модель DOM/XR, не выдавай mock за live и desktop за аппаратную проверку. Документируй детали и отправляй каждое завершённое изменение в GitHub без повторного запроса на обычный push. Не обещай публикацию по наличию workflow/артефакта. Не переписывай проект с нуля.
+> Продолжай ОРБИТУ в ddintsen/-, main. Прочитай AGENTS.md и docs/HANDOFF.md, проверь GitHub/working tree. Репозиторий public, сайт уже опубликован: https://ddintsen.github.io/-/ (run 39014468288, build/deploy и HTML/assets 200). Не проси повторно включать Pages. Проверь новую post-deploy browser verify job/receipt и реальный запуск пользователя, затем физический Quest 3S и согласованный API. StackBlitz на последнем скриншоте ещё клонировал репозиторий, но для просмотра уже есть отдельный сайт. Сохраняй визуальный v2, точные данные и общую модель DOM/XR; не выдавай mock за live и desktop за аппаратную проверку. Документируй детали и отправляй завершённые изменения в GitHub без повторного запроса на обычный push. Не переписывай проект с нуля.

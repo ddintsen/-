@@ -1,10 +1,14 @@
 import { chromium } from "@playwright/test";
 import fs from "node:fs";
+import path from "node:path";
 
 // Start `npm run preview -- --port 4173` before this read-only browser smoke check.
 const baseURL = (process.env.PREVIEW_URL || "http://127.0.0.1:4173/").replace(
   /\/?$/,
   "/",
+);
+const evidenceDirectory = path.resolve(
+  process.env.PRODUCTION_EVIDENCE_DIR || "docs/evidence",
 );
 const browser = await chromium.launch({
   executablePath: process.env.CHROMIUM_PATH || "/usr/bin/chromium",
@@ -35,6 +39,11 @@ try {
   ).json();
   if (!profiles["meta-quest-touch-plus"])
     throw new Error("Quest controller profile missing");
+  fs.mkdirSync(evidenceDirectory, { recursive: true });
+  await page.screenshot({
+    path: path.join(evidenceDirectory, "production-overview.png"),
+    fullPage: true,
+  });
   await context.setOffline(true);
   await page.reload();
   await page.waitForSelector('[data-dashboard-id="1"]');
@@ -56,8 +65,9 @@ try {
   await page.waitForTimeout(500);
   await page.getByLabel("Приблизить дашборд").selectOption("1");
   await page.waitForTimeout(300);
-  fs.mkdirSync("docs/evidence", { recursive: true });
-  await page.screenshot({ path: "docs/evidence/spatial-focus.png" });
+  await page.screenshot({
+    path: path.join(evidenceDirectory, "spatial-focus.png"),
+  });
   const result = {
     baseURL,
     productionHttp: true,
@@ -71,7 +81,7 @@ try {
     errors,
   };
   fs.writeFileSync(
-    "docs/evidence/production-smoke.json",
+    path.join(evidenceDirectory, "production-smoke.json"),
     JSON.stringify(result, null, 2) + "\n",
   );
   console.log(result);

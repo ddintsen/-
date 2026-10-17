@@ -194,3 +194,11 @@
 ### Включение Pages сообщено пользователем
 - Подробная передача сохранена локальным коммитом 713f6e4; проверено 37 относительных ссылок после добавления CLOUD_START, Prettier и git diff --check PASS.
 - Пользователь после шагов настройки Source ответил «готово». Принято как выполненное переключение GitHub Actions; HANDOFF/AGENTS актуализированы. Следующий push обоих коммитов запускает реальный deploy; сначала проверяем receipt, не просим повторить действие.
+
+## 2026-10-17 — первая успешная публикация и browser verification
+- Пользователь подтвердил настройку «готово», передача 713f6e4 + уточнение a1cdf58 отправлены в main; remote SHA совпал, tree чист.
+- Run 39014468288/source a1cdf58 реально завершил build/deploy success. Pages API 200/configured workflow; HTML, index JS/CSS и registerSW HTTP 200. Snapshot сохранён в docs/evidence/published-site-2026-10-17.json. Рабочий URL https://ddintsen.github.io/-/ сразу передан пользователю.
+- HANDOFF/README/AGENTS/CONTEXT/DEPLOYMENT/CLOUD_START обновлены: сайт уже готов, повторная настройка владельцем не требуется. Старые 404 сохранены исторически, physical Quest остаётся непроверенным.
+- Для проверки фактической публикации добавлена verify job после deploy: настоящий браузер, PWA/profiles, screenshots, offline 10 карточек/фон/WebGL. Использует существующий test:production, новый PRODUCTION_EVIDENCE_DIR направляет свежие доказательства в runner.temp. Отдельный verificationResult и artifact orbita-live-smoke входят в receipt; это не выдаётся за physical Quest.
+- Deployment tests 6/6 PASS, YAML/Prettier/git diff --check PASS. Проверка live browser ожидает первого CI запуска; пока не объявляется пройденной. App UI/данные не менялись.
+- Особенность текущего restricted Node 24 runner: node --test в process-isolation вывел один file-level PASS вместо шести case-строк. Проверены реальные asserts напрямую node scripts/deployment-status.test.mjs и с --test-isolation=none: 6/6 PASS, 0 skipped/failed. Package script/CI Node 22 не менялись ради локальной особенности.
