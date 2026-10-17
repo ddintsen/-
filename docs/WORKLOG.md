@@ -252,3 +252,9 @@
 - Общая XR-строка источника в фокусе перенесена в ближнюю группу под навигацией, чтобы крупная карточка не заслоняла её; в панораме остаётся одна общая строка на прежней дистанции. Typecheck и реальный browser walkthrough после этого PASS; runtime-контекст и источник не пропадают при приближении. Физический Quest не проверялся.
 
 - Окончательный build с VITE_BASE_PATH=/-/ и production smoke на http://127.0.0.1:4173/-/ PASS: manifest/SW/Quest profiles, offline 10 дашбордов/процедурная комната/осмотр и возврат/фокус, errors=[]. Ресурсы index-MjYKNnaZ.js и index-DQpebAp7.css. Все локальные результаты сохранены; следующий шаг — push и exact-source live receipt.
+
+### Очистка текста опубликована и синхронизирована
+- App-коммит ac4f7bbd08ff331418cd6e7c33b753bebbadd2f1 отправлен в origin/main, удалённый SHA совпал, tree был чист.
+- Completed CI run39028437101/sourceac4f7bb: build/deploy/verificationResult=success, HTML/JS/CSS/registerSW200, public/main. Ресурсы index-MjYKNnaZ.js/index-DQpebAp7.css совпадают с финальной локальной сборкой.
+- Реальная проверка опубликованного https://ddintsen.github.io/-/ прошла PWA/manifest/профили/offline10 карточек/процедурную комнату/фокус без page errors. Receipt copy-cleanup-published-2026-10-17.json, свежий orbita-live-smoke artifact https://github.com/ddintsen/-/actions/runs/39028437101/artifacts/12099029451 .
+- Итоговая запись меняет только docs/evidence; runtime после проверенного ac4f7bb не меняется. Процедурная комната/данные/пороги/ввод XR сохранены, физический Quest и реальный API по-прежнему не были проверены этой задачей.

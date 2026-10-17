@@ -127,3 +127,5 @@ CI [run39027207213](https://github.com/ddintsen/-/actions/runs/39027207213), sou
 
 ## 2026-10-17 — очистка текста
 Unit38/38 и E2E17/17 PASS; typecheck/format/tokens/build PASS. Strict premium audit0 findings, DESIGN lint0 errors/32 прежних runtime-adapter warnings. Browser walkthrough: обзор/одиночная вкладка/API/demo/XR panorama/focus/mobile, errors=[], overflow=false, один заголовок на одиночной вкладке. Evidence copy-visual-check.json и *-copy-cleanup.png. Source+period остаются общей mesh-строкой в панораме и ближнем фокусе; пороги простоев и данные не менялись. Новый post-deploy receipt добавляется после публикации.
+
+Очистка текста также прошла live verification: [run39028437101](https://github.com/ddintsen/-/actions/runs/39028437101), sourceac4f7bb, build/deploy/verify success и HTML/assets200. [Receipt](evidence/copy-cleanup-published-2026-10-17.json), [свежий browser artifact](https://github.com/ddintsen/-/actions/runs/39028437101/artifacts/12099029451). После этого меняются только docs/evidence.

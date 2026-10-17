@@ -18,7 +18,7 @@ React + TypeScript приложение по предоставленному Т
 
 ## Открыть онлайн
 
-**[Открыть ОРБИТУ](https://ddintsen.github.io/-/)** — опубликованное приложение с демоданными. GitHub подтвердил успешные build/deploy и ответы HTML/JS/CSS 200; [receipt новой версии с 3D-комнатой](docs/evidence/deslop-published-2026-10-17.json). Установка и GitHub/StackBlitz-аккаунт для просмотра сайта не требуются.
+**[Открыть ОРБИТУ](https://ddintsen.github.io/-/)** — опубликованное приложение с демоданными. GitHub подтвердил успешные build/deploy и ответы HTML/JS/CSS 200; [receipt версии с очищенными текстами](docs/evidence/copy-cleanup-published-2026-10-17.json). Установка и GitHub/StackBlitz-аккаунт для просмотра сайта не требуются.
 
 В Meta Quest 3S откройте этот адрес в Meta Quest Browser и выберите вход в VR. Физический шлем ещё не проверен; браузерный WebGL не заменяет такую приёмку.
 
