@@ -1,0 +1,11 @@
+{
+  "productionHttp": true,
+  "serviceWorkerControlled": true,
+  "manifest": true,
+  "questControllerProfiles": true,
+  "offlineDemo": true,
+  "offlineRoom": true,
+  "offlineWebGL": true,
+  "offlineDashboardCount": 10,
+  "errors": []
+}

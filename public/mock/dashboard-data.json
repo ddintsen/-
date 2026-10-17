@@ -1,0 +1,311 @@
+{
+  "meta": {
+    "reportDate": "Октябрь 2026",
+    "ytdStartLabel": "с 01.01.2026",
+    "currency": "₴"
+  },
+  "block1_payments": {
+    "dashboard1_channels": {
+      "channels": [
+        {
+          "name": "Интернет",
+          "jan": 14.5,
+          "cur": 18.2
+        },
+        {
+          "name": "Моб. банк",
+          "jan": 32.1,
+          "cur": 31.4
+        },
+        {
+          "name": "ТСО",
+          "jan": 31.8,
+          "cur": 29.5
+        },
+        {
+          "name": "Кассы",
+          "jan": 15.2,
+          "cur": 16.8
+        },
+        {
+          "name": "АТМ",
+          "jan": 6.4,
+          "cur": 7.1
+        },
+        {
+          "name": "Автоплат.",
+          "jan": 3.1,
+          "cur": 3.8
+        }
+      ],
+      "dboSharePercent": 86.0
+    },
+    "dashboard2_monthlyCount": {
+      "planBars": [
+        {
+          "label": "Общий план",
+          "percent": 95
+        },
+        {
+          "label": "Разовые",
+          "percent": 96
+        },
+        {
+          "label": "Регулярные",
+          "percent": 84
+        }
+      ],
+      "cards": [
+        {
+          "title": "Общее количество",
+          "value": 55089470,
+          "delta": "+4,2%",
+          "spark": [
+            48,
+            50,
+            49,
+            53,
+            55
+          ]
+        },
+        {
+          "title": "Разовые платежи",
+          "value": 32605811,
+          "delta": "+3,8%",
+          "spark": [
+            28,
+            30,
+            31,
+            31.5,
+            32.6
+          ]
+        },
+        {
+          "title": "Регулярные платежи",
+          "value": 22483659,
+          "delta": "+1,9%",
+          "spark": [
+            20,
+            20.8,
+            21.4,
+            22,
+            22.5
+          ]
+        }
+      ]
+    },
+    "dashboard3_monthlyVolume": {
+      "planBars": [
+        {
+          "label": "Общий объем",
+          "percent": 95
+        },
+        {
+          "label": "Разовые",
+          "percent": 96
+        },
+        {
+          "label": "Регулярные",
+          "percent": 84
+        }
+      ],
+      "cards": [
+        {
+          "title": "Общий объем (₴)",
+          "value": 55089470,
+          "delta": "+5,1%",
+          "spark": [
+            47,
+            49,
+            51,
+            53,
+            55
+          ]
+        },
+        {
+          "title": "Объем разовых (₴)",
+          "value": 32605811,
+          "delta": "+4,4%",
+          "spark": [
+            27,
+            29,
+            30,
+            31.8,
+            32.6
+          ]
+        },
+        {
+          "title": "Объем регулярных (₴)",
+          "value": 22483659,
+          "delta": "+2,3%",
+          "spark": [
+            19,
+            20,
+            21,
+            21.9,
+            22.5
+          ]
+        }
+      ]
+    },
+    "dashboard4_ytdMain": [
+      {
+        "label": "Количество платежей",
+        "percent": 6.2,
+        "value": 76080103,
+        "scaleMode": "ytd"
+      },
+      {
+        "label": "Объем платежей",
+        "percent": 5.3,
+        "value": 80722842308,
+        "scaleMode": "ytd"
+      },
+      {
+        "label": "Прибыль",
+        "percent": 8.3,
+        "value": 247471918,
+        "scaleMode": "ytd"
+      }
+    ]
+  },
+  "block2_cashDesk": {
+    "dashboard5_operationTypes": {
+      "monthlyPlanPercent": 6.2,
+      "types": [
+        {
+          "name": "Платежи",
+          "count": 21310811,
+          "color": "#4ade80"
+        },
+        {
+          "name": "Пополнение карт",
+          "count": 4890200,
+          "color": "#facc15"
+        },
+        {
+          "name": "Снятие наличных",
+          "count": 3210450,
+          "color": "#f87171"
+        },
+        {
+          "name": "Валютообмен",
+          "count": 1420110,
+          "color": "#c084fc"
+        }
+      ]
+    },
+    "dashboard6_ytdMain": [
+      {
+        "label": "Кол-во операций",
+        "percent": 8.1,
+        "value": 76080103,
+        "scaleMode": "ytd"
+      },
+      {
+        "label": "Объем операций",
+        "percent": 5.4,
+        "value": 30722512309,
+        "scaleMode": "ytd"
+      },
+      {
+        "label": "Прибыль касс",
+        "percent": 6.3,
+        "value": 247471516,
+        "scaleMode": "ytd"
+      }
+    ],
+    "dashboard7_operationsAndStaff": {
+      "workingCashDesksByDay": [
+        1390,
+        1410,
+        1465,
+        1120,
+        1180,
+        1430,
+        1475,
+        1510
+      ],
+      "staffShortageVacancies": 17,
+      "downtimeTodayPercent": 1.3
+    }
+  },
+  "block3_atmTso": {
+    "dashboard8_operationsCount": [
+      {
+        "label": "Текущий месяц",
+        "percent": 6.2,
+        "value": 11314490,
+        "scaleMode": "ytd"
+      },
+      {
+        "label": "С начала года",
+        "percent": 6.2,
+        "value": 61168379,
+        "scaleMode": "ytd"
+      }
+    ],
+    "dashboard9_operationsVolume": [
+      {
+        "label": "Текущий месяц",
+        "percent": 6.2,
+        "value": 21154783688,
+        "scaleMode": "ytd"
+      },
+      {
+        "label": "С начала года",
+        "percent": 5.2,
+        "value": 91217696291,
+        "scaleMode": "ytd"
+      }
+    ],
+    "dashboard10_workingEquipmentAndDowntime": {
+      "days": [
+        "01",
+        "05",
+        "10",
+        "15",
+        "20",
+        "25"
+      ],
+      "tsoLine": [
+        4120,
+        4260,
+        4190,
+        4240,
+        4150,
+        4230
+      ],
+      "atmLine": [
+        3180,
+        3040,
+        3150,
+        2980,
+        3060,
+        3010
+      ],
+      "recLine": [
+        1890,
+        2050,
+        1940,
+        2180,
+        1820,
+        1990
+      ],
+      "downtime": [
+        {
+          "name": "ТСО",
+          "percent": 6.2
+        },
+        {
+          "name": "АТМ",
+          "percent": 6.2
+        },
+        {
+          "name": "Rec",
+          "percent": 6.2
+        }
+      ]
+    }
+  }
+}

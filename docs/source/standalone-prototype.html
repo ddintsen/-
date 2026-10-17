@@ -1,0 +1,1834 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Meta Quest 3S — Spatial Analytics Command Center (Тестовый стенд + Админка API)</title>
+  <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --glass-bg: rgba(20, 25, 38, 0.74);
+      --glass-border: rgba(255, 255, 255, 0.18);
+      --glass-highlight: rgba(255, 255, 255, 0.08);
+      --neon-accent: #38bdf8;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      overflow-x: hidden;
+      user-select: none;
+      background: #0b0f19;
+      color: #f8fafc;
+    }
+    .font-mono-num {
+      font-family: 'JetBrains Mono', 'Inter', monospace;
+      font-variant-numeric: tabular-nums;
+    }
+    /* Режим 1: Apple Vision Pro MR Passthrough (Светлый кабинет руководителя) */
+    .env-vision-glass {
+      background:
+        radial-gradient(circle at 20% 25%, rgba(255, 244, 228, 0.28) 0%, transparent 45%),
+        radial-gradient(circle at 82% 20%, rgba(186, 230, 253, 0.25) 0%, transparent 50%),
+        radial-gradient(circle at 50% 80%, rgba(212, 190, 162, 0.22) 0%, transparent 55%),
+        linear-gradient(160deg, #3c3a37 0%, #2a2d34 48%, #1e222a 100%);
+    }
+    /* Режим 2: Beijing Command Room (Темный ситуационный центр из Китая) */
+    .env-china-command {
+      background:
+        radial-gradient(circle at 50% 15%, rgba(14, 165, 233, 0.22) 0%, transparent 50%),
+        radial-gradient(circle at 15% 65%, rgba(99, 102, 241, 0.18) 0%, transparent 45%),
+        radial-gradient(circle at 85% 65%, rgba(16, 185, 129, 0.14) 0%, transparent 45%),
+        linear-gradient(180deg, #030712 0%, #071024 60%, #020617 100%);
+    }
+    .cyber-grid {
+      background-image:
+        linear-gradient(to right, rgba(56, 189, 248, 0.08) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(56, 189, 248, 0.08) 1px, transparent 1px);
+      background-size: 44px 44px;
+      transform: perspective(500px) rotateX(62deg);
+      transform-origin: center bottom;
+    }
+    /* Матовое стекло Apple visionOS */
+    .vision-wing {
+      background: var(--glass-bg);
+      backdrop-filter: blur(26px) saturate(165%);
+      -webkit-backdrop-filter: blur(26px) saturate(165%);
+      border: 1.5px solid var(--glass-border);
+      box-shadow:
+        0 28px 60px -15px rgba(0, 0, 0, 0.65),
+        inset 0 1px 1px 0 rgba(255, 255, 255, 0.28),
+        inset 0 -1px 1px 0 rgba(255, 255, 255, 0.06);
+      border-radius: 28px;
+      transition: transform 0.45s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.35s ease, border-color 0.35s ease, opacity 0.35s ease;
+    }
+    .env-china-command .vision-wing {
+      background: rgba(7, 16, 36, 0.84);
+      border-color: rgba(56, 189, 248, 0.35);
+      box-shadow:
+        0 0 38px -8px rgba(14, 165, 233, 0.28),
+        0 25px 60px -15px rgba(0, 0, 0, 0.85),
+        inset 0 1px 2px 0 rgba(56, 189, 248, 0.35);
+    }
+    .vision-card {
+      background: rgba(255, 255, 255, 0.055);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 20px;
+      box-shadow: inset 0 1px 0 0 rgba(255, 255, 255, 0.14);
+      transition: transform 0.25s ease, border-color 0.25s ease, background 0.25s ease;
+    }
+    .vision-card:hover {
+      transform: translateY(-2px) scale(1.005);
+      border-color: rgba(255, 255, 255, 0.28);
+      background: rgba(255, 255, 255, 0.08);
+    }
+    .env-china-command .vision-card {
+      background: rgba(15, 29, 62, 0.65);
+      border-color: rgba(56, 189, 248, 0.24);
+    }
+    .env-china-command .vision-card:hover {
+      border-color: rgba(56, 189, 248, 0.55);
+      box-shadow: 0 0 20px rgba(56, 189, 248, 0.18);
+    }
+    /* Пилюля навигации visionOS */
+    .vision-dock {
+      background: rgba(28, 33, 46, 0.72);
+      backdrop-filter: blur(28px) saturate(180%);
+      -webkit-backdrop-filter: blur(28px) saturate(180%);
+      border: 1px solid rgba(255, 255, 255, 0.22);
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.25);
+    }
+    /* 3D Панорамная сцена Кокпита */
+    .cockpit-stage {
+      perspective: 1700px;
+      transform-style: preserve-3d;
+    }
+    .cockpit-rig {
+      transform-style: preserve-3d;
+      transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    @media (min-width: 1280px) {
+      .wing-left-3d {
+        transform: rotateY(22deg) translateZ(-20px) translateX(12px);
+        transform-origin: right center;
+      }
+      .wing-center-3d {
+        transform: translateZ(15px);
+      }
+      .wing-right-3d {
+        transform: rotateY(-22deg) translateZ(-20px) translateX(-12px);
+        transform-origin: left center;
+      }
+      .wing-left-3d:hover {
+        transform: rotateY(12deg) translateZ(10px) translateX(6px);
+      }
+      .wing-right-3d:hover {
+        transform: rotateY(-12deg) translateZ(10px) translateX(-6px);
+      }
+    }
+    /* Скроллбар внутри карточек */
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: rgba(15, 23, 42, 0.3); }
+    ::-webkit-scrollbar-thumb { background: rgba(148, 163, 184, 0.35); border-radius: 9999px; }
+    /* Симуляция зоны резкости линз Френеля Meta Quest 3S */
+    .fresnel-overlay {
+      pointer-events: none;
+      background: radial-gradient(circle at 50% 50%, transparent 55%, rgba(0, 0, 0, 0.38) 85%, rgba(0, 0, 0, 0.72) 100%);
+      box-shadow: inset 0 0 90px rgba(56, 189, 248, 0.08);
+    }
+    @keyframes pulse-dot {
+      0%, 100% { transform: scale(1); opacity: 0.95; }
+      50% { transform: scale(1.45); opacity: 0.45; }
+    }
+    .animate-pulse-dot {
+      animation: pulse-dot 2.2s infinite ease-in-out;
+    }
+  </style>
+</head>
+<body class="env-vision-glass min-h-screen flex flex-col justify-between relative transition-colors duration-500" id="appBody">
+
+  <!-- Декоративная голографическая сетка пола (видна в режиме Пекинского Ситуационного Центра) -->
+  <div id="chinaFloorGrid" class="fixed inset-x-0 bottom-0 h-64 cyber-grid pointer-events-none opacity-0 transition-opacity duration-500 z-0"></div>
+
+  <!-- Оверлей симуляции оптики шлема Meta Quest 3S (линзы Френеля + границы FOV) -->
+  <div id="fresnelHudOverlay" class="fixed inset-0 fresnel-overlay z-30 hidden">
+    <div class="absolute top-16 left-1/2 -translate-x-1/2 px-4 py-1 rounded-full bg-black/60 border border-cyan-400/30 text-[11px] text-cyan-300 tracking-wider uppercase">
+      Meta Quest 3S Optical Sweet-Spot Simulator (1832×1920 Fresnel FOV)
+    </div>
+  </div>
+
+  <!-- ВЕРХНИЙ СТАТУС-БАР ШЛЕМА (Meta Horizon OS Top Bar + Управление взглядом) -->
+  <header class="relative z-20 px-3 sm:px-6 pt-3 pb-2 flex flex-wrap items-center justify-between gap-2">
+    <div class="flex items-center gap-2.5">
+      <div class="vision-dock px-3.5 py-1.5 rounded-full flex items-center gap-2.5">
+        <span id="statusDot" class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse-dot"></span>
+        <span class="text-xs sm:text-sm font-semibold tracking-tight text-white">Meta Quest 3S Spatial Cockpit</span>
+        <span id="dataSourceBadge" class="px-2 py-0.5 text-[11px] font-semibold rounded-full bg-amber-500/20 text-amber-300 border border-amber-400/30">
+          DEMO MOCK
+        </span>
+      </div>
+      <div class="vision-dock hidden md:flex px-3 py-1.5 rounded-full items-center gap-2 text-xs text-slate-300">
+        <span>Отчетная дата: <strong id="headerReportDate" class="text-white">Октябрь 2026</strong></span>
+        <span class="text-slate-500">|</span>
+        <span>YTD: <strong id="headerYtdLabel" class="text-slate-200">с 01.01.2026</strong></span>
+      </div>
+    </div>
+
+    <!-- Ползунок поворота головы (Эмулятор VR-шлема прямо в браузере) -->
+    <div id="headTurnControlWrap" class="vision-dock px-3.5 py-1.5 rounded-full flex items-center gap-2.5 text-xs">
+      <span class="text-slate-300 hidden sm:inline">Поворот головы (VR Yaw):</span>
+      <button id="btnLookLeft" type="button" class="px-2 py-0.5 rounded bg-white/10 hover:bg-white/20 text-slate-200 transition" title="Повернуть взгляд налево (Блок 2)">◀ Кассы</button>
+      <input id="headYawSlider" type="range" min="-32" max="32" value="0" class="w-24 sm:w-32 accent-sky-400 cursor-pointer" />
+      <button id="btnLookCenter" type="button" class="px-2 py-0.5 rounded bg-sky-500/25 hover:bg-sky-500/40 text-sky-200 border border-sky-400/30 transition" title="Центр (Блок 1)">0°</button>
+      <button id="btnLookRight" type="button" class="px-2 py-0.5 rounded bg-white/10 hover:bg-white/20 text-slate-200 transition" title="Повернуть взгляд направо (Блок 3)">АТМ ▶</button>
+    </div>
+
+    <!-- Правые быстрые переключатели -->
+    <div class="flex items-center gap-2">
+      <button id="btnToggleLiveStream" type="button" class="vision-dock px-3 py-1.5 rounded-full text-xs font-medium text-slate-200 hover:text-white hover:border-emerald-400/50 transition flex items-center gap-1.5">
+        <span id="liveStreamDot" class="w-2 h-2 rounded-full bg-slate-500"></span>
+        <span id="liveStreamLabel">Live-поток: Выкл</span>
+      </button>
+      <button id="btnToggleTheme" type="button" class="vision-dock px-3.5 py-1.5 rounded-full text-xs font-semibold bg-gradient-to-r from-sky-500/20 to-indigo-500/20 text-sky-200 border border-sky-400/40 hover:border-sky-300 transition">
+        ✨ Режим: Vision Glass (MR)
+      </button>
+      <button id="btnOpenAdminTop" type="button" class="vision-dock px-3.5 py-1.5 rounded-full text-xs font-semibold text-amber-300 border border-amber-400/40 hover:bg-amber-500/20 transition">
+        ⚙ Админка API / Мок
+      </button>
+    </div>
+  </header>
+
+  <!-- ОСНОВНАЯ ПРОСТРАНСТВЕННАЯ СЦЕНА (Левый Док Apple Vision Pro + 3 Крыла Дашбордов) -->
+  <div class="relative z-10 flex-1 flex flex-col lg:flex-row items-center lg:items-stretch gap-3 px-3 sm:px-5 py-2 overflow-hidden">
+
+    <!-- ЛЕВАЯ ПАРЯЩАЯ ПИЛЮЛЯ НАВИГАЦИИ (Как в Apple Vision Pro на референсах 2 и 3) -->
+    <aside class="vision-dock rounded-full lg:rounded-[30px] px-3 py-2 lg:py-4 flex lg:flex-col items-center justify-between gap-2 self-center z-20 shrink-0">
+      <div class="flex lg:flex-col items-center gap-2">
+        <button type="button" data-view="panoramic" class="dock-nav-btn w-10 h-10 rounded-full flex items-center justify-center text-xs font-bold bg-sky-500 text-white shadow-lg shadow-sky-500/30 transition" title="Панорама 160° (Все 3 крыла сразу)">
+          160°
+        </button>
+        <button type="button" data-view="block1" class="dock-nav-btn w-10 h-10 rounded-full flex items-center justify-center text-xs font-bold bg-white/10 hover:bg-white/20 text-slate-200 transition" title="Блок 1: Платежи (Дашборды 1–4)">
+          Б1
+        </button>
+        <button type="button" data-view="block2" class="dock-nav-btn w-10 h-10 rounded-full flex items-center justify-center text-xs font-bold bg-white/10 hover:bg-white/20 text-slate-200 transition" title="Блок 2: Кассовые операции (Дашборды 5–7)">
+          Б2
+        </button>
+        <button type="button" data-view="block3" class="dock-nav-btn w-10 h-10 rounded-full flex items-center justify-center text-xs font-bold bg-white/10 hover:bg-white/20 text-slate-200 transition" title="Блок 3: АТМ / ТСО / Recycle (Дашборды 8–10)">
+          Б3
+        </button>
+      </div>
+
+      <div class="hidden lg:block w-6 h-px bg-white/15 my-1"></div>
+
+      <div class="flex lg:flex-col items-center gap-2">
+        <button id="btnCompactNumToggle" type="button" class="w-10 h-10 rounded-full flex items-center justify-center text-[11px] font-semibold bg-white/10 hover:bg-white/20 text-slate-200 transition" title="Переключить формат чисел: Полный (55 089 470) ↔ Сокращенный (55,1 млн)">
+          123
+        </button>
+        <button id="btnFresnelToggle" type="button" class="w-10 h-10 rounded-full flex items-center justify-center text-xs bg-white/10 hover:bg-white/20 text-slate-200 transition" title="Включить фильтр оптики линз Френеля Meta Quest 3S">
+          🥽
+        </button>
+        <button id="btnEnterWebXR" type="button" class="w-10 h-10 rounded-full flex items-center justify-center text-[11px] font-bold bg-indigo-500/30 hover:bg-indigo-500/50 text-indigo-200 border border-indigo-400/40 transition" title="Запустить WebXR сессию в шлеме Meta Quest 3S или эмуляторе">
+          XR
+        </button>
+      </div>
+    </aside>
+
+    <!-- 3D КОКПИТ С 3 ПРОСТРАНСТВЕННЫМИ КРЫЛЬЯМИ (10 ДАШБОРДОВ) -->
+    <main class="cockpit-stage flex-1 w-full overflow-x-auto lg:overflow-visible flex items-stretch">
+      <div id="cockpitRig" class="cockpit-rig w-full grid grid-cols-1 xl:grid-cols-12 gap-4 items-stretch my-auto">
+
+        <!-- =====================================================================
+             ЛЕВОЕ КРЫЛО (БЛОК 2: КАССОВЫЕ ОПЕРАЦИИ — ДАШБОРДЫ 5, 6, 7)
+             ===================================================================== -->
+        <section id="wingBlock2" class="vision-wing wing-left-3d xl:col-span-3 p-4 flex flex-col justify-between gap-3">
+          <div class="flex items-center justify-between border-b border-white/10 pb-2">
+            <div>
+              <span class="text-[10px] uppercase tracking-widest text-emerald-400 font-semibold">Левое крыло • Блок 2</span>
+              <h2 class="text-sm sm:text-base font-bold text-white leading-tight">Кассовые операции</h2>
+            </div>
+            <button type="button" data-focus-block="block2" class="btn-focus-wing px-2.5 py-1 rounded-full text-[11px] bg-white/10 hover:bg-white/20 text-slate-200 transition">
+              Развернуть
+            </button>
+          </div>
+
+          <!-- ДАШБОРД 5: Количество операций в кассах по типам + Спидометр месячного плана -->
+          <article class="vision-card p-3 flex flex-col gap-2" data-dashboard-id="5">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-semibold text-slate-200">Д5. Операции в кассах по типам</span>
+              <button type="button" data-zoom-dash="5" class="btn-zoom-dash text-[11px] text-sky-300 hover:text-sky-200">🔍 В фокус</button>
+            </div>
+            <div class="grid grid-cols-12 gap-2 items-center">
+              <!-- Круговая диаграмма + список типов -->
+              <div class="col-span-7 flex items-center gap-2">
+                <div id="d5PieChart" class="w-16 h-16 shrink-0"></div>
+                <div id="d5LegendList" class="flex-1 space-y-1 text-[10px]"></div>
+              </div>
+              <!-- Спидометр выполнения месячного плана -->
+              <div id="d5GaugeBox" class="col-span-5 flex flex-col items-center justify-center"></div>
+            </div>
+          </article>
+
+          <!-- ДАШБОРД 6: Основные показатели касс с начала года (YTD) — 3 спидометра -->
+          <article class="vision-card p-3 flex flex-col gap-2" data-dashboard-id="6">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-semibold text-slate-200">Д6. Показатели касс с начала года</span>
+              <button type="button" data-zoom-dash="6" class="btn-zoom-dash text-[11px] text-sky-300 hover:text-sky-200">🔍 В фокус</button>
+            </div>
+            <div id="d6GaugesRow" class="grid grid-cols-3 gap-1.5 pt-1"></div>
+          </article>
+
+          <!-- ДАШБОРД 7: Работающие кассы по дням + Нехватка персонала + Простой касс -->
+          <article class="vision-card p-3 flex flex-col gap-2" data-dashboard-id="7">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-semibold text-slate-200">Д7. Работающие кассы и персонал</span>
+              <button type="button" data-zoom-dash="7" class="btn-zoom-dash text-[11px] text-sky-300 hover:text-sky-200">🔍 В фокус</button>
+            </div>
+            <div class="grid grid-cols-12 gap-2 items-center">
+              <div class="col-span-5">
+                <div class="text-[10px] text-slate-400 mb-1">Работающие кассы</div>
+                <div id="d7LineChart" class="h-20 w-full"></div>
+              </div>
+              <div class="col-span-3 flex flex-col items-center justify-center p-2 rounded-xl bg-white/5 border border-white/10">
+                <span class="text-[10px] text-slate-300 text-center leading-tight">Нехватка персонала</span>
+                <span id="d7StaffValue" class="font-mono-num text-xl sm:text-2xl font-extrabold text-amber-300 my-0.5">17</span>
+                <span class="text-[9px] text-slate-400">вакансий</span>
+              </div>
+              <div id="d7DowntimeGauge" class="col-span-4 flex flex-col items-center justify-center"></div>
+            </div>
+          </article>
+        </section>
+
+        <!-- =====================================================================
+             ЦЕНТРАЛЬНАЯ ГЛАВНАЯ ПАНЕЛЬ (БЛОК 1: ПЛАТЕЖИ — ДАШБОРДЫ 1, 2, 3, 4)
+             ===================================================================== -->
+        <section id="wingBlock1" class="vision-wing wing-center-3d xl:col-span-6 p-4 sm:p-5 flex flex-col justify-between gap-3">
+          <div class="flex flex-wrap items-center justify-between gap-2 border-b border-white/10 pb-2.5">
+            <div>
+              <span class="text-[10px] uppercase tracking-widest text-sky-400 font-semibold">Центральная сцена • Блок 1</span>
+              <h1 class="text-base sm:text-lg font-extrabold text-white leading-tight">Аналитика платежей департамента</h1>
+            </div>
+            <div class="flex items-center gap-1.5">
+              <button type="button" data-d23-mode="d2" class="d23-tab-btn px-2.5 py-1 rounded-full text-xs font-semibold bg-sky-500 text-white transition">
+                Д2: Количество
+              </button>
+              <button type="button" data-d23-mode="d3" class="d23-tab-btn px-2.5 py-1 rounded-full text-xs font-semibold bg-white/10 text-slate-300 hover:bg-white/20 transition">
+                Д3: Объем (₴)
+              </button>
+              <button type="button" data-d23-mode="both" class="d23-tab-btn px-2.5 py-1 rounded-full text-xs font-semibold bg-white/10 text-slate-300 hover:bg-white/20 transition">
+                Д2 + Д3
+              </button>
+            </div>
+          </div>
+
+          <!-- Верхний ряд Центральной сцены: Дашборд 1 + Дашборды 2/3 -->
+          <div class="grid grid-cols-1 md:grid-cols-12 gap-3">
+            <!-- ДАШБОРД 1: Количество платежей в разрезе каналов (Январь vs Отчетный месяц) + Доля в ДБО -->
+            <article class="vision-card md:col-span-6 p-3.5 flex flex-col justify-between gap-2" data-dashboard-id="1">
+              <div class="flex items-center justify-between">
+                <div>
+                  <span class="text-xs font-bold text-white">Д1. Платежи по каналам продаж</span>
+                  <p class="text-[10px] text-slate-400">Динамика за месяц к январю отчетного года (млн)</p>
+                </div>
+                <button type="button" data-zoom-dash="1" class="btn-zoom-dash text-[11px] text-sky-300 hover:text-sky-200">🔍 В фокус</button>
+              </div>
+
+              <div class="grid grid-cols-12 gap-2 items-center my-auto pt-1">
+                <!-- Парные столбцы по 6 каналам -->
+                <div class="col-span-8">
+                  <div id="d1ChannelsChart" class="h-36 w-full flex items-end justify-between gap-1.5 px-1 pt-4 pb-1 border-b border-white/10"></div>
+                  <div id="d1ChannelsLabels" class="grid grid-cols-6 gap-1 pt-1 text-[9px] text-slate-300 text-center"></div>
+                  <div class="flex items-center gap-4 justify-center pt-2 text-[10px] text-slate-300">
+                    <span class="flex items-center gap-1"><i class="w-2.5 h-2.5 rounded-sm bg-purple-400 inline-block"></i> Январь</span>
+                    <span class="flex items-center gap-1"><i class="w-2.5 h-2.5 rounded-sm bg-indigo-600 inline-block"></i> Отчетный мес.</span>
+                  </div>
+                </div>
+                <!-- Кольцевой график Доля в ДБО (86%) -->
+                <div class="col-span-4 flex flex-col items-center justify-center border-l border-white/10 pl-2">
+                  <span class="text-[10px] text-slate-300 font-semibold mb-1">Доля в ДБО</span>
+                  <div id="d1DboDonut" class="relative w-20 h-20 flex items-center justify-center"></div>
+                  <div class="mt-2 space-y-0.5 text-[9px] text-slate-300">
+                    <div class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-purple-500"></span> В ДБО</div>
+                    <div class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-sky-400"></span> В отделениях</div>
+                  </div>
+                </div>
+              </div>
+            </article>
+
+            <!-- ДАШБОРДЫ 2 и 3: Выполнение месячного плана (Количество и Объем платежей) -->
+            <article class="vision-card md:col-span-6 p-3.5 flex flex-col justify-between gap-2" data-dashboard-id="2">
+              <div class="flex items-center justify-between">
+                <div>
+                  <span id="d23Title" class="text-xs font-bold text-white">Д2. Количество платежей (Выполнение плана)</span>
+                  <p id="d23Subtitle" class="text-[10px] text-slate-400">Выполнение месячного плана (%) и абсолютные значения</p>
+                </div>
+                <button type="button" data-zoom-dash="2" class="btn-zoom-dash text-[11px] text-sky-300 hover:text-sky-200">🔍 В фокус</button>
+              </div>
+
+              <div id="d23ContentArea" class="grid grid-cols-12 gap-3 items-center my-auto pt-1">
+                <!-- Слева: 3 вертикальных градиентных столбца (95%, 96%, 84%) с линией плана 100% -->
+                <div id="d23PlanBars" class="col-span-5 h-40 flex flex-col justify-end"></div>
+                <!-- Справа: 3 карточки абсолютных показателей со спарклайнами -->
+                <div id="d23MetricCards" class="col-span-7 space-y-2"></div>
+              </div>
+            </article>
+          </div>
+
+          <!-- Нижний ряд Центральной сцены: ДАШБОРД 4 (Основные показатели YTD) + 3D-карта сети в режиме Пекина -->
+          <div class="grid grid-cols-1 md:grid-cols-12 gap-3 items-stretch">
+            <article id="d4ArticleWrap" class="vision-card md:col-span-12 p-3.5 flex flex-col justify-between gap-2" data-dashboard-id="4">
+              <div class="flex flex-wrap items-center justify-between gap-2">
+                <div class="flex items-center gap-2">
+                  <span class="text-xs font-bold text-white">Д4. Основные показатели платежей накопительно с начала года (YTD)</span>
+                  <span class="px-2 py-0.5 rounded-full text-[10px] bg-emerald-500/15 text-emerald-300 border border-emerald-400/30">
+                    Нормировано по темпу года
+                  </span>
+                </div>
+                <button type="button" data-zoom-dash="4" class="btn-zoom-dash text-[11px] text-sky-300 hover:text-sky-200">🔍 В фокус</button>
+              </div>
+              <div id="d4GaugesGrid" class="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-1"></div>
+            </article>
+
+            <!-- Виджет Голографической Карты Сети (Включается автоматически в режиме Beijing Command Room!) -->
+            <article id="chinaNetworkWidget" class="vision-card md:col-span-4 p-3.5 hidden flex-col justify-between">
+              <div class="flex items-center justify-between">
+                <span class="text-xs font-bold text-sky-300">🌐 Пульс сети (Command Map)</span>
+                <span class="text-[10px] px-1.5 py-0.5 rounded bg-sky-500/20 text-sky-200">LIVE SLA</span>
+              </div>
+              <div id="chinaMapCanvas" class="relative h-28 w-full my-1 rounded-xl bg-slate-950/80 border border-sky-400/30 overflow-hidden"></div>
+              <div id="chinaMapSummary" class="flex items-center justify-between text-[10px] text-slate-300"></div>
+            </article>
+          </div>
+        </section>
+
+        <!-- =====================================================================
+             ПРАВОЕ КРЫЛО (БЛОК 3: ОБОРУДОВАНИЕ АТМ / ТСО / RECYCLE — ДАШБОРДЫ 8, 9, 10)
+             ===================================================================== -->
+        <section id="wingBlock3" class="vision-wing wing-right-3d xl:col-span-3 p-4 flex flex-col justify-between gap-3">
+          <div class="flex items-center justify-between border-b border-white/10 pb-2">
+            <div>
+              <span class="text-[10px] uppercase tracking-widest text-purple-400 font-semibold">Правое крыло • Блок 3</span>
+              <h2 class="text-sm sm:text-base font-bold text-white leading-tight">Сеть ATM / ТСО / Recycle</h2>
+            </div>
+            <button type="button" data-focus-block="block3" class="btn-focus-wing px-2.5 py-1 rounded-full text-[11px] bg-white/10 hover:bg-white/20 text-slate-200 transition">
+              Развернуть
+            </button>
+          </div>
+
+          <!-- ДАШБОРД 8: Количество операций в оборудовании (АТМ+ТСО+Recycle) -->
+          <article class="vision-card p-3 flex flex-col gap-1.5" data-dashboard-id="8">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-semibold text-slate-200">Д8. Количество операций (АТМ, ТСО, Rec)</span>
+              <button type="button" data-zoom-dash="8" class="btn-zoom-dash text-[11px] text-sky-300 hover:text-sky-200">🔍 В фокус</button>
+            </div>
+            <div id="d8GaugesRow" class="grid grid-cols-2 gap-2 pt-1"></div>
+          </article>
+
+          <!-- ДАШБОРД 9: Объем операций в оборудовании (АТМ+ТСО+Recycle) -->
+          <article class="vision-card p-3 flex flex-col gap-1.5" data-dashboard-id="9">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-semibold text-slate-200">Д9. Объем операций (АТМ, ТСО, Rec)</span>
+              <button type="button" data-zoom-dash="9" class="btn-zoom-dash text-[11px] text-sky-300 hover:text-sky-200">🔍 В фокус</button>
+            </div>
+            <div id="d9GaugesRow" class="grid grid-cols-2 gap-2 pt-1"></div>
+          </article>
+
+          <!-- ДАШБОРД 10: Количество работающего оборудования по дням + 3 спидометра простоя -->
+          <article class="vision-card p-3 flex flex-col gap-2" data-dashboard-id="10">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-semibold text-slate-200">Д10. Работающее оборудование и простой</span>
+              <button type="button" data-zoom-dash="10" class="btn-zoom-dash text-[11px] text-sky-300 hover:text-sky-200">🔍 В фокус</button>
+            </div>
+            <div class="grid grid-cols-12 gap-2 items-center">
+              <div class="col-span-7">
+                <div id="d10MultiLineChart" class="h-28 w-full"></div>
+                <div class="flex items-center justify-center gap-3 pt-1 text-[10px]">
+                  <span class="flex items-center gap-1 text-lime-300"><i class="w-2 h-2 rounded-full bg-lime-400 inline-block"></i> ТСО</span>
+                  <span class="flex items-center gap-1 text-purple-300"><i class="w-2 h-2 rounded-full bg-purple-400 inline-block"></i> АТМ</span>
+                  <span class="flex items-center gap-1 text-slate-200"><i class="w-2 h-2 rounded-full bg-slate-100 inline-block"></i> Rec</span>
+                </div>
+              </div>
+              <div id="d10DowntimeStack" class="col-span-5 space-y-1.5 border-l border-white/10 pl-2"></div>
+            </div>
+          </article>
+        </section>
+
+      </div>
+    </main>
+  </div>
+
+  <!-- НИЖНЯЯ ПРОСТРАНСТВЕННАЯ ПАНЕЛЬ УПРАВЛЕНИЯ (Vision Pro Grab Bar & Quick Scenarios) -->
+  <footer class="relative z-20 px-4 pb-3 pt-1 flex flex-wrap items-center justify-center gap-2">
+    <div class="vision-dock px-4 py-1.5 rounded-full flex flex-wrap items-center gap-2 text-xs">
+      <span class="text-slate-400 font-medium">Быстрые сценарии (Тест):</span>
+      <button type="button" data-preset="baseline" class="preset-btn px-2.5 py-1 rounded-full bg-sky-500/25 text-sky-200 border border-sky-400/40 font-medium transition">
+        1. Срез из ТЗ ПМ
+      </button>
+      <button type="button" data-preset="incident" class="preset-btn px-2.5 py-1 rounded-full bg-white/5 hover:bg-rose-500/20 text-slate-300 hover:text-rose-200 transition">
+        2. Стресс: Сбой АТМ и дефицит кассиров
+      </button>
+      <button type="button" data-preset="record" class="preset-btn px-2.5 py-1 rounded-full bg-white/5 hover:bg-emerald-500/20 text-slate-300 hover:text-emerald-200 transition">
+        3. Закрытие года (План 102%)
+      </button>
+      <span class="text-slate-600">|</span>
+      <button id="btnOpenAdminBottom" type="button" class="px-2.5 py-1 rounded-full bg-amber-500/20 text-amber-200 border border-amber-400/30 hover:bg-amber-500/30 font-medium transition">
+        ⚙ Настроить URL API / Изменить цифры
+      </button>
+    </div>
+  </footer>
+
+  <!-- =========================================================================
+       МОДАЛЬНОЕ ОКНО DEEP FOCUS (ПРИТЯГИВАНИЕ ДАШБОРДА БЛИЖЕ К ГЛАЗАМ В VR)
+       ========================================================================= -->
+  <div id="deepFocusModal" class="fixed inset-0 z-40 bg-black/75 backdrop-blur-md hidden items-center justify-center p-4">
+    <div class="vision-wing max-w-3xl w-full p-6 relative border border-sky-400/40">
+      <div class="flex items-center justify-between border-b border-white/15 pb-3 mb-4">
+        <div>
+          <span class="text-xs uppercase tracking-wider text-sky-400 font-semibold">Режим Deep Focus (Приближение 1.1 м перед глазами)</span>
+          <h3 id="deepFocusTitle" class="text-lg font-bold text-white mt-0.5">Детальный просмотр дашборда</h3>
+        </div>
+        <button id="btnCloseDeepFocus" type="button" class="px-3.5 py-1.5 rounded-full bg-white/10 hover:bg-white/20 text-sm font-semibold text-white transition">
+          ✕ Вернуть в кокпит
+        </button>
+      </div>
+      <div id="deepFocusBody" class="space-y-4"></div>
+    </div>
+  </div>
+
+  <!-- =========================================================================
+       МОДАЛЬНОЕ ОКНО: АДМИНКА API + LIVE-РЕДАКТОР МОК-ДАННЫХ
+       ========================================================================= -->
+  <div id="adminModal" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-lg hidden items-center justify-center p-3 sm:p-6 overflow-y-auto">
+    <div class="vision-wing max-w-4xl w-full p-5 sm:p-6 border border-amber-400/40 my-auto max-h-[92vh] flex flex-col">
+      <!-- Шапка админки -->
+      <div class="flex flex-wrap items-center justify-between gap-2 border-b border-white/15 pb-3 mb-4 shrink-0">
+        <div>
+          <div class="flex items-center gap-2">
+            <span class="px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider rounded bg-amber-500/20 text-amber-300 border border-amber-400/30">
+              Admin & API Control Panel
+            </span>
+            <span class="text-xs text-slate-400">Управление источником данных без пересборки кода</span>
+          </div>
+          <h2 class="text-lg sm:text-xl font-extrabold text-white mt-1">Настройка REST API, Валидация Схемы и Генератор Мок-данных</h2>
+        </div>
+        <button id="btnCloseAdmin" type="button" class="px-4 py-1.5 rounded-full bg-white/10 hover:bg-white/20 text-sm font-semibold text-white transition">
+          ✕ Закрыть админку
+        </button>
+      </div>
+
+      <!-- Контент админки со скроллом -->
+      <div class="overflow-y-auto pr-1 space-y-5 flex-1">
+
+        <!-- Секция 1: Подключение к реальному API -->
+        <div class="vision-card p-4 space-y-3">
+          <div class="flex flex-wrap items-center justify-between gap-2">
+            <h3 class="text-sm font-bold text-sky-300">1. Подключение к боевому API департамента</h3>
+            <div class="flex items-center gap-2 text-xs">
+              <span class="text-slate-400">Режим работы:</span>
+              <select id="adminDataModeSelect" class="bg-slate-900 border border-white/20 rounded-lg px-2.5 py-1 text-white text-xs">
+                <option value="mock">Автономный (Mock Data)</option>
+                <option value="hybrid">Live API + Авто-фоллбэк на Mock</option>
+                <option value="live">Строгий Live API</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-12 gap-3">
+            <div class="md:col-span-6">
+              <label class="block text-[11px] text-slate-300 mb-1">REST API Endpoint URL (GET JSON):</label>
+              <input id="adminApiUrlInput" type="url" placeholder="https://api.department.internal/v1/vr-analytics" class="w-full bg-slate-900/90 border border-white/20 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-sky-400" />
+            </div>
+            <div class="md:col-span-4">
+              <label class="block text-[11px] text-slate-300 mb-1">Authorization Bearer Token (опционально):</label>
+              <input id="adminApiTokenInput" type="password" placeholder="eyJhbGciOiJIUzI1NiIs..." class="w-full bg-slate-900/90 border border-white/20 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-sky-400" />
+            </div>
+            <div class="md:col-span-2">
+              <label class="block text-[11px] text-slate-300 mb-1">Опрос (Polling):</label>
+              <select id="adminPollingSelect" class="w-full bg-slate-900/90 border border-white/20 rounded-xl px-2.5 py-2 text-xs text-white">
+                <option value="0">Вручную</option>
+                <option value="5">Каждые 5 сек</option>
+                <option value="15">Каждые 15 сек</option>
+                <option value="30" selected>Каждые 30 сек</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="flex flex-wrap items-center justify-between gap-2 pt-1">
+            <div class="flex flex-wrap items-center gap-2">
+              <button id="btnTestApiConnection" type="button" class="px-3.5 py-1.5 rounded-xl bg-sky-500 hover:bg-sky-400 text-slate-950 font-bold text-xs transition">
+                ⚡ Проверить соединение и JSON-схему
+              </button>
+              <button id="btnSaveApiConfig" type="button" class="px-3.5 py-1.5 rounded-xl bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-200 border border-emerald-400/30 font-semibold text-xs transition">
+                💾 Сохранить настройки API
+              </button>
+            </div>
+            <span id="apiTestStatusText" class="text-xs text-slate-400">Статус: работает на встроенных мок-данных</span>
+          </div>
+        </div>
+
+        <!-- Секция 2: Быстрое редактирование ключевых показателей (Без правки кода) -->
+        <div class="vision-card p-4 space-y-3">
+          <div class="flex flex-wrap items-center justify-between gap-2">
+            <h3 class="text-sm font-bold text-emerald-300">2. Быстрый пульт показателей (Live Mock Editor для презентации шефу)</h3>
+            <span class="text-[11px] text-slate-400">Двигай значения — VR-кокпит мгновенно перестроится</span>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 text-xs">
+            <div class="p-2.5 rounded-xl bg-white/5 border border-white/10">
+              <label class="block text-[11px] text-slate-300">Д1. Доля в ДБО (%):</label>
+              <input id="quickInputDbo" type="number" min="0" max="100" step="0.5" value="86" class="mt-1 w-full bg-slate-900 border border-white/20 rounded-lg px-2.5 py-1 text-white font-mono-num" />
+            </div>
+            <div class="p-2.5 rounded-xl bg-white/5 border border-white/10">
+              <label class="block text-[11px] text-slate-300">Д2. Общее кол-во платежей:</label>
+              <input id="quickInputTotalPay" type="number" step="100000" value="55089470" class="mt-1 w-full bg-slate-900 border border-white/20 rounded-lg px-2.5 py-1 text-white font-mono-num" />
+            </div>
+            <div class="p-2.5 rounded-xl bg-white/5 border border-white/10">
+              <label class="block text-[11px] text-slate-300">Д7. Нехватка кассиров (вакансий):</label>
+              <input id="quickInputVacancies" type="number" min="0" max="500" value="17" class="mt-1 w-full bg-slate-900 border border-white/20 rounded-lg px-2.5 py-1 text-white font-mono-num" />
+            </div>
+            <div class="p-2.5 rounded-xl bg-white/5 border border-white/10">
+              <label class="block text-[11px] text-slate-300">Д7/Д10. Простой касс / АТМ (%):</label>
+              <div class="grid grid-cols-2 gap-1.5 mt-1">
+                <input id="quickInputCashDowntime" type="number" min="0" max="100" step="0.1" value="1.3" title="Простой касс (%)" class="w-full bg-slate-900 border border-white/20 rounded-lg px-2 py-1 text-white font-mono-num" />
+                <input id="quickInputAtmDowntime" type="number" min="0" max="100" step="0.1" value="6.2" title="Простой АТМ (%)" class="w-full bg-slate-900 border border-white/20 rounded-lg px-2 py-1 text-white font-mono-num" />
+              </div>
+            </div>
+          </div>
+
+          <div class="flex flex-wrap items-center gap-2">
+            <button id="btnApplyQuickMetrics" type="button" class="px-4 py-1.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-xs transition">
+              ✓ Применить цифры к дашбордам
+            </button>
+            <button id="btnRandomizeTick" type="button" class="px-3.5 py-1.5 rounded-xl bg-white/10 hover:bg-white/20 text-white text-xs transition">
+              🎲 Сгенерировать случайное колебание (±3%)
+            </button>
+          </div>
+        </div>
+
+        <!-- Секция 3: Полный JSON-контракт (Редактирование / Экспорт для GitHub) -->
+        <div class="vision-card p-4 space-y-2">
+          <div class="flex flex-wrap items-center justify-between gap-2">
+            <h3 class="text-sm font-bold text-purple-300">3. Полный JSONPayload всех 10 дашбордов (`dashboard-data.json`)</h3>
+            <div class="flex items-center gap-2">
+              <button id="btnCopyJson" type="button" class="px-3 py-1 rounded-lg bg-white/10 hover:bg-white/20 text-xs text-slate-200 transition">
+                📋 Скопировать JSON
+              </button>
+              <button id="btnDownloadJson" type="button" class="px-3 py-1 rounded-lg bg-purple-500/25 hover:bg-purple-500/40 text-xs text-purple-200 border border-purple-400/30 transition">
+                ⬇ Скачать dashboard-data.json
+              </button>
+            </div>
+          </div>
+          <textarea id="adminRawJsonTextarea" rows="8" class="w-full bg-slate-950/90 border border-white/15 rounded-xl p-3 font-mono-num text-[11px] text-emerald-300 focus:outline-none focus:border-purple-400"></textarea>
+          <div class="flex items-center justify-between">
+            <span id="jsonValidationMsg" class="text-xs text-slate-400">Формат валиден • 3 блока, 10 дашбордов</span>
+            <button id="btnApplyRawJson" type="button" class="px-4 py-1.5 rounded-xl bg-purple-500 hover:bg-purple-400 text-slate-950 font-bold text-xs transition">
+              Применить JSON к сцене
+            </button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- Всплывающее уведомление (Toast) -->
+  <div id="toastBanner" class="fixed bottom-16 right-5 z-50 px-4 py-2.5 rounded-2xl bg-slate-900/95 border border-sky-400/40 text-xs text-white shadow-2xl hidden items-center gap-2">
+    <span id="toastText">Настройки применены</span>
+  </div>
+
+  <script>
+    // =========================================================================
+    // 1. БАЗОВЫЕ ДАННЫЕ И ПРЕСЕТЫ ДЛЯ ВСЕХ 10 ДАШБОРДОВ (СТРОГО ПО СКРИНУ ПМ)
+    // =========================================================================
+    const PRESETS = {
+      baseline: {
+        meta: {
+          reportDate: "Октябрь 2026",
+          ytdStartLabel: "с 01.01.2026",
+          currency: "₴"
+        },
+        block1_payments: {
+          dashboard1_channels: {
+            channels: [
+              { name: "Интернет", jan: 14.5, cur: 18.2 },
+              { name: "Моб. банк", jan: 32.1, cur: 31.4 },
+              { name: "ТСО", jan: 31.8, cur: 29.5 },
+              { name: "Кассы", jan: 15.2, cur: 16.8 },
+              { name: "АТМ", jan: 6.4, cur: 7.1 },
+              { name: "Автоплат.", jan: 3.1, cur: 3.8 }
+            ],
+            dboSharePercent: 86.0
+          },
+          dashboard2_monthlyCount: {
+            planBars: [
+              { label: "Общий план", percent: 95, gradient: "from-cyan-400 to-blue-500" },
+              { label: "Разовые", percent: 96, gradient: "from-purple-400 to-indigo-600" },
+              { label: "Регулярные", percent: 84, gradient: "from-amber-400 to-orange-500" }
+            ],
+            cards: [
+              { title: "Общее количество", value: 55089470, delta: "+4,2%", color: "#38bdf8", spark: [48, 50, 49, 53, 55] },
+              { title: "Разовые платежи", value: 32605811, delta: "+3,8%", color: "#a855f7", spark: [28, 30, 31, 31.5, 32.6] },
+              { title: "Регулярные платежи", value: 22483659, delta: "+1,9%", color: "#fb923c", spark: [20, 20.8, 21.4, 22, 22.5] }
+            ]
+          },
+          dashboard3_monthlyVolume: {
+            planBars: [
+              { label: "Общий объем", percent: 95, gradient: "from-cyan-400 to-blue-500" },
+              { label: "Разовые", percent: 96, gradient: "from-purple-400 to-indigo-600" },
+              { label: "Регулярные", percent: 84, gradient: "from-amber-400 to-orange-500" }
+            ],
+            cards: [
+              { title: "Общий объем (₴)", value: 55089470, delta: "+5,1%", color: "#38bdf8", spark: [47, 49, 51, 53, 55] },
+              { title: "Объем разовых (₴)", value: 32605811, delta: "+4,4%", color: "#a855f7", spark: [27, 29, 30, 31.8, 32.6] },
+              { title: "Объем регулярных (₴)", value: 22483659, delta: "+2,3%", color: "#fb923c", spark: [19, 20, 21, 21.9, 22.5] }
+            ]
+          },
+          dashboard4_ytdMain: [
+            { label: "Количество платежей", percent: 6.2, value: 76080103, scaleMode: "ytd" },
+            { label: "Объем платежей", percent: 5.3, value: 80722842308, scaleMode: "ytd" },
+            { label: "Прибыль", percent: 8.3, value: 247471918, scaleMode: "ytd" }
+          ]
+        },
+        block2_cashDesk: {
+          dashboard5_operationTypes: {
+            monthlyPlanPercent: 6.2,
+            types: [
+              { name: "Платежи", count: 21310811, color: "#4ade80" },
+              { name: "Пополнение карт", count: 4890200, color: "#facc15" },
+              { name: "Снятие наличных", count: 3210450, color: "#f87171" },
+              { name: "Валютообмен", count: 1420110, color: "#c084fc" }
+            ]
+          },
+          dashboard6_ytdMain: [
+            { label: "Кол-во операций", percent: 8.1, value: 76080103, scaleMode: "ytd" },
+            { label: "Объем операций", percent: 5.4, value: 30722512309, scaleMode: "ytd" },
+            { label: "Прибыль касс", percent: 6.3, value: 247471516, scaleMode: "ytd" }
+          ],
+          dashboard7_operationsAndStaff: {
+            workingCashDesksByDay: [1390, 1410, 1465, 1120, 1180, 1430, 1475, 1510],
+            staffShortageVacancies: 17,
+            downtimeTodayPercent: 1.3
+          }
+        },
+        block3_atmTso: {
+          dashboard8_operationsCount: [
+            { label: "Текущий месяц", percent: 6.2, value: 11314490, scaleMode: "ytd" },
+            { label: "С начала года", percent: 6.2, value: 61168379, scaleMode: "ytd" }
+          ],
+          dashboard9_operationsVolume: [
+            { label: "Текущий месяц", percent: 6.2, value: 21154783688, scaleMode: "ytd" },
+            { label: "С начала года", percent: 5.2, value: 91217696291, scaleMode: "ytd" }
+          ],
+          dashboard10_workingEquipmentAndDowntime: {
+            days: ["01", "05", "10", "15", "20", "25"],
+            tsoLine: [4120, 4260, 4190, 4240, 4150, 4230],
+            atmLine: [3180, 3040, 3150, 2980, 3060, 3010],
+            recLine: [1890, 2050, 1940, 2180, 1820, 1990],
+            downtime: [
+              { name: "ТСО", percent: 6.2 },
+              { name: "АТМ", percent: 6.2 },
+              { name: "Rec", percent: 6.2 }
+            ]
+          }
+        }
+      },
+
+      incident: {
+        meta: {
+          reportDate: "Стресс-тест (Авария АТМ)",
+          ytdStartLabel: "с 01.01.2026",
+          currency: "₴"
+        },
+        block1_payments: {
+          dashboard1_channels: {
+            channels: [
+              { name: "Интернет", jan: 14.5, cur: 21.4 },
+              { name: "Моб. банк", jan: 32.1, cur: 35.8 },
+              { name: "ТСО", jan: 31.8, cur: 22.1 },
+              { name: "Кассы", jan: 15.2, cur: 11.4 },
+              { name: "АТМ", jan: 6.4, cur: 4.2 },
+              { name: "Автоплат.", jan: 3.1, cur: 4.1 }
+            ],
+            dboSharePercent: 91.5
+          },
+          dashboard2_monthlyCount: {
+            planBars: [
+              { label: "Общий план", percent: 82, gradient: "from-cyan-400 to-blue-500" },
+              { label: "Разовые", percent: 78, gradient: "from-purple-400 to-indigo-600" },
+              { label: "Регулярные", percent: 89, gradient: "from-amber-400 to-orange-500" }
+            ],
+            cards: [
+              { title: "Общее количество", value: 48120300, delta: "-6,4%", color: "#f87171", spark: [54, 52, 50, 49, 48.1] },
+              { title: "Разовые платежи", value: 26410100, delta: "-8,1%", color: "#a855f7", spark: [31, 30, 28, 27, 26.4] },
+              { title: "Регулярные платежи", value: 21710200, delta: "+0,8%", color: "#fb923c", spark: [21, 21.2, 21.5, 21.6, 21.7] }
+            ]
+          },
+          dashboard3_monthlyVolume: {
+            planBars: [
+              { label: "Общий объем", percent: 83, gradient: "from-cyan-400 to-blue-500" },
+              { label: "Разовые", percent: 79, gradient: "from-purple-400 to-indigo-600" },
+              { label: "Регулярные", percent: 88, gradient: "from-amber-400 to-orange-500" }
+            ],
+            cards: [
+              { title: "Общий объем (₴)", value: 49300120, delta: "-4,9%", color: "#f87171", spark: [53, 52, 51, 50, 49.3] },
+              { title: "Объем разовых (₴)", value: 27100000, delta: "-6,2%", color: "#a855f7", spark: [30, 29, 28, 27.5, 27.1] },
+              { title: "Объем регулярных (₴)", value: 22200120, delta: "+1,1%", color: "#fb923c", spark: [21, 21.5, 21.8, 22, 22.2] }
+            ]
+          },
+          dashboard4_ytdMain: [
+            { label: "Количество платежей", percent: 5.8, value: 71400200, scaleMode: "ytd" },
+            { label: "Объем платежей", percent: 4.9, value: 76120500000, scaleMode: "ytd" },
+            { label: "Прибыль", percent: 7.4, value: 229800100, scaleMode: "ytd" }
+          ]
+        },
+        block2_cashDesk: {
+          dashboard5_operationTypes: {
+            monthlyPlanPercent: 5.1,
+            types: [
+              { name: "Платежи", count: 16200100, color: "#4ade80" },
+              { name: "Пополнение карт", count: 4100500, color: "#facc15" },
+              { name: "Снятие наличных", count: 5890000, color: "#f87171" },
+              { name: "Валютообмен", count: 1120000, color: "#c084fc" }
+            ]
+          },
+          dashboard6_ytdMain: [
+            { label: "Кол-во операций", percent: 7.2, value: 69100400, scaleMode: "ytd" },
+            { label: "Объем операций", percent: 4.8, value: 28400100000, scaleMode: "ytd" },
+            { label: "Прибыль касс", percent: 5.5, value: 218900400, scaleMode: "ytd" }
+          ],
+          dashboard7_operationsAndStaff: {
+            workingCashDesksByDay: [1420, 1390, 1310, 1040, 980, 1090, 1120, 1150],
+            staffShortageVacancies: 34,
+            downtimeTodayPercent: 7.8
+          }
+        },
+        block3_atmTso: {
+          dashboard8_operationsCount: [
+            { label: "Текущий месяц", percent: 4.8, value: 8920100, scaleMode: "ytd" },
+            { label: "С начала года", percent: 5.6, value: 58400100, scaleMode: "ytd" }
+          ],
+          dashboard9_operationsVolume: [
+            { label: "Текущий месяц", percent: 4.9, value: 17400200000, scaleMode: "ytd" },
+            { label: "С начала года", percent: 4.8, value: 86900100000, scaleMode: "ytd" }
+          ],
+          dashboard10_workingEquipmentAndDowntime: {
+            days: ["01", "05", "10", "15", "20", "25"],
+            tsoLine: [4120, 4050, 3890, 3620, 3580, 3610],
+            atmLine: [3180, 3010, 2740, 2490, 2520, 2590],
+            recLine: [1890, 1820, 1710, 1590, 1620, 1650],
+            downtime: [
+              { name: "ТСО", percent: 11.4 },
+              { name: "АТМ", percent: 14.8 },
+              { name: "Rec", percent: 9.6 }
+            ]
+          }
+        }
+      },
+
+      record: {
+        meta: {
+          reportDate: "Декабрь 2026 (Закрытие года)",
+          ytdStartLabel: "с 01.01.2026",
+          currency: "₴"
+        },
+        block1_payments: {
+          dashboard1_channels: {
+            channels: [
+              { name: "Интернет", jan: 14.5, cur: 24.8 },
+              { name: "Моб. банк", jan: 32.1, cur: 44.2 },
+              { name: "ТСО", jan: 31.8, cur: 34.1 },
+              { name: "Кассы", jan: 15.2, cur: 17.5 },
+              { name: "АТМ", jan: 6.4, cur: 8.4 },
+              { name: "Автоплат.", jan: 3.1, cur: 6.9 }
+            ],
+            dboSharePercent: 92.4
+          },
+          dashboard2_monthlyCount: {
+            planBars: [
+              { label: "Общий план", percent: 102, gradient: "from-emerald-400 to-teal-500" },
+              { label: "Разовые", percent: 104, gradient: "from-purple-400 to-indigo-600" },
+              { label: "Регулярные", percent: 99, gradient: "from-cyan-400 to-blue-500" }
+            ],
+            cards: [
+              { title: "Общее количество", value: 68420900, delta: "+14,8%", color: "#34d399", spark: [52, 56, 60, 64, 68.4] },
+              { title: "Разовые платежи", value: 41210500, delta: "+16,2%", color: "#a855f7", spark: [31, 34, 37, 39, 41.2] },
+              { title: "Регулярные платежи", value: 27210400, delta: "+12,4%", color: "#38bdf8", spark: [21, 22, 24, 25.8, 27.2] }
+            ]
+          },
+          dashboard3_monthlyVolume: {
+            planBars: [
+              { label: "Общий объем", percent: 103, gradient: "from-emerald-400 to-teal-500" },
+              { label: "Разовые", percent: 105, gradient: "from-purple-400 to-indigo-600" },
+              { label: "Регулярные", percent: 100, gradient: "from-cyan-400 to-blue-500" }
+            ],
+            cards: [
+              { title: "Общий объем (₴)", value: 94850000, delta: "+18,1%", color: "#34d399", spark: [72, 78, 84, 90, 94.8] },
+              { title: "Объем разовых (₴)", value: 58320000, delta: "+19,4%", color: "#a855f7", spark: [44, 48, 52, 55, 58.3] },
+              { title: "Объем регулярных (₴)", value: 36530000, delta: "+15,0%", color: "#38bdf8", spark: [28, 30, 32, 34.5, 36.5] }
+            ]
+          },
+          dashboard4_ytdMain: [
+            { label: "Количество платежей", percent: 98.4, value: 892400120, scaleMode: "ytd" },
+            { label: "Объем платежей", percent: 99.2, value: 945120800000, scaleMode: "ytd" },
+            { label: "Прибыль", percent: 101.6, value: 3120450900, scaleMode: "ytd" }
+          ]
+        },
+        block2_cashDesk: {
+          dashboard5_operationTypes: {
+            monthlyPlanPercent: 97.5,
+            types: [
+              { name: "Платежи", count: 26840000, color: "#4ade80" },
+              { name: "Пополнение карт", count: 6420000, color: "#facc15" },
+              { name: "Снятие наличных", count: 3890000, color: "#f87171" },
+              { name: "Валютообмен", count: 2150000, color: "#c084fc" }
+            ]
+          },
+          dashboard6_ytdMain: [
+            { label: "Кол-во операций", percent: 96.8, value: 845120000, scaleMode: "ytd" },
+            { label: "Объем операций", percent: 95.4, value: 368900000000, scaleMode: "ytd" },
+            { label: "Прибыль касс", percent: 99.1, value: 2980400000, scaleMode: "ytd" }
+          ],
+          dashboard7_operationsAndStaff: {
+            workingCashDesksByDay: [1490, 1510, 1525, 1520, 1535, 1540, 1555, 1560],
+            staffShortageVacancies: 4,
+            downtimeTodayPercent: 0.6
+          }
+        },
+        block3_atmTso: {
+          dashboard8_operationsCount: [
+            { label: "Текущий месяц", percent: 98.2, value: 14890200, scaleMode: "ytd" },
+            { label: "С начала года", percent: 97.9, value: 168900400, scaleMode: "ytd" }
+          ],
+          dashboard9_operationsVolume: [
+            { label: "Текущий месяц", percent: 99.4, value: 28900400000, scaleMode: "ytd" },
+            { label: "С начала года", percent: 98.1, value: 312400800000, scaleMode: "ytd" }
+          ],
+          dashboard10_workingEquipmentAndDowntime: {
+            days: ["01", "05", "10", "15", "20", "25"],
+            tsoLine: [4350, 4390, 4410, 4420, 4450, 4460],
+            atmLine: [3250, 3280, 3290, 3310, 3320, 3340],
+            recLine: [2150, 2190, 2210, 2240, 2260, 2280],
+            downtime: [
+              { name: "ТСО", percent: 1.4 },
+              { name: "АТМ", percent: 1.8 },
+              { name: "Rec", percent: 1.2 }
+            ]
+          }
+        }
+      }
+    };
+
+    // =========================================================================
+    // 2. СОСТОЯНИЕ ПРИЛОЖЕНИЯ (STATE)
+    // =========================================================================
+    const state = {
+      data: JSON.parse(JSON.stringify(PRESETS.baseline)),
+      theme: "vision-glass", // 'vision-glass' | 'china-command'
+      viewMode: "panoramic", // 'panoramic' | 'block1' | 'block2' | 'block3'
+      d23Mode: "d2",         // 'd2' | 'd3' | 'both'
+      compactNumbers: false,
+      fresnelHud: false,
+      liveStreamTimer: null,
+      apiPollingTimer: null,
+      apiConfig: {
+        mode: "mock",
+        url: "",
+        token: "",
+        pollingSec: 30
+      }
+    };
+
+    // Загрузка сохраненных настроек из localStorage (безопасно в try/catch)
+    try {
+      const savedCfg = localStorage.getItem("vr_quest3s_api_config");
+      if (savedCfg) {
+        state.apiConfig = Object.assign(state.apiConfig, JSON.parse(savedCfg));
+      }
+    } catch (err) {
+      // Игнорируем ограничения iframe sandbox
+    }
+
+    // =========================================================================
+    // 3. ФОРМАТИРОВАНИЕ ЧИСЕЛ И УМНЫЕ ШКАЛЫ ЦВЕТОВ СПИДОМЕТРОВ
+    // =========================================================================
+    function formatNum(num) {
+      if (num === null || num === undefined || isNaN(num)) return "0";
+      const n = Number(num);
+      if (state.compactNumbers) {
+        if (Math.abs(n) >= 1e9) return (n / 1e9).toFixed(2).replace(".", ",") + " млрд";
+        if (Math.abs(n) >= 1e6) return (n / 1e6).toFixed(2).replace(".", ",") + " млн";
+        if (Math.abs(n) >= 1e3) return (n / 1e3).toFixed(1).replace(".", ",") + " тыс";
+      }
+      return Math.round(n).toString().replace(/\B(?=(\d{3})+(?!\d))/g, " ");
+    }
+
+    function formatPct(pct) {
+      return Number(pct).toFixed(1).replace(".", ",") + "%";
+    }
+
+    // Выбор цвета дуги спидометра без ложной красной тревоги на YTD показателях
+    function getGaugeColor(percent, scaleMode) {
+      const p = Number(percent);
+      if (scaleMode === "downtime") {
+        // Инвертированная шкала для простоев (чем меньше простой, тем лучше!)
+        if (p <= 2.0) return "#4ade80"; // Изумрудный (норма)
+        if (p <= 6.5) return "#a3e635"; // Лаймовый (допустимо, как на скрине ПМ 6.2%)
+        if (p <= 10.0) return "#facc15"; // Желтый
+        return "#f87171"; // Тревожный красный
+      }
+      // Для YTD и месячных планов на скрине ПМ дуги ярко-зеленые/лаймовые
+      if (p >= 95) return "#34d399";
+      if (p >= 5.0) return "#84cc16"; // Зелено-лаймовый, как на скрине ПМ (5.2% - 8.3% YTD)
+      return "#f59e0b";
+    }
+
+    // Отрисовка полукруглого спидометра (Arc Gauge) в точности по стилю ТЗ ПМ + стекло Vision Pro
+    function renderArcGaugeHTML({ label, percent, value, scaleMode = "ytd", compact = false }) {
+      const p = Math.max(0, Math.min(100, Number(percent)));
+      const color = getGaugeColor(percent, scaleMode);
+      // Для наглядности дуги при малых YTD значениях (5-8%) делаем минимальную видимую дугу 22%, чтобы она хорошо считывалась в очках, как на макете ПМ
+      const visualFill = scaleMode === "ytd" && p < 20 ? Math.max(18, p * 2.8) : Math.max(12, p);
+      const radius = 38;
+      const circumference = Math.PI * radius; // ~119.38
+      const dashOffset = circumference * (1 - Math.min(100, visualFill) / 100);
+
+      return `
+        <div class="flex flex-col items-center justify-between p-2 rounded-2xl bg-black/25 border border-white/10 w-full">
+          ${label ? `<div class="text-[10px] text-slate-300 font-medium text-center truncate w-full mb-0.5" title="${label}">${label}</div>` : ""}
+          <div class="relative ${compact ? "w-20 h-11" : "w-24 h-13"} flex items-end justify-center">
+            <svg viewBox="0 0 100 56" class="w-full h-full overflow-visible">
+              <path d="M 12 50 A 38 38 0 0 1 88 50" fill="none" stroke="rgba(255,255,255,0.14)" stroke-width="11" stroke-linecap="round" />
+              <path d="M 12 50 A 38 38 0 0 1 88 50" fill="none" stroke="${color}" stroke-width="11" stroke-linecap="round"
+                stroke-dasharray="${circumference.toFixed(1)}" stroke-dashoffset="${dashOffset.toFixed(1)}"
+                style="filter: drop-shadow(0 0 6px ${color}80); transition: stroke-dashoffset 0.5s ease;" />
+            </svg>
+            <span class="absolute bottom-0.5 font-mono-num ${compact ? "text-xs" : "text-sm"} font-extrabold text-white tracking-tight">
+              ${formatPct(percent)}
+            </span>
+          </div>
+          ${value !== undefined && value !== null ? `
+            <div class="font-mono-num ${compact ? "text-[11px]" : "text-xs sm:text-[13px]"} font-bold text-white mt-1.5 text-center tracking-tight">
+              ${formatNum(value)}
+            </div>
+          ` : ""}
+        </div>
+      `;
+    }
+
+    // Мини-спарклайн для карточек Д2 и Д3
+    function renderSparklineSVG(points, color) {
+      if (!points || !points.length) return "";
+      const min = Math.min(...points);
+      const max = Math.max(...points);
+      const range = max - min || 1;
+      const coords = points.map((v, idx) => {
+        const x = (idx / (points.length - 1)) * 60;
+        const y = 22 - ((v - min) / range) * 16;
+        return `${x.toFixed(1)},${y.toFixed(1)}`;
+      }).join(" ");
+      return `
+        <svg viewBox="0 0 60 24" class="w-14 h-6 overflow-visible">
+          <polyline fill="none" stroke="${color}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" points="${coords}" />
+        </svg>
+      `;
+    }
+
+    // =========================================================================
+    // 4. ОТРИСОВКА ВСЕХ 10 ДАШБОРДОВ
+    // =========================================================================
+    function renderAllDashboards() {
+      const d = state.data;
+      document.getElementById("headerReportDate").textContent = d.meta.reportDate;
+      document.getElementById("headerYtdLabel").textContent = d.meta.ytdStartLabel;
+
+      renderDashboard1(d.block1_payments.dashboard1_channels);
+      renderDashboard2And3(d.block1_payments);
+      renderDashboard4(d.block1_payments.dashboard4_ytdMain);
+      renderDashboard5(d.block2_cashDesk.dashboard5_operationTypes);
+      renderDashboard6(d.block2_cashDesk.dashboard6_ytdMain);
+      renderDashboard7(d.block2_cashDesk.dashboard7_operationsAndStaff);
+      renderDashboard8(d.block3_atmTso.dashboard8_operationsCount);
+      renderDashboard9(d.block3_atmTso.dashboard9_operationsVolume);
+      renderDashboard10(d.block3_atmTso.dashboard10_workingEquipmentAndDowntime);
+      renderChinaNetworkMap();
+    }
+
+    // --- ДАШБОРД 1: Каналы платежей (Парные столбцы) + Доля в ДБО (Donut) ---
+    function renderDashboard1(d1) {
+      const chartEl = document.getElementById("d1ChannelsChart");
+      const labelsEl = document.getElementById("d1ChannelsLabels");
+      const maxVal = Math.max(...d1.channels.flatMap(c => [c.jan, c.cur]), 35);
+
+      chartEl.innerHTML = d1.channels.map(ch => {
+        const hJan = Math.max(12, Math.round((ch.jan / maxVal) * 100));
+        const hCur = Math.max(12, Math.round((ch.cur / maxVal) * 100));
+        return `
+          <div class="flex-1 flex items-end justify-center gap-1 h-full">
+            <div class="w-3 sm:w-3.5 rounded-t-md bg-gradient-to-t from-purple-700 to-purple-400 relative group transition-all duration-300" style="height:${hJan}%">
+              <span class="absolute -top-3.5 left-1/2 -translate-x-1/2 text-[8px] font-mono-num text-purple-200">${ch.jan.toFixed(0)}</span>
+            </div>
+            <div class="w-3 sm:w-3.5 rounded-t-md bg-gradient-to-t from-indigo-900 via-indigo-600 to-sky-400 relative group transition-all duration-300" style="height:${hCur}%">
+              <span class="absolute -top-3.5 left-1/2 -translate-x-1/2 text-[8px] font-mono-num text-sky-200 font-bold">${ch.cur.toFixed(0)}</span>
+            </div>
+          </div>
+        `;
+      }).join("");
+
+      labelsEl.innerHTML = d1.channels.map(ch => `<span class="truncate" title="${ch.name}">${ch.name}</span>`).join("");
+
+      const dbo = Number(d1.dboSharePercent);
+      const r = 32;
+      const c = 2 * Math.PI * r;
+      const offset = c * (1 - dbo / 100);
+      document.getElementById("d1DboDonut").innerHTML = `
+        <svg viewBox="0 0 80 80" class="w-full h-full -rotate-90">
+          <circle cx="40" cy="40" r="${r}" fill="none" stroke="rgba(56,189,248,0.22)" stroke-width="10" />
+          <circle cx="40" cy="40" r="${r}" fill="none" stroke="#a855f7" stroke-width="10" stroke-linecap="round"
+            stroke-dasharray="${c.toFixed(1)}" stroke-dashoffset="${offset.toFixed(1)}" />
+        </svg>
+        <div class="absolute inset-0 flex flex-col items-center justify-center">
+          <span class="font-mono-num text-base font-extrabold text-white">${Math.round(dbo)}%</span>
+        </div>
+      `;
+    }
+
+    // --- ДАШБОРДЫ 2 и 3: Выполнение месячного плана по Количеству (Д2) и Объему (Д3) ---
+    function renderDashboard2And3(b1) {
+      const titleEl = document.getElementById("d23Title");
+      const barsEl = document.getElementById("d23PlanBars");
+      const cardsEl = document.getElementById("d23MetricCards");
+
+      const source = state.d23Mode === "d3" ? b1.dashboard3_monthlyVolume : b1.dashboard2_monthlyCount;
+      if (state.d23Mode === "d2") {
+        titleEl.textContent = "Д2. Количество платежей за отчетный месяц";
+      } else if (state.d23Mode === "d3") {
+        titleEl.textContent = "Д3. Объем платежей за отчетный месяц (₴)";
+      } else {
+        titleEl.textContent = "Д2 + Д3. Количество и Объем платежей (Сводно)";
+      }
+
+      barsEl.innerHTML = `
+        <div class="text-[10px] text-slate-300 font-semibold mb-1 flex items-center justify-between">
+          <span>Выполнение плана, %</span>
+          <span class="text-emerald-300 font-mono-num">План 100%</span>
+        </div>
+        <div class="relative flex-1 flex items-end justify-around gap-2 px-2 pt-4 pb-1 bg-black/25 rounded-2xl border border-white/10">
+          <!-- Зеленая пунктирная линия 100% плана -->
+          <div class="absolute inset-x-2 top-5 border-t border-dashed border-emerald-400/70 pointer-events-none"></div>
+          ${source.planBars.map(bar => {
+            const h = Math.max(20, Math.min(100, bar.percent));
+            return `
+              <div class="flex-1 flex flex-col items-center h-full justify-end">
+                <span class="font-mono-num text-[11px] font-extrabold text-white mb-1">${bar.percent}%</span>
+                <div class="w-full max-w-[38px] rounded-t-xl bg-gradient-to-t ${bar.gradient} shadow-lg transition-all duration-500" style="height:${h * 0.75}%"></div>
+                <span class="text-[9px] text-slate-300 mt-1 truncate max-w-full">${bar.label}</span>
+              </div>
+            `;
+          }).join("")}
+        </div>
+      `;
+
+      if (state.d23Mode === "both") {
+        cardsEl.innerHTML = b1.dashboard2_monthlyCount.cards.map((c, idx) => {
+          const volCard = b1.dashboard3_monthlyVolume.cards[idx];
+          return `
+            <div class="p-2 rounded-xl bg-black/25 border border-white/10 flex items-center justify-between gap-2" style="border-left: 3px solid ${c.color}">
+              <div>
+                <div class="text-[10px] text-slate-300">${c.title}</div>
+                <div class="font-mono-num text-xs font-extrabold text-white">Кол-во: ${formatNum(c.value)}</div>
+                <div class="font-mono-num text-[11px] text-sky-300">Объем: ${formatNum(volCard.value)} ₴</div>
+              </div>
+              <div class="text-right">
+                <span class="text-[10px] font-mono-num text-emerald-300">${c.delta}</span>
+                ${renderSparklineSVG(c.spark, c.color)}
+              </div>
+            </div>
+          `;
+        }).join("");
+      } else {
+        cardsEl.innerHTML = source.cards.map(c => `
+          <div class="p-2.5 rounded-xl bg-black/25 border border-white/10 flex items-center justify-between gap-2" style="border-left: 3px solid ${c.color}">
+            <div>
+              <div class="text-[10px] uppercase tracking-wider text-slate-400">${c.title}</div>
+              <div class="font-mono-num text-sm sm:text-base font-extrabold text-white tracking-tight mt-0.5">${formatNum(c.value)}</div>
+            </div>
+            <div class="flex flex-col items-end">
+              ${renderSparklineSVG(c.spark, c.color)}
+              <span class="text-[10px] font-mono-num text-emerald-300 font-semibold">${c.delta} к пр. мес.</span>
+            </div>
+          </div>
+        `).join("");
+      }
+    }
+
+    // --- ДАШБОРД 4: Основные показатели платежей с начала года (3 спидометра) ---
+    function renderDashboard4(d4List) {
+      document.getElementById("d4GaugesGrid").innerHTML = d4List.map(item =>
+        renderArcGaugeHTML({
+          label: item.label,
+          percent: item.percent,
+          value: item.value,
+          scaleMode: item.scaleMode
+        })
+      ).join("");
+    }
+
+    // --- ДАШБОРД 5: Количество операций в кассах по типам (Pie + Спидометр) ---
+    function renderDashboard5(d5) {
+      const total = d5.types.reduce((acc, t) => acc + t.count, 0) || 1;
+      let accPct = 0;
+      const stops = d5.types.map(t => {
+        const start = accPct;
+        const pct = (t.count / total) * 100;
+        accPct += pct;
+        return `${t.color} ${start.toFixed(1)}% ${accPct.toFixed(1)}%`;
+      }).join(", ");
+
+      document.getElementById("d5PieChart").innerHTML = `
+        <div class="w-16 h-16 rounded-full shadow-inner border-2 border-white/15" style="background: conic-gradient(${stops});"></div>
+      `;
+
+      document.getElementById("d5LegendList").innerHTML = d5.types.map(t => `
+        <div class="flex items-center justify-between gap-1">
+          <span class="flex items-center gap-1 text-slate-300 truncate">
+            <i class="w-2 h-2 rounded-full shrink-0" style="background:${t.color}"></i>
+            <span class="truncate">${t.name}</span>
+          </span>
+          <span class="font-mono-num font-semibold text-white">${formatNum(t.count)}</span>
+        </div>
+      `).join("");
+
+      document.getElementById("d5GaugeBox").innerHTML = renderArcGaugeHTML({
+        label: "План мес.",
+        percent: d5.monthlyPlanPercent,
+        value: total,
+        scaleMode: "ytd",
+        compact: true
+      });
+    }
+
+    // --- ДАШБОРД 6: Основные показатели кассовых операций с начала года (3 спидометра) ---
+    function renderDashboard6(d6List) {
+      document.getElementById("d6GaugesRow").innerHTML = d6List.map(item =>
+        renderArcGaugeHTML({
+          label: item.label,
+          percent: item.percent,
+          value: item.value,
+          scaleMode: item.scaleMode,
+          compact: true
+        })
+      ).join("");
+    }
+
+    // --- ДАШБОРД 7: Работающие кассы, нехватка персонала и простой касс ---
+    function renderDashboard7(d7) {
+      const pts = d7.workingCashDesksByDay;
+      const min = Math.min(...pts) * 0.92;
+      const max = Math.max(...pts) * 1.05;
+      const range = max - min || 1;
+
+      const polyCoords = pts.map((v, i) => {
+        const x = 8 + (i / (pts.length - 1)) * 144;
+        const y = 64 - ((v - min) / range) * 48;
+        return `${x.toFixed(1)},${y.toFixed(1)}`;
+      }).join(" ");
+
+      const dotsHtml = pts.map((v, i) => {
+        const x = 8 + (i / (pts.length - 1)) * 144;
+        const y = 64 - ((v - min) / range) * 48;
+        return `
+          <circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="2.5" fill="#38bdf8" />
+          ${i % 2 === 0 || i === pts.length - 1 ? `<text x="${x.toFixed(1)}" y="${(y - 5).toFixed(1)}" fill="#e2e8f0" font-size="8" text-anchor="middle">${v}</text>` : ""}
+        `;
+      }).join("");
+
+      document.getElementById("d7LineChart").innerHTML = `
+        <svg viewBox="0 0 160 72" class="w-full h-full bg-sky-950/30 rounded-xl border border-sky-400/20 overflow-visible">
+          <polyline fill="rgba(56,189,248,0.18)" stroke="none" points="8,68 ${polyCoords} 152,68" />
+          <polyline fill="none" stroke="#38bdf8" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" points="${polyCoords}" />
+          ${dotsHtml}
+        </svg>
+      `;
+
+      const staffEl = document.getElementById("d7StaffValue");
+      staffEl.textContent = d7.staffShortageVacancies;
+      staffEl.className = `font-mono-num text-xl sm:text-2xl font-extrabold my-0.5 ${d7.staffShortageVacancies > 20 ? "text-rose-400" : "text-amber-300"}`;
+
+      document.getElementById("d7DowntimeGauge").innerHTML = renderArcGaugeHTML({
+        label: "Простой касс",
+        percent: d7.downtimeTodayPercent,
+        value: null,
+        scaleMode: "downtime",
+        compact: true
+      });
+    }
+
+    // --- ДАШБОРД 8: Количество операций в оборудовании (АТМ+ТСО+Recycle) ---
+    function renderDashboard8(d8List) {
+      document.getElementById("d8GaugesRow").innerHTML = d8List.map(item =>
+        renderArcGaugeHTML({
+          label: item.label,
+          percent: item.percent,
+          value: item.value,
+          scaleMode: item.scaleMode,
+          compact: true
+        })
+      ).join("");
+    }
+
+    // --- ДАШБОРД 9: Объем операций в оборудовании (АТМ+ТСО+Recycle) ---
+    function renderDashboard9(d9List) {
+      document.getElementById("d9GaugesRow").innerHTML = d9List.map(item =>
+        renderArcGaugeHTML({
+          label: item.label,
+          percent: item.percent,
+          value: item.value,
+          scaleMode: item.scaleMode,
+          compact: true
+        })
+      ).join("");
+    }
+
+    // --- ДАШБОРД 10: Работающее оборудование (3 линии) + 3 спидометра простоя ---
+    function renderDashboard10(d10) {
+      const allVals = [...d10.tsoLine, ...d10.atmLine, ...d10.recLine];
+      const min = Math.min(...allVals) * 0.9;
+      const max = Math.max(...allVals) * 1.05;
+      const range = max - min || 1;
+
+      function makeLine(arr) {
+        return arr.map((v, i) => {
+          const x = 10 + (i / (arr.length - 1)) * 160;
+          const y = 84 - ((v - min) / range) * 68;
+          return `${x.toFixed(1)},${y.toFixed(1)}`;
+        }).join(" ");
+      }
+
+      document.getElementById("d10MultiLineChart").innerHTML = `
+        <svg viewBox="0 0 180 94" class="w-full h-full bg-black/25 rounded-xl border border-white/10 p-1">
+          <line x1="10" y1="20" x2="170" y2="20" stroke="rgba(255,255,255,0.07)" stroke-width="1" />
+          <line x1="10" y1="50" x2="170" y2="50" stroke="rgba(255,255,255,0.07)" stroke-width="1" />
+          <line x1="10" y1="80" x2="170" y2="80" stroke="rgba(255,255,255,0.07)" stroke-width="1" />
+          <polyline fill="none" stroke="#a3e635" stroke-width="2.4" stroke-linecap="round" points="${makeLine(d10.tsoLine)}" />
+          <polyline fill="none" stroke="#c084fc" stroke-width="2.4" stroke-linecap="round" points="${makeLine(d10.atmLine)}" />
+          <polyline fill="none" stroke="#f8fafc" stroke-width="2.0" stroke-linecap="round" points="${makeLine(d10.recLine)}" />
+        </svg>
+      `;
+
+      document.getElementById("d10DowntimeStack").innerHTML = d10.downtime.map(dt => {
+        const col = getGaugeColor(dt.percent, "downtime");
+        return `
+          <div class="flex items-center justify-between px-2 py-1 rounded-xl bg-black/25 border border-white/10">
+            <span class="text-[10px] font-bold text-slate-300">${dt.name}</span>
+            <div class="flex items-center gap-1.5">
+              <div class="w-10 h-2 rounded-full bg-white/10 overflow-hidden">
+                <div class="h-full rounded-full" style="width:${Math.min(100, dt.percent * 5)}%; background:${col}"></div>
+              </div>
+              <span class="font-mono-num text-[11px] font-bold" style="color:${col}">${formatPct(dt.percent)}</span>
+            </div>
+          </div>
+        `;
+      }).join("");
+    }
+
+    // --- ГОЛОГРАФИЧЕСКАЯ КАРТА СЕТИ (ДЛЯ РЕЖИМА BEIJING COMMAND ROOM) ---
+    function renderChinaNetworkMap() {
+      const mapEl = document.getElementById("chinaMapCanvas");
+      const summaryEl = document.getElementById("chinaMapSummary");
+      if (!mapEl) return;
+
+      const atmDowntime = state.data.block3_atmTso.dashboard10_workingEquipmentAndDowntime.downtime[1].percent;
+      const isAlert = atmDowntime > 8;
+
+      const nodes = [
+        { x: 22, y: 35, label: "Центр", status: "ok" },
+        { x: 48, y: 28, label: "Север", status: "ok" },
+        { x: 68, y: 42, label: "Восток", status: isAlert ? "warn" : "ok" },
+        { x: 35, y: 68, label: "Юг", status: "ok" },
+        { x: 78, y: 72, label: "Запад", status: isAlert ? "alert" : "ok" },
+        { x: 54, y: 55, label: "Хаб ДБО", status: "ok" }
+      ];
+
+      mapEl.innerHTML = `
+        <svg viewBox="0 0 200 100" class="w-full h-full">
+          <line x1="44" y1="35" x2="96" y2="28" stroke="rgba(56,189,248,0.28)" stroke-width="1" />
+          <line x1="96" y1="28" x2="136" y2="42" stroke="rgba(56,189,248,0.28)" stroke-width="1" />
+          <line x1="44" y1="35" x2="108" y2="55" stroke="rgba(56,189,248,0.35)" stroke-width="1.2" />
+          <line x1="108" y1="55" x2="156" y2="72" stroke="rgba(56,189,248,0.28)" stroke-width="1" />
+          <line x1="70" y1="68" x2="108" y2="55" stroke="rgba(56,189,248,0.28)" stroke-width="1" />
+          ${nodes.map(n => {
+            const c = n.status === "alert" ? "#f87171" : n.status === "warn" ? "#facc15" : "#34d399";
+            return `
+              <circle cx="${n.x * 2}" cy="${n.y}" r="7" fill="${c}33" />
+              <circle cx="${n.x * 2}" cy="${n.y}" r="3.2" fill="${c}" />
+              <text x="${n.x * 2}" y="${n.y + 11}" fill="#bae6fd" font-size="7" text-anchor="middle">${n.label}</text>
+            `;
+          }).join("")}
+        </svg>
+      `;
+
+      const activeAtm = state.data.block3_atmTso.dashboard10_workingEquipmentAndDowntime.atmLine.slice(-1)[0];
+      summaryEl.innerHTML = `
+        <span>Активно АТМ: <strong class="text-emerald-300 font-mono-num">${activeAtm}</strong></span>
+        <span>SLA Сети: <strong class="${isAlert ? "text-rose-400" : "text-sky-300"} font-mono-num">${(100 - atmDowntime).toFixed(1)}%</strong></span>
+      `;
+    }
+
+    // =========================================================================
+    // 5. УПРАВЛЕНИЕ РЕЖИМАМИ, ПОВОРОТОМ ШЛЕМА И МОДАЛКАМИ
+    // =========================================================================
+    function showToast(msg) {
+      const banner = document.getElementById("toastBanner");
+      document.getElementById("toastText").textContent = msg;
+      banner.classList.remove("hidden");
+      banner.classList.add("flex");
+      clearTimeout(banner._timer);
+      banner._timer = setTimeout(() => {
+        banner.classList.add("hidden");
+        banner.classList.remove("flex");
+      }, 3200);
+    }
+
+    function applyThemeMode() {
+      const body = document.getElementById("appBody");
+      const floor = document.getElementById("chinaFloorGrid");
+      const btn = document.getElementById("btnToggleTheme");
+      const d4Wrap = document.getElementById("d4ArticleWrap");
+      const chinaMap = document.getElementById("chinaNetworkWidget");
+
+      if (state.theme === "china-command") {
+        body.classList.remove("env-vision-glass");
+        body.classList.add("env-china-command");
+        floor.classList.remove("opacity-0");
+        floor.classList.add("opacity-100");
+        btn.textContent = "🐉 Режим: Beijing Command Room (VR)";
+        d4Wrap.classList.remove("md:col-span-12");
+        d4Wrap.classList.add("md:col-span-8");
+        chinaMap.classList.remove("hidden");
+        chinaMap.classList.add("flex");
+      } else {
+        body.classList.remove("env-china-command");
+        body.classList.add("env-vision-glass");
+        floor.classList.remove("opacity-100");
+        floor.classList.add("opacity-0");
+        btn.textContent = "✨ Режим: Vision Glass (MR)";
+        d4Wrap.classList.remove("md:col-span-8");
+        d4Wrap.classList.add("md:col-span-12");
+        chinaMap.classList.add("hidden");
+        chinaMap.classList.remove("flex");
+      }
+    }
+
+    function applyViewMode(mode) {
+      state.viewMode = mode;
+      const w1 = document.getElementById("wingBlock1");
+      const w2 = document.getElementById("wingBlock2");
+      const w3 = document.getElementById("wingBlock3");
+
+      document.querySelectorAll(".dock-nav-btn").forEach(btn => {
+        if (btn.getAttribute("data-view") === mode) {
+          btn.className = "dock-nav-btn w-10 h-10 rounded-full flex items-center justify-center text-xs font-bold bg-sky-500 text-white shadow-lg shadow-sky-500/30 transition";
+        } else {
+          btn.className = "dock-nav-btn w-10 h-10 rounded-full flex items-center justify-center text-xs font-bold bg-white/10 hover:bg-white/20 text-slate-200 transition";
+        }
+      });
+
+      w1.classList.remove("hidden", "xl:col-span-12", "xl:col-span-6");
+      w2.classList.remove("hidden", "xl:col-span-12", "xl:col-span-3", "wing-left-3d");
+      w3.classList.remove("hidden", "xl:col-span-12", "xl:col-span-3", "wing-right-3d");
+
+      if (mode === "panoramic") {
+        w1.classList.add("xl:col-span-6");
+        w2.classList.add("xl:col-span-3", "wing-left-3d");
+        w3.classList.add("xl:col-span-3", "wing-right-3d");
+      } else if (mode === "block1") {
+        w1.classList.add("xl:col-span-12");
+        w2.classList.add("hidden");
+        w3.classList.add("hidden");
+      } else if (mode === "block2") {
+        w2.classList.add("xl:col-span-12");
+        w1.classList.add("hidden");
+        w3.classList.add("hidden");
+      } else if (mode === "block3") {
+        w3.classList.add("xl:col-span-12");
+        w1.classList.add("hidden");
+        w2.classList.add("hidden");
+      }
+    }
+
+    function setHeadYaw(deg) {
+      const slider = document.getElementById("headYawSlider");
+      slider.value = deg;
+      const rig = document.getElementById("cockpitRig");
+      rig.style.transform = `rotateY(${-deg * 0.45}deg) translateX(${-deg * 6}px)`;
+    }
+
+    // Открытие любого из 10 дашбордов крупным планом (Deep Focus)
+    function openDeepFocus(dashId) {
+      const modal = document.getElementById("deepFocusModal");
+      const titleEl = document.getElementById("deepFocusTitle");
+      const bodyEl = document.getElementById("deepFocusBody");
+      const card = document.querySelector(`[data-dashboard-id="${dashId}"]`);
+      if (!card) return;
+
+      const titles = {
+        "1": "Дашборд 1: Количество платежей в разрезе каналов продаж и доля в ДБО",
+        "2": "Дашборд 2 / 3: Выполнение месячного плана по количеству и объему платежей",
+        "4": "Дашборд 4: Основные показатели платежей накопительно с начала года (YTD)",
+        "5": "Дашборд 5: Количество операций в кассах в разрезе типов операций",
+        "6": "Дашборд 6: Основные показатели кассовых операций накопительно с начала года",
+        "7": "Дашборд 7: Количество работающих касс, нехватка персонала и простои",
+        "8": "Дашборд 8: Количество операций в оборудовании (АТМ + ТСО + Recycle)",
+        "9": "Дашборд 9: Объем операций в оборудовании (АТМ + ТСО + Recycle)",
+        "10": "Дашборд 10: Количество работающего оборудования и процент простоя"
+      };
+
+      titleEl.textContent = titles[String(dashId)] || `Дашборд №${dashId}`;
+      bodyEl.innerHTML = `<div class="p-4 rounded-2xl bg-slate-900/90 border border-white/15">${card.innerHTML}</div>`;
+      modal.classList.remove("hidden");
+      modal.classList.add("flex");
+    }
+
+    // =========================================================================
+    // 6. АДМИНКА API, ТЕСТЕР СОЕДИНЕНИЯ И ЖИВАЯ СИМУЛЯЦИЯ
+    // =========================================================================
+    function syncAdminInputsFromState() {
+      const d = state.data;
+      document.getElementById("adminDataModeSelect").value = state.apiConfig.mode;
+      document.getElementById("adminApiUrlInput").value = state.apiConfig.url;
+      document.getElementById("adminApiTokenInput").value = state.apiConfig.token;
+      document.getElementById("adminPollingSelect").value = String(state.apiConfig.pollingSec);
+
+      document.getElementById("quickInputDbo").value = d.block1_payments.dashboard1_channels.dboSharePercent;
+      document.getElementById("quickInputTotalPay").value = d.block1_payments.dashboard2_monthlyCount.cards[0].value;
+      document.getElementById("quickInputVacancies").value = d.block2_cashDesk.dashboard7_operationsAndStaff.staffShortageVacancies;
+      document.getElementById("quickInputCashDowntime").value = d.block2_cashDesk.dashboard7_operationsAndStaff.downtimeTodayPercent;
+      document.getElementById("quickInputAtmDowntime").value = d.block3_atmTso.dashboard10_workingEquipmentAndDowntime.downtime[1].percent;
+
+      document.getElementById("adminRawJsonTextarea").value = JSON.stringify(d, null, 2);
+    }
+
+    async function testAndFetchLiveApi() {
+      const url = document.getElementById("adminApiUrlInput").value.trim();
+      const token = document.getElementById("adminApiTokenInput").value.trim();
+      const statusEl = document.getElementById("apiTestStatusText");
+      const badgeEl = document.getElementById("dataSourceBadge");
+
+      if (!url) {
+        statusEl.textContent = "⚠ Введите URL API для проверки (сейчас активны локальные мок-данные)";
+        statusEl.className = "text-xs text-amber-300";
+        showToast("Укажите URL API в поле ввода");
+        return;
+      }
+
+      statusEl.textContent = "⏳ Выполняется запрос к API...";
+      statusEl.className = "text-xs text-sky-300";
+      const t0 = performance.now();
+
+      try {
+        const headers = { "Accept": "application/json" };
+        if (token) headers["Authorization"] = token.startsWith("Bearer ") ? token : `Bearer ${token}`;
+
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 5000);
+        const resp = await fetch(url, { method: "GET", headers, signal: controller.signal });
+        clearTimeout(timeoutId);
+
+        const latency = Math.round(performance.now() - t0);
+        if (!resp.ok) {
+          throw new Error(`HTTP ${resp.status}`);
+        }
+        const json = await resp.json();
+
+        if (json && json.block1_payments && json.block2_cashDesk && json.block3_atmTso) {
+          state.data = json;
+          renderAllDashboards();
+          syncAdminInputsFromState();
+          statusEl.textContent = `✓ Успешно (${latency} мс): схема 10 дашбордов подтверждена!`;
+          statusEl.className = "text-xs text-emerald-300 font-semibold";
+          badgeEl.textContent = "LIVE API";
+          badgeEl.className = "px-2 py-0.5 text-[11px] font-semibold rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-400/30";
+          showToast(`Данные успешно получены с API (${latency} мс)`);
+        } else {
+          statusEl.textContent = `⚠ Сервер ответил (${latency} мс), но JSON не содержит ключей block1..block3 — оставлен фоллбэк на мок`;
+          statusEl.className = "text-xs text-amber-300";
+          showToast("Ответ получен, но схема JSON отличается от контракта. Сработал авто-фоллбэк.");
+        }
+      } catch (err) {
+        statusEl.textContent = `✕ Не удалось подключиться (${err.message || "CORS / Timeout"}). Автоматически сохранен режим Mock Data.`;
+        statusEl.className = "text-xs text-rose-300";
+        badgeEl.textContent = "FALLBACK MOCK";
+        showToast("API недоступен — сработал защитный фоллбэк на мок-данные");
+      }
+    }
+
+    function simulateRandomTick() {
+      const d = state.data;
+      const factor = () => 1 + (Math.random() * 0.04 - 0.018);
+
+      d.block1_payments.dashboard2_monthlyCount.cards.forEach(c => {
+        c.value = Math.round(c.value * factor());
+      });
+      d.block1_payments.dashboard4_ytdMain.forEach(g => {
+        g.value = Math.round(g.value * factor());
+        g.percent = Math.max(1, Math.min(100, Number((g.percent + (Math.random() * 0.4 - 0.15)).toFixed(1))));
+      });
+      d.block2_cashDesk.dashboard7_operationsAndStaff.downtimeTodayPercent = Math.max(
+        0.3,
+        Number((d.block2_cashDesk.dashboard7_operationsAndStaff.downtimeTodayPercent + (Math.random() * 0.4 - 0.2)).toFixed(1))
+      );
+      renderAllDashboards();
+    }
+
+    function toggleLiveStream() {
+      const dot = document.getElementById("liveStreamDot");
+      const label = document.getElementById("liveStreamLabel");
+      if (state.liveStreamTimer) {
+        clearInterval(state.liveStreamTimer);
+        state.liveStreamTimer = null;
+        dot.className = "w-2 h-2 rounded-full bg-slate-500";
+        label.textContent = "Live-поток: Выкл";
+        showToast("Живая симуляция транзакций остановлена");
+      } else {
+        state.liveStreamTimer = setInterval(simulateRandomTick, 2600);
+        dot.className = "w-2 h-2 rounded-full bg-emerald-400 animate-ping";
+        label.textContent = "Live-поток: Вкл (2.6с)";
+        showToast("Включена живая симуляция потока транзакций API");
+      }
+    }
+
+    // =========================================================================
+    // 7. ПРИВЯЗКА ВСЕХ ОБРАБОТЧИКОВ СОБЫТИЙ
+    // =========================================================================
+    window.addEventListener("DOMContentLoaded", () => {
+      renderAllDashboards();
+      applyThemeMode();
+
+      // Поворот головы (VR Yaw Slider & кнопки)
+      document.getElementById("headYawSlider").addEventListener("input", e => {
+        setHeadYaw(Number(e.target.value));
+      });
+      document.getElementById("btnLookLeft").addEventListener("click", () => setHeadYaw(-26));
+      document.getElementById("btnLookCenter").addEventListener("click", () => setHeadYaw(0));
+      document.getElementById("btnLookRight").addEventListener("click", () => setHeadYaw(26));
+
+      // Тумблер темы Vision Glass (MR) <-> Beijing Command Room (VR)
+      document.getElementById("btnToggleTheme").addEventListener("click", () => {
+        state.theme = state.theme === "vision-glass" ? "china-command" : "vision-glass";
+        applyThemeMode();
+        showToast(
+          state.theme === "china-command"
+            ? "Включен режим Ситуационного Центра (Beijing Command Room)"
+            : "Включен режим смешанной реальности Apple Vision Glass (MR)"
+        );
+      });
+
+      // Тумблер Live-симуляции
+      document.getElementById("btnToggleLiveStream").addEventListener("click", toggleLiveStream);
+
+      // Кнопки левого дока навигации
+      document.querySelectorAll(".dock-nav-btn").forEach(btn => {
+        btn.addEventListener("click", () => {
+          const v = btn.getAttribute("data-view");
+          setHeadYaw(0);
+          applyViewMode(v);
+        });
+      });
+
+      // Кнопки "Развернуть" на боковых крыльях
+      document.querySelectorAll(".btn-focus-wing").forEach(btn => {
+        btn.addEventListener("click", () => {
+          const target = btn.getAttribute("data-focus-block");
+          setHeadYaw(0);
+          applyViewMode(state.viewMode === target ? "panoramic" : target);
+        });
+      });
+
+      // Переключатель вкладок Д2 / Д3
+      document.querySelectorAll(".d23-tab-btn").forEach(btn => {
+        btn.addEventListener("click", () => {
+          state.d23Mode = btn.getAttribute("data-d23-mode");
+          document.querySelectorAll(".d23-tab-btn").forEach(b => {
+            if (b.getAttribute("data-d23-mode") === state.d23Mode) {
+              b.className = "d23-tab-btn px-2.5 py-1 rounded-full text-xs font-semibold bg-sky-500 text-white transition";
+            } else {
+              b.className = "d23-tab-btn px-2.5 py-1 rounded-full text-xs font-semibold bg-white/10 text-slate-300 hover:bg-white/20 transition";
+            }
+          });
+          renderDashboard2And3(state.data.block1_payments);
+        });
+      });
+
+      // Переключатель сокращенных чисел (55,1 млн <-> 55 089 470)
+      document.getElementById("btnCompactNumToggle").addEventListener("click", e => {
+        state.compactNumbers = !state.compactNumbers;
+        e.currentTarget.classList.toggle("bg-sky-500", state.compactNumbers);
+        e.currentTarget.classList.toggle("text-white", state.compactNumbers);
+        renderAllDashboards();
+        showToast(state.compactNumbers ? "Формат чисел: сокращенный (млн / млрд)" : "Формат чисел: точный поразрядный");
+      });
+
+      // Симулятор оптики линз Френеля Meta Quest 3S
+      document.getElementById("btnFresnelToggle").addEventListener("click", e => {
+        state.fresnelHud = !state.fresnelHud;
+        document.getElementById("fresnelHudOverlay").classList.toggle("hidden", !state.fresnelHud);
+        e.currentTarget.classList.toggle("bg-sky-500", state.fresnelHud);
+        showToast(state.fresnelHud ? "Включен фильтр зоны резкости линз Френеля Quest 3S" : "Фильтр оптики Quest 3S отключен");
+      });
+
+      // Кнопка входа в WebXR
+      document.getElementById("btnEnterWebXR").addEventListener("click", async () => {
+        if (navigator.xr && navigator.xr.isSessionSupported) {
+          try {
+            const arSupported = await navigator.xr.isSessionSupported("immersive-ar");
+            const vrSupported = await navigator.xr.isSessionSupported("immersive-vr");
+            if (arSupported || vrSupported) {
+              showToast(`WebXR устройство обнаружено (${arSupported ? "AR Passthrough" : "VR"}). Запуск сессии...`);
+              return;
+            }
+          } catch (err) {
+            // Игнорируем ограничения безопасности iframe
+          }
+        }
+        showToast("Шлем не подключен: используйте ползунок «Поворот головы (VR Yaw)» сверху или откройте в Chrome с Immersive Web Emulator");
+      });
+
+      // Делегирование клика по кнопкам "🔍 В фокус" (Deep Focus)
+      document.body.addEventListener("click", e => {
+        const zoomBtn = e.target.closest(".btn-zoom-dash");
+        if (zoomBtn) {
+          openDeepFocus(zoomBtn.getAttribute("data-zoom-dash"));
+        }
+      });
+
+      document.getElementById("btnCloseDeepFocus").addEventListener("click", () => {
+        const modal = document.getElementById("deepFocusModal");
+        modal.classList.add("hidden");
+        modal.classList.remove("flex");
+      });
+
+      // Пресеты сценариев в футере
+      document.querySelectorAll(".preset-btn").forEach(btn => {
+        btn.addEventListener("click", () => {
+          const presetKey = btn.getAttribute("data-preset");
+          if (PRESETS[presetKey]) {
+            state.data = JSON.parse(JSON.stringify(PRESETS[presetKey]));
+            renderAllDashboards();
+            syncAdminInputsFromState();
+            document.querySelectorAll(".preset-btn").forEach(b => {
+              b.className = "preset-btn px-2.5 py-1 rounded-full bg-white/5 text-slate-300 transition";
+            });
+            btn.className = "preset-btn px-2.5 py-1 rounded-full bg-sky-500/25 text-sky-200 border border-sky-400/40 font-medium transition";
+            showToast(`Загружен сценарий: ${state.data.meta.reportDate}`);
+          }
+        });
+      });
+
+      // Открытие и закрытие Админки API / Моков
+      function openAdmin() {
+        syncAdminInputsFromState();
+        const modal = document.getElementById("adminModal");
+        modal.classList.remove("hidden");
+        modal.classList.add("flex");
+      }
+      function closeAdmin() {
+        const modal = document.getElementById("adminModal");
+        modal.classList.add("hidden");
+        modal.classList.remove("flex");
+      }
+
+      document.getElementById("btnOpenAdminTop").addEventListener("click", openAdmin);
+      document.getElementById("btnOpenAdminBottom").addEventListener("click", openAdmin);
+      document.getElementById("btnCloseAdmin").addEventListener("click", closeAdmin);
+
+      // Кнопки внутри Админки
+      document.getElementById("btnTestApiConnection").addEventListener("click", testAndFetchLiveApi);
+
+      document.getElementById("btnSaveApiConfig").addEventListener("click", () => {
+        state.apiConfig.mode = document.getElementById("adminDataModeSelect").value;
+        state.apiConfig.url = document.getElementById("adminApiUrlInput").value.trim();
+        state.apiConfig.token = document.getElementById("adminApiTokenInput").value.trim();
+        state.apiConfig.pollingSec = Number(document.getElementById("adminPollingSelect").value);
+
+        try {
+          localStorage.setItem("vr_quest3s_api_config", JSON.stringify(state.apiConfig));
+        } catch (err) {}
+
+        clearInterval(state.apiPollingTimer);
+        if (state.apiConfig.mode !== "mock" && state.apiConfig.url && state.apiConfig.pollingSec > 0) {
+          state.apiPollingTimer = setInterval(testAndFetchLiveApi, state.apiConfig.pollingSec * 1000);
+        }
+        showToast("Конфигурация API сохранена");
+      });
+
+      document.getElementById("btnApplyQuickMetrics").addEventListener("click", () => {
+        const d = state.data;
+        d.block1_payments.dashboard1_channels.dboSharePercent = Number(document.getElementById("quickInputDbo").value) || 86;
+        d.block1_payments.dashboard2_monthlyCount.cards[0].value = Number(document.getElementById("quickInputTotalPay").value) || 55089470;
+        d.block2_cashDesk.dashboard7_operationsAndStaff.staffShortageVacancies = Number(document.getElementById("quickInputVacancies").value) || 0;
+        d.block2_cashDesk.dashboard7_operationsAndStaff.downtimeTodayPercent = Number(document.getElementById("quickInputCashDowntime").value) || 1.3;
+        const atmDt = Number(document.getElementById("quickInputAtmDowntime").value) || 6.2;
+        d.block3_atmTso.dashboard10_workingEquipmentAndDowntime.downtime.forEach(item => {
+          item.percent = atmDt;
+        });
+
+        renderAllDashboards();
+        document.getElementById("adminRawJsonTextarea").value = JSON.stringify(d, null, 2);
+        showToast("Новые показатели применены к VR-кокпиту!");
+      });
+
+      document.getElementById("btnRandomizeTick").addEventListener("click", () => {
+        simulateRandomTick();
+        syncAdminInputsFromState();
+        showToast("Сгенерировано случайное колебание метрик (±3%)");
+      });
+
+      document.getElementById("btnApplyRawJson").addEventListener("click", () => {
+        const raw = document.getElementById("adminRawJsonTextarea").value;
+        const msgEl = document.getElementById("jsonValidationMsg");
+        try {
+          const parsed = JSON.parse(raw);
+          if (!parsed.block1_payments || !parsed.block2_cashDesk || !parsed.block3_atmTso) {
+            throw new Error("Отсутствуют обязательные секции block1_payments / block2_cashDesk / block3_atmTso");
+          }
+          state.data = parsed;
+          renderAllDashboards();
+          syncAdminInputsFromState();
+          msgEl.textContent = "✓ JSON валиден и применен к сцене";
+          msgEl.className = "text-xs text-emerald-300 font-semibold";
+          showToast("Полный JSON-контракт успешно применен!");
+        } catch (err) {
+          msgEl.textContent = "✕ Ошибка JSON: " + err.message;
+          msgEl.className = "text-xs text-rose-400 font-semibold";
+        }
+      });
+
+      document.getElementById("btnCopyJson").addEventListener("click", () => {
+        const textarea = document.getElementById("adminRawJsonTextarea");
+        textarea.select();
+        try {
+          document.execCommand("copy");
+          showToast("JSON скопирован в буфер обмена");
+        } catch (err) {
+          showToast("Выделите текст в поле для копирования");
+        }
+      });
+
+      document.getElementById("btnDownloadJson").addEventListener("click", () => {
+        const blob = new Blob([JSON.stringify(state.data, null, 2)], { type: "application/json" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = "dashboard-data.json";
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+        showToast("Файл dashboard-data.json скачан");
+      });
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="2000" height="1500" viewBox="0 0 2000 1500">
+<defs>
+ <linearGradient id="wall" x2="1" y2=".3"><stop stop-color="#a6a48b"/><stop offset=".6" stop-color="#8d907e"/><stop offset="1" stop-color="#5e6f5a"/></linearGradient>
+ <linearGradient id="floor" x2=".3" y2="1"><stop stop-color="#85775c"/><stop offset="1" stop-color="#484d3f"/></linearGradient>
+ <linearGradient id="window" x2=".4" y2="1"><stop stop-color="#d2d5bc"/><stop offset=".5" stop-color="#a1b7a5"/><stop offset="1" stop-color="#899a7a"/></linearGradient>
+ <radialGradient id="light"><stop stop-color="#ece5b7" stop-opacity=".62"/><stop offset="1" stop-color="#d0d1a4" stop-opacity="0"/></radialGradient>
+ <filter id="blur"><feGaussianBlur stdDeviation="18"/></filter>
+ <filter id="grain"><feTurbulence type="fractalNoise" baseFrequency=".55" numOctaves="3" stitchTiles="stitch"/><feColorMatrix type="saturate" values="0"/><feComponentTransfer><feFuncA type="linear" slope=".07"/></feComponentTransfer></filter>
+</defs>
+<path fill="url(#wall)" d="M0 0H2000V1200H0z"/>
+<path fill="url(#floor)" d="M0 1050L2000 960V1500H0z"/>
+<path fill="#59634f" d="M1540 0H2000V1080L1540 1000z"/>
+<g opacity=".9"><path fill="#8d9280" d="M0 0H550V1010L0 1170z"/><path fill="url(#window)" d="M15 0H515V968L15 1110z"/>
+<g fill="#707b65"><path d="M170 0h15v1060l-15 5zM345 0h17v1008l-17 5zM0 300l515-30v16L0 316zM0 620l515-80v18L0 638z"/></g>
+<g filter="url(#blur)" fill="#738363" opacity=".5"><ellipse cx="180" cy="780" rx="100" ry="260"/><ellipse cx="420" cy="820" rx="95" ry="180"/></g></g>
+<path fill="#717764" d="M790 250H1420V280H790zM790 570H1420V590H790z" opacity=".65"/>
+<path fill="#79816c" d="M835 280H940V570H835zM1150 370H1310V570H1150z"/>
+<g fill="#566e50" opacity=".8" filter="url(#blur)"><path d="M1740 1160Q1700 450 1800 390Q1770 710 1740 1160M1740 970Q1460 600 1560 590Q1740 600 1740 970M1750 910Q1950 540 1970 650Q1990 850 1750 910M1760 1100Q1550 910 1560 860Q1730 870 1760 1100"/></g>
+<path fill="#a3a18a" d="M1650 1120h190l-25 225h-145z"/>
+<ellipse cx="1000" cy="1320" rx="690" ry="210" fill="#51594a" opacity=".6"/>
+<path fill="#757c64" d="M800 1015Q800 970 850 970H1370Q1420 970 1430 1030L1470 1240H770z"/>
+<path fill="#8c9074" d="M790 1110Q790 1080 835 1080H1400L1440 1220H770z"/>
+<path fill="#867e62" d="M400 1280L980 1210L1230 1380L560 1470z"/>
+<ellipse cx="580" cy="150" rx="800" ry="820" fill="url(#light)"/>
+<path fill="#c2c0a0" d="M100 1180L730 1020L1630 1450H960z" opacity=".12"/>
+<rect width="2000" height="1500" filter="url(#grain)" opacity=".7"/>
+</svg>

@@ -1,0 +1,38 @@
+/* Generated from DESIGN.md. Run npm run tokens. */
+:root {
+  --color-background: #24262b;
+  --color-surface: rgba(44, 45, 51, 0.78);
+  --color-elevated: #35363e;
+  --color-text: #f5f3f8;
+  --color-muted: #c6c4ce;
+  --color-primary: #f1edf9;
+  --color-on-primary: #302b3b;
+  --color-border: rgba(241, 237, 250, 0.19);
+  --color-success: #a1e4c3;
+  --color-warning: #f1d28c;
+  --color-danger: #ffaaa9;
+  --color-cyan: #91dbef;
+  --color-purple: #c0adff;
+  --color-orange: #efba94;
+  --color-focus: #d7c7ff;
+  --color-scrollbar: #93909e;
+  --color-scrollbar-track: #303038;
+  --color-scrollbar-hover: #c0bbcd;
+  --color-scrollbar-active: #f1edf9;
+  --color-glass: rgba(44, 45, 51, 0.76);
+  --color-card: rgba(25, 25, 32, 0.36);
+  --color-glass-dark: rgba(28, 29, 39, 0.88);
+  --color-card-dark: rgba(19, 20, 29, 0.48);
+  --color-chrome: rgba(45, 45, 52, 0.78);
+  --font-display: Manrope Variable, Inter Variable, sans-serif;
+  --font-body: Inter Variable, system-ui, sans-serif;
+  --font-data: Inter Variable, system-ui, sans-serif;
+  --radius-default: 1.5rem;
+  --radius-control: 0.75rem;
+  --radius-panel: 1.75rem;
+  --radius-pill: 999px;
+  --space-unit: 0.25rem;
+  --space-card: 1.25rem;
+  --space-gap: 0.875rem;
+  --space-page: 2rem;
+}
