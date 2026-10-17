@@ -65,5 +65,13 @@
     "Real API endpoint not provided/tested",
     "Cloud snapshot publication and restoration not established by this coding task"
   ],
-  "mobileRiskWarning": "Visible and readable; 48 responsive cases and six Axe scans repeated after footer correction"
+  "mobileRiskWarning": "Visible and readable; 48 responsive cases and six Axe scans repeated after footer correction",
+  "publication": {
+    "sourceCommit": "0f21d879fd5ffd1150de46ec8cc6abe7b9b71d6d",
+    "runId": "39064544873",
+    "build": "success",
+    "deploy": "success",
+    "browserVerify": "success",
+    "assetsMatchLocal": true
+  }
 }

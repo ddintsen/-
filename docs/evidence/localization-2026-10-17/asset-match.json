@@ -1,0 +1,15 @@
+{
+  "checkedAt": "2026-10-17T19:59:00.939269+00:00",
+  "sourceCommit": "0f21d879fd5ffd1150de46ec8cc6abe7b9b71d6d",
+  "runId": "39064544873",
+  "localAssets": [
+    "index-BY9oka8h.css",
+    "index-Ck3O_dOr.js"
+  ],
+  "publishedAssets": [
+    "index-BY9oka8h.css",
+    "index-Ck3O_dOr.js"
+  ],
+  "match": true,
+  "evidenceSource": "Completed GitHub Actions deployment receipt and post-deploy browser verification"
+}
