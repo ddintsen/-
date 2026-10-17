@@ -121,3 +121,6 @@ Rollup сообщает о большом отдельном XR-chunk (~1,05 М�
 - [Геометрия и визуальная проверка](evidence/deslop-visual-check.json): 11 batches комнаты, 16590 triangles, вся панорама25 draw calls/16618 triangles; browser demand останавливается в простое. Desktop/mobile overflow=false, page errors=[]. Это не замер аппаратного FPS.
 - [Обзор](evidence/desktop-deslop.png), [мобильный](evidence/mobile-deslop.png), [панорама](evidence/spatial-deslop.png), [3D на телефоне](evidence/spatial-mobile-deslop.png), [комната днём](evidence/procedural-room-day.png), [вечером](evidence/procedural-room-night.png). В обычном 2D остаётся фотография, в browser3D/VR — геометрия; AR исключает непрозрачный кабинет.
 - Новый live deploy проверяется после push. Физический Quest 3S, passthrough/контроллеры/оптика/FPS и реальный API остаются отдельной приёмкой.
+
+### Публикация новой комнаты PASS
+CI [run39027207213](https://github.com/ddintsen/-/actions/runs/39027207213), source8fc4659: build/deploy/browser verify success, HTML/assets200. [Receipt](evidence/deslop-published-2026-10-17.json), [свежий live smoke](https://github.com/ddintsen/-/actions/runs/39027207213/artifacts/12098947936) с offlineProceduralRoom=true и errors=[]. Основная ссылка https://ddintsen.github.io/-/. После проверенного app-коммита меняется только документация/evidence.
