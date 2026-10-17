@@ -18,5 +18,15 @@
   "legacyPwaUpdate": "passed",
   "standalone": "passed",
   "physicalQuest": "unrun",
-  "realApi": "unrun"
+  "realApi": "unrun",
+  "deploymentStatusTests": {
+    "passed": 6
+  },
+  "publication": {
+    "sourceCommit": "504f106ac600d5efd1445c849dc839f829dcf34b",
+    "runId": "39072969953",
+    "buildResult": "success",
+    "deployResult": "success",
+    "verificationResult": "success"
+  }
 }
