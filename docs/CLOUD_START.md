@@ -22,3 +22,5 @@ Production: npm run build, затем npm run preview -- --port 4173. Прове
 
 ## GitHub
 Пользователь явно разрешил и потребовал постоянное сохранение завершённых изменений в `ddintsen/-`, ветка `main`. Читайте соответствующее правило AGENTS.md. После проверки изменения коммитятся и отправляются в origin/main; затем проверяются remote SHA и чистота working tree. Не оставляйте результат только в ZIP или локальной среде. Push не заменяет развёртывание сайта или публикацию cloud snapshot.
+
+В исходном cloud checkout fetch refspec был ограничен `+HEAD:refs/remotes/origin/HEAD`, поэтому Git не распознавал upstream main даже после `push -u`. В текущем checkout дополнительно настроен `+refs/heads/main:refs/remotes/origin/main`, выполнен fetch, main отслеживает origin/main. Если новая cloud-среда снова создаёт checkout только с HEAD refspec, сначала проверьте конфигурацию и добавьте mapping main без удаления существующих mappings. После fetch настройте upstream нужной ветки. Не заменяйте эту проверку force push.

@@ -86,3 +86,5 @@
 - `git ls-remote origin refs/heads/main` подтвердил совпадение локального и удалённого SHA. Дополнительное независимое shallow-клонирование из https://github.com/ddintsen/-.git подтвердило 111 файлов, наличие src/App.tsx, локального фона, скриншота desktop-v2, AGENTS.md и lockfile.
 - Перед отправкой повторно прошли typecheck, tokens:check, format:check и 38 unit-тестов. Поведение приложения не менялось; ранее выполненные 13 E2E и production/offline проверки остаются применимыми.
 - Обновление этого журнала и CONTEXT также сохраняется отдельным коммитом и отправляется в main. Публикация сайта и cloud snapshot не выполнялись и не являются частью Git push.
+
+- Устранена особенность cloud checkout: исходный fetch refspec сохранял только HEAD. Добавлен отдельный mapping main, выполнен fetch; локальная main теперь корректно отслеживает origin/main. `git status --short --branch` показывает `main...origin/main` без отличий. Причина и восстановление описаны в docs/CLOUD_START.md.
