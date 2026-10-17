@@ -93,3 +93,10 @@ Rollup сообщает о большом отдельном XR-chunk (~1,05 М�
 
 - Реальный CI build/exports PASS для 8a96e4f (run 39011423496), оба output artifact IDs получены из upload-artifact и записаны в [receipt](evidence/stackblitz-artifacts-2026-10-17.json). Pages deploy отдельно failure/404.
 - Дополнительный ZIP с двумя HTML и README проверен CRC через Python ZipFile.testzip, ошибок нет. Наличие artifact/download файла не объявляется внешним запуском StackBlitz.
+
+## 2026-10-17 — после изменения public пользователем
+
+- Анонимные GitHub page и raw main/.stackblitzrc HTTP 200: [evidence](evidence/public-access-2026-10-17.json).
+- Реальный run 39013695211/source 8846f30: metadata public/main, build success, deploy failure; Pages API/site 404. [Completed receipt](evidence/public-deployment-2026-10-17.json).
+- StackBlitz import на явную main предложен для повторного открытия после изменения доступа. Полный внешний запуск пока не подтверждён (cloud CONNECT 403, пользовательский ответ ожидается).
+- Изменения только документации/evidence: git diff --check PASS. Новые UI-тесты не запускались.

@@ -175,3 +175,9 @@
 - Уточнён запуск для руководителя: WebXR Meta Quest 3S, HTTPS-сайт и VR-вход; APK не входит в эту веб-сборку, physical Quest непроверен.
 - Сетевые команды require_escalated разрешены и отработали для GitHub; это не auto-review rejection. При стандартном restricted запуске proxy:8080 недоступен. Политики не отключались. Изменения только docs/evidence: git diff --check, без повторных UI-тестов.
 - Push документации запускает штатную повторную сборку/Pages deploy/receipt; после него нужно проверить реальный результат для нового sourceCommit.
+
+### Проверка после public завершена
+- Документация отправлена 8846f308399296f0651cfae2a90c29723f4befa3; local/remote main совпали, tree чист.
+- Реальный run 39013695211 завершён: public/main, build success, deploy failure, API Pages 404, публичный сайт 404. Snapshot сохранён в docs/evidence/public-deployment-2026-10-17.json. Публичность не выдана за включение Pages.
+- Для постоянного HTTPS-сайта остаётся Source=GitHub Actions в Settings/Pages с доступом владельца, затем повторный workflow. Для StackBlitz дан явный public main import, полный запуск пока не подтверждён пользователем/внешним браузером.
+- Artifact snapshots для 8846f30: orbita-stackblitz 12094007051, orbita-preview 12094071776. Исходники приложения не менялись, CI автоматически проверил прежние app/unit/build и новые deployment tests. Документация/evidence финализируются отдельным push, без повторных UI E2E.

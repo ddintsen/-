@@ -66,3 +66,7 @@ Jobs `inspect` и `receipt` сохраняют `deployment-status.json` в сл�
 [Run 39009913265](https://github.com/ddintsen/-/actions/runs/39009913265), коммит 4f16cc7: сборка success, deploy failure. Завершённый receipt получен через Git, его снимок — [deployment-2026-10-17.json](evidence/deployment-2026-10-17.json). В 06:27:46 UTC API Pages и публичный адрес вернули 404. Сайт не опубликован.
 
 Пользователь поручил выполнить всё самостоятельно; согласие на публикацию есть. Технический доступ к первичной настройке Pages из текущей среды отсутствует. Cloudflare Quick Tunnel не смог подключиться из-за недоступного DNS, Netlify Drop отвечает 403; временная ссылка также не создана. Никакой из подготовленных launch/deploy URL не объявляется работающим онлайн-просмотром.
+
+## После открытия репозитория пользователем
+
+17 октября 2026 новый run [39013695211](https://github.com/ddintsen/-/actions/runs/39013695211) для 8846f30 подтвердил public/main и успешную сборку. Deploy по-прежнему failure: Pages API 404 и сайт 404. [Completed receipt](evidence/public-deployment-2026-10-17.json). Для постоянного сайта остаётся выбрать Source=GitHub Actions в Settings/Pages и повторить workflow. Рабочая ссылка приложения в очках пока не подтверждена.
