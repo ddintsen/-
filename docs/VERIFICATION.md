@@ -75,3 +75,11 @@ Rollup сообщает о большом отдельном XR-chunk (~1,05 М�
 - Скриншоты: spatial-before-next (исходное состояние), spatial-next, spatial-focus-next, spatial-mobile-next, spatial-mobile-expanded-next. Mobile FOV исправлен по фактическому обрезанию карточки; WebXR projection не менялась.
 - Workflow YAML разобран yaml-парсером; публикация требует первоначального Source=GitHub Actions в настройках Pages. Доступ к внешнему Actions API/github.io в cloud заблокирован; реальная публикация здесь не подтверждена. См. DEPLOYMENT.md.
 - Physical Quest: по-прежнему не проверен. При переходе preview↔XR фокус сбрасывается, чтобы поза карточки из одного viewing space не переносилась в другой.
+
+## 2026-10-17 — проверка внешней публикации
+
+- `npm run test:deployment`: 4/4 PASS (успех HTML/assets, 404 Pages/site, missing asset, network failure, отсутствие утечки тестового токена). YAML workflow разобран без ошибок; Prettier новых файлов и git diff --check PASS.
+- 38 unit приложения, typecheck, tokens:check PASS. Изменения только CI/диагностика/docs; повторные браузерные тесты не запускались.
+- GitHub Actions run 39009913265 действительно выполнил сборку: success. Deploy: failure. Completed receipt: Pages API 404, сайт 404; [снимок](evidence/deployment-2026-10-17.json). Это не успешный онлайн-просмотр.
+- Стандартный GITHUB_TOKEN не разрешает первоначальное enablement Pages согласно официальному configure-pages action. Рабочий Git-доступ не предоставляет cloud REST-доступ к настройкам.
+- Временный Cloudflare Tunnel не создан (DNS connection refused); Netlify Drop HTTP 403. Онлайн-ссылка не подтверждена и не выдана как рабочая.

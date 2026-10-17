@@ -1,0 +1,23 @@
+{
+  "checkedAt": "2026-10-17T06:27:46.903Z",
+  "repository": "ddintsen/-",
+  "sourceCommit": "4f16cc75a3f870bc70630a024f90e07f6206acb8",
+  "runId": "39009913265",
+  "phase": "complete",
+  "buildResult": "success",
+  "deployResult": "failure",
+  "pages": {
+    "status": 404,
+    "configured": false,
+    "buildType": null,
+    "htmlUrl": null,
+    "message": "Not Found"
+  },
+  "site": {
+    "url": "https://ddintsen.github.io/-/",
+    "status": 404,
+    "app": false,
+    "assets": []
+  },
+  "outcome": "pages-not-configured"
+}
