@@ -1,6 +1,6 @@
 {
   "capturedAt": "2026-10-18T04:46:58.820Z",
-  "source": "Actual browser captures of local production; not generated images or physical headset captures",
+  "source": "Actual local production browser captures with assets matching CI-verified published runtime; not physical Quest or direct live capture",
   "baseCommit": "8fa40fb5a734cb2754a6ff4248cb741b577d6e43",
   "files": [
     "desktop-light.png",
@@ -18,5 +18,7 @@
     "panorama-dark.png",
     "space-environment-dark.png"
   ],
-  "errors": []
+  "errors": [],
+  "sourceCommit": "9af132f821a90268e941d61b466e26c00cd07495",
+  "publishedRunId": "39098410015"
 }

@@ -1,6 +1,6 @@
 {
   "checkedAt": "2026-10-18T04:48:46.257417+00:00",
-  "phase": "local-validated",
+  "phase": "published-verified",
   "baseCommit": "8fa40fb5a734cb2754a6ff4248cb741b577d6e43",
   "unitPassed": 61,
   "e2e": {
@@ -25,5 +25,13 @@
     "No physical Quest optics, controls/pinch, passthrough or FPS test",
     "Real API endpoint not supplied; demo remains demo",
     "Intermediate room iteration archived in Git 8fa40fb, not separately deployed"
-  ]
+  ],
+  "sourceCommit": "9af132f821a90268e941d61b466e26c00cd07495",
+  "publication": {
+    "runId": "39098410015",
+    "build": "success",
+    "deploy": "success",
+    "browser": "success",
+    "assetsMatch": true
+  }
 }

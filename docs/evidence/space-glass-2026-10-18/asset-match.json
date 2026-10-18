@@ -1,0 +1,16 @@
+{
+  "checkedAt": "2026-10-18T04:52:29.348018+00:00",
+  "sourceCommit": "9af132f821a90268e941d61b466e26c00cd07495",
+  "runId": "39098410015",
+  "localAssets": [
+    "/-/assets/index-BvL0wCsI.js",
+    "/-/assets/index-CpBQc3PK.css"
+  ],
+  "publishedAssets": [
+    "/-/assets/index-BvL0wCsI.js",
+    "/-/assets/index-CpBQc3PK.css"
+  ],
+  "match": true,
+  "liveBrowserVerification": "success",
+  "captureSource": "Local production with matching published assets, not physical Quest or direct live capture"
+}
