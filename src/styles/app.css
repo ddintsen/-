@@ -4106,3 +4106,13 @@ input:not([type="range"]):not([type="checkbox"]):not([type="radio"]) {
   backdrop-filter: blur(40px) saturate(160%);
   box-shadow: var(--stand-shadow);
 }
+
+/* The filled primary keeps its fill on hover; the generic outline hover must not empty it. */
+@media (hover: hover) and (pointer: fine) {
+  .button.outline.xr-entry:hover:not(:disabled),
+  [data-theme="office"] .button.outline.xr-entry:hover:not(:disabled) {
+    background: var(--color-primary);
+    color: var(--color-on-primary);
+    filter: brightness(0.94);
+  }
+}

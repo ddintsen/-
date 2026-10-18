@@ -177,7 +177,12 @@ test("spatial overview paints channel labels and focus paints all equipment fact
   const exact = (await painted())
     .filter((x) => x.width === 2048)
     .map((x) => x.text);
-  for (const heading of ["Показник", "Факт", "План / Поріг", "Виконання"])
+  for (const heading of [
+    "Показник",
+    "Факт",
+    "План / Поріг",
+    "Виконання / Статус",
+  ])
     expect(exact).toContain(heading);
   expect(exact).toContain("SLA 5%");
   expect(exact).toContain("Високий простій");

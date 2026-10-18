@@ -198,7 +198,7 @@ const messages: Record<string, readonly [string, string]> = {
   Точно: ["Точно", "Exact"],
   "Обновить данные": ["Оновити дані", "Refresh data"],
   Обновить: ["Оновити", "Refresh"],
-  "Открыть в пространстве": ["Відкрити в просторі", "Open in Space"],
+  "Открыть в пространстве": ["Відкрити в просторі", "Open in space"],
   "{source}. Обновление недоступно.": [
     "{source}. Оновлення недоступне.",
     "{source}. Refresh unavailable.",

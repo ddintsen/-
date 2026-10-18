@@ -550,12 +550,16 @@ function sparkline(
   ctx.stroke();
 }
 
-/** Body of a dashboard inside a 1280×800 area; shared by overview panels and the focus surface. */
+/**
+ * Body of a dashboard inside a 1280 x (800 + extra) area; shared by overview panels and the
+ * focus surface. `extra` lets a taller focus section grow the chart instead of leaving air.
+ */
 function drawBody(
   ctx: Ctx,
   pal: XrPalette,
   m: DashboardModel,
   compact: boolean,
+  extra = 0,
 ) {
   if (m.kind === "channels") {
     legend(
@@ -569,35 +573,30 @@ function drawBody(
       196,
       26,
     );
-    if (m.bars.length) channelBars(ctx, pal, m, 56, 300, 800, 300);
+    const barsH = 300 + extra * 0.75;
+    if (m.bars.length) channelBars(ctx, pal, m, 56, 300, 800, barsH);
     else
       write(ctx, t("Нет данных по каналам"), 56, 420, {
         size: 32,
         color: pal.muted,
       });
-    donut(
-      ctx,
-      pal,
-      m,
-      1060,
-      440,
-      130,
-      formatPercent(m.share ?? 0),
-      "доля в ДБО",
-    );
+    const r = 130 + Math.min(60, extra * 0.12),
+      cy = 440 + extra * 0.4;
+    donut(ctx, pal, m, 1060, cy, r, formatPercent(m.share ?? 0), "доля в ДБО");
     write(
       ctx,
       `${t("В отделениях")} ${formatPercent(100 - (m.share ?? 0))}`,
       1060,
-      640,
+      cy + r + 70,
       { size: 26, color: pal.muted, align: "center", max: 360 },
     );
     return;
   }
   if (m.kind === "monthly") {
-    planBars(ctx, pal, m, 56, 260, 560, 390);
+    planBars(ctx, pal, m, 56, 260, 560, 390 + extra * 0.85);
+    const step = 172 + (extra * 0.85) / 3;
     m.metrics.forEach((metric, i) => {
-      const y = 236 + i * 172;
+      const y = 236 + i * step;
       write(ctx, t(metric.label), 690, y, {
         size: 26,
         color: pal.muted,
@@ -625,18 +624,29 @@ function drawBody(
   }
   if (m.kind === "gauges") {
     const n = Math.max(1, m.gauges.length),
-      top = 236,
-      step = Math.min(190, (720 - top) / n + 20);
+      top = 236 + extra * 0.1,
+      step = Math.min(190 + extra / n, (720 + extra - top) / n + 20),
+      scale = 1 + Math.min(0.2, extra / 1500);
     m.gauges.forEach((g, i) =>
-      gaugeRow(ctx, pal, g, 56, top + i * step, 1168, compact),
+      gaugeRow(ctx, pal, g, 56, top + i * step, 1168, compact, scale),
     );
     return;
   }
   if (m.kind === "cash") {
     const total = m.slices.reduce((a, b) => a + b.value, 0);
-    donut(ctx, pal, m, 230, 420, 150, formatNumber(total, true), "операций");
+    donut(
+      ctx,
+      pal,
+      m,
+      230,
+      420 + extra * 0.35,
+      150 + Math.min(50, extra * 0.1),
+      formatNumber(total, true),
+      "операций",
+    );
+    const step = 78 + extra * 0.12;
     m.slices.forEach((s, i) => {
-      const y = 260 + i * 78;
+      const y = 260 + i * step;
       legendDot(ctx, 470, y - 10, pal.tone(s.color), 9);
       write(ctx, t(s.label), 494, y, { size: 30, color: pal.text, max: 380 });
       write(ctx, formatNumber(s.value, compact), 1224, y, {
@@ -647,44 +657,53 @@ function drawBody(
         max: 260,
       });
     });
-    gaugeRow(ctx, pal, m.gauges[0], 470, 620, 754, compact);
+    gaugeRow(ctx, pal, m.gauges[0], 470, 620 + extra * 0.85, 754, compact);
     return;
   }
   if (m.kind === "staff") {
-    lineChart(ctx, pal, m, 150, 220, 640, 330, 24);
-    legend(ctx, pal, m.series, 150, 640, 24);
+    const grow = extra * 0.8;
+    lineChart(ctx, pal, m, 150, 220, 640, 330 + grow, 24);
+    legend(ctx, pal, m.series, 150, 640 + grow, 24);
     const vacancies = m.metrics[0];
-    write(ctx, String(vacancies.value), 870, 360, {
+    write(ctx, String(vacancies.value), 870, 360 + extra * 0.35, {
       size: 120,
       weight: 500,
       display: true,
       color: pal.tone(vacancies.color),
     });
-    write(ctx, t("Открытые вакансии"), 874, 410, {
+    write(ctx, t("Открытые вакансии"), 874, 410 + extra * 0.35, {
       size: 28,
       color: pal.muted,
       max: 360,
     });
-    gaugeRow(ctx, pal, m.gauges[0], 870, 560, 354, compact, 0.9);
+    gaugeRow(ctx, pal, m.gauges[0], 870, 560 + grow, 354, compact, 0.9);
     return;
   }
   // Equipment: working devices over the month, downtime against the SLA marker.
-  lineChart(ctx, pal, m, 150, 200, 1070, 250, 24);
-  legend(ctx, pal, m.series, 150, 530, 24);
+  const grow = extra * 0.7;
+  lineChart(ctx, pal, m, 150, 200, 1070, 250 + grow, 24);
+  legend(ctx, pal, m.series, 150, 530 + grow, 24);
   write(
     ctx,
     `${t("Простой")} · SLA ${formatPercent(DOWNTIME_LIMIT)}`,
     56,
-    610,
-    {
-      size: 26,
-      color: pal.muted,
-    },
+    610 + grow,
+    { size: 26, color: pal.muted },
   );
   const n = Math.max(1, m.gauges.length),
-    colW = (1168 - (n - 1) * 48) / n;
+    colW = (1168 - (n - 1) * 48) / n,
+    scale = 0.85 + Math.min(0.2, extra / 1500);
   m.gauges.forEach((g, i) =>
-    gaugeRow(ctx, pal, g, 56 + i * (colW + 48), 668, colW, compact, 0.85),
+    gaugeRow(
+      ctx,
+      pal,
+      g,
+      56 + i * (colW + 48),
+      668 + grow,
+      colW,
+      compact,
+      scale,
+    ),
   );
 }
 
@@ -761,23 +780,25 @@ export function drawOverviewPanel(
         max: 440,
       },
     );
+    // The status sits beside its label: under the meter it read as the next row's caption.
     m.gauges.forEach((g, i) => {
-      const y = 128 + i * 92;
+      const y = 134 + i * 88;
       const tone = pal.tone(colors[gaugeTone(g.percent, g.mode)]);
-      write(ctx, t(g.label), 790, y, { size: 28, color: pal.text, max: 260 });
+      write(ctx, t(g.label), 790, y, { size: 28, color: pal.text, max: 150 });
+      write(ctx, downtimeLabel(g.percent), 1124, y, {
+        size: 24,
+        color: pal.muted,
+        align: "right",
+        max: 190,
+      });
       write(ctx, formatPercent(g.percent), 1236, y, {
         size: 34,
         weight: 600,
         color: tone,
         align: "right",
-        max: 180,
+        max: 100,
       });
       meter(ctx, pal, g.percent, g.mode, 790, y + 20, 446, 12);
-      write(ctx, downtimeLabel(g.percent), 790, y + 60, {
-        size: 22,
-        color: pal.muted,
-        max: 446,
-      });
     });
   } else if (m.kind === "cash") {
     const total = m.slices.reduce((n, s) => n + s.value, 0);
@@ -922,33 +943,22 @@ export function drawFocusPanel(
   });
   if (model.subtitle) text(model.subtitle, 64, 146, 32, pal.muted);
   if (period) text(period, c.width - 64, 96, 34, pal.muted, "right", 420);
-  // The chart is the overview body, drawn at a larger scale on its own section.
+  // The chart is the overview body, grown to fill its section instead of floating in it.
+  const chartH = c.height - 232,
+    scale = 990 / 1280,
+    cropH = (chartH - 40) / scale,
+    extra = Math.max(0, cropH - 620);
   const chart = document.createElement("canvas");
   chart.width = 1280;
-  chart.height = 800;
+  chart.height = Math.ceil(800 + extra);
   const chartCtx = chart.getContext("2d")!;
-  drawBody(chartCtx, pal, model, compact);
-  const chartH = c.height - 232;
+  drawBody(chartCtx, pal, model, compact, extra);
   section(ctx, pal, 48, 184, 1010, chartH, 40);
-  ctx.drawImage(
-    chart,
-    0,
-    160,
-    1280,
-    620,
-    58,
-    184 + Math.max(20, (chartH - 480) / 2),
-    990,
-    480,
-  );
+  ctx.drawImage(chart, 0, 160, 1280, cropH, 58, 204, 990, cropH * scale);
   const tableX = 1092,
     tableW = c.width - tableX - 48;
-  section(ctx, pal, tableX, 184, tableW, c.height - 232, 40);
+  section(ctx, pal, tableX, 184, tableW, chartH, 40);
   text("Точные значения", tableX + 36, 252, 36, pal.text, "left", 600, 600);
-  text("Показатель", tableX + 36, 304, 24, pal.muted, "left", 300);
-  text("Факт", tableX + 556, 304, 24, pal.muted, "right", 210);
-  text("План / Порог", tableX + 580, 304, 24, pal.muted, "left", 140);
-  text("Выполнение", tableX + tableW - 36, 304, 24, pal.muted, "right", 150);
   const facts = comparisonRows(model);
   const start = Math.min(
     Math.max(0, offset),
@@ -959,19 +969,79 @@ export function drawFocusPanel(
   // A short table reads at a larger size instead of floating in its section.
   const roomy = step >= 76,
     rowSize = roomy ? 28 : 25,
-    smallSize = roomy ? 26 : 23;
+    smallSize = roomy ? 26 : 23,
+    headSize = 24;
+  // Columns are measured from their real content, so no header or status is squeezed.
+  const measure = (value: string, size: number, weight: number) => {
+    ctx.font = `${Math.min(700, weight + 100)} ${size}px ${TEXT_FONT}`;
+    return ctx.measureText(t(value)).width;
+  };
+  const widest = (values: string[], size: number, weight: number) =>
+    Math.max(0, ...values.map((value) => measure(value, size, weight)));
+  const gap = 28,
+    inner = tableW - 72;
+  const factW = Math.max(
+      widest(
+        rows.map((r) => r.actual),
+        rowSize,
+        600,
+      ),
+      measure("Факт", headSize, 500),
+    ),
+    refW = Math.max(
+      widest(
+        rows.map((r) => r.reference),
+        smallSize,
+        500,
+      ),
+      measure("План / Порог", headSize, 500),
+    ),
+    statusW = Math.max(
+      widest(
+        rows.map((r) => r.status),
+        smallSize,
+        500,
+      ),
+      measure("Выполнение / Статус", headSize, 500),
+    );
+  let labelW = inner - (factW + refW + statusW + gap * 3);
+  let refMax = refW,
+    statusMax = statusW;
+  if (labelW < 250) {
+    // Too narrow: the reference and status columns give up width evenly.
+    const short = 250 - labelW;
+    refMax = Math.max(110, refW - short / 2);
+    statusMax = Math.max(130, statusW - short / 2);
+    labelW = inner - (factW + refMax + statusMax + gap * 3);
+  }
+  const labelX = tableX + 36,
+    factX = labelX + labelW + gap + factW,
+    refX = factX + gap,
+    statusX = tableX + tableW - 36;
+  text("Показатель", labelX, 304, headSize, pal.muted, "left", labelW);
+  text("Факт", factX, 304, headSize, pal.muted, "right", factW);
+  text("План / Порог", refX, 304, headSize, pal.muted, "left", refMax);
+  text(
+    "Выполнение / Статус",
+    statusX,
+    304,
+    headSize,
+    pal.muted,
+    "right",
+    statusMax,
+  );
   rows.forEach(({ label, actual, reference, status }, index) => {
     const y = 360 + index * step;
     ctx.strokeStyle = pal.grid;
     ctx.lineWidth = 2;
     ctx.beginPath();
-    ctx.moveTo(tableX + 36, y + 20);
-    ctx.lineTo(tableX + tableW - 36, y + 20);
+    ctx.moveTo(labelX, y + 20);
+    ctx.lineTo(statusX, y + 20);
     ctx.stroke();
-    text(label, tableX + 36, y, rowSize, pal.muted, "left", 290);
-    text(actual, tableX + 556, y, rowSize, pal.text, "right", 210, 600);
-    text(reference, tableX + 580, y, smallSize, pal.muted, "left", 140);
-    text(status, tableX + tableW - 36, y, smallSize, pal.text, "right", 150);
+    text(label, labelX, y, rowSize, pal.muted, "left", labelW);
+    text(actual, factX, y, rowSize, pal.text, "right", factW, 600);
+    text(reference, refX, y, smallSize, pal.muted, "left", refMax);
+    text(status, statusX, y, smallSize, pal.text, "right", statusMax);
   });
   return texture(c);
 }

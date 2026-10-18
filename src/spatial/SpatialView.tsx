@@ -41,6 +41,12 @@ import { Button, NativeSelect } from "../components/ui";
 import { formatReportDate, t, useLocale } from "../i18n";
 
 const PREVIEW_PULLBACK = 1.5;
+// The ray reaches the stands at 1.85 m (the library default stops at 1 m) and its cursor
+// draws above panels, which render without depth testing at renderOrder 2-10.
+const SPATIAL_RAY = {
+  rayModel: { maxLength: 3, opacity: 0.5, renderOrder: 30 },
+  cursorModel: { renderOrder: 31, opacity: 0.85, size: 0.05 },
+};
 // The stand's thickness: rounded like its glass, inset so no corner shows past it.
 const standSlab = new RoundedBoxGeometry(1.26, 1.1, 0.03, 4, 0.07);
 // Payments first, then the side stands, matching the DOM arrival.
@@ -51,8 +57,8 @@ const xrStore = createXRStore({
   offerSession: false,
   enterGrantedSession: false,
   handTracking: true,
-  hand: { model: false },
-  controller: { model: false },
+  hand: { model: false, rayPointer: SPATIAL_RAY },
+  controller: { model: false, rayPointer: SPATIAL_RAY },
   baseAssetPath: new URL(
     `${import.meta.env.BASE_URL}xr-profiles/`,
     window.location.href,
@@ -336,8 +342,9 @@ function Scene({
           : null}
         {!hasFocus && data && sourceAlert ? (
           <SpatialControl
+            // Above the stands: below them the headset actions would cover it.
             label={sourceAlert}
-            position={[0, 0.91, -1.85]}
+            position={[0, 2.3, -1.85]}
             width={1.6}
             height={0.1}
           />
