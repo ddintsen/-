@@ -103,7 +103,7 @@ test("spatial environments, expanded viewport and mobile focus controls stay acc
     "dark",
   );
   await environments
-    .getByRole("button", { name: "Кабинет", exact: true })
+    .getByRole("button", { name: "Светлое окружение", exact: true })
     .click();
   const initialHeight = (await page.locator(".xr-canvas").boundingBox())!
     .height;
@@ -139,12 +139,12 @@ test("spatial environments, expanded viewport and mobile focus controls stay acc
   ).toEqual([]);
 });
 
-test("room inspection rotates freely and restores the analytics panorama", async ({
+test("space exploration rotates freely and restores the analytics panorama", async ({
   page,
 }) => {
   await openSpatial(page);
   await page.getByLabel("Приблизить дашборд").selectOption("7");
-  await page.getByRole("button", { name: "Осмотреть комнату" }).click();
+  await page.getByRole("button", { name: "Осмотреть пространство" }).click();
   await expect(page.getByLabel("Приблизить дашборд")).toHaveCount(0);
   const turn = page.getByLabel("Поворот взгляда в градусах");
   await expect(turn).toHaveAttribute("max", "180");

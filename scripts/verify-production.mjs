@@ -32,7 +32,7 @@ try {
   await page.evaluate(() => navigator.serviceWorker.ready);
   await page.reload();
   await page.waitForFunction(() => !!navigator.serviceWorker.controller);
-  await page.locator('.room-backdrop canvas[data-room-ready="true"]').waitFor();
+  await page.locator('.space-backdrop canvas[data-space-ready="true"]').waitFor();
   const manifest = await (
     await page.request.get(new URL("manifest.webmanifest", baseURL).href)
   ).json();
@@ -52,9 +52,9 @@ try {
   await context.setOffline(true);
   await page.reload();
   await page.waitForSelector('[data-dashboard-id="1"]');
-  await page.locator('.room-backdrop canvas[data-room-ready="true"]').waitFor();
-  const offlineRoom = await page.locator(".room-backdrop canvas").isVisible();
-  if (!offlineRoom) throw new Error("Offline empty 3D room unavailable");
+  await page.locator('.space-backdrop canvas[data-space-ready="true"]').waitFor();
+  const offlineSpace = await page.locator(".space-backdrop canvas").isVisible();
+  if (!offlineSpace) throw new Error("Offline 3D space environment unavailable");
   const offlineCards = await page.locator("[data-dashboard-id]").count();
   if (offlineCards !== 9)
     throw new Error("Default offline dashboard set incomplete");
@@ -66,18 +66,18 @@ try {
   await page.locator(".xr-canvas canvas").waitFor();
   if ((await page.locator("#xr-focus option").count()) !== 11)
     throw new Error("All ten focus dashboards must remain available");
-  await page.getByRole("button", { name: "Осмотреть комнату" }).click();
-  const roomTurn = page.getByLabel("Поворот взгляда в градусах");
-  if ((await roomTurn.getAttribute("max")) !== "180")
-    throw new Error("Offline procedural room inspection unavailable");
-  await roomTurn.fill("-30");
+  await page.getByRole("button", { name: "Осмотреть пространство" }).click();
+  const spaceTurn = page.getByLabel("Поворот взгляда в градусах");
+  if ((await spaceTurn.getAttribute("max")) !== "180")
+    throw new Error("Offline space environment inspection unavailable");
+  await spaceTurn.fill("-30");
   await page.waitForTimeout(300);
   await page.locator(".xr-canvas").screenshot({
-    path: path.join(evidenceDirectory, "procedural-room.png"),
+    path: path.join(evidenceDirectory, "space-environment.png"),
   });
   await page.getByRole("button", { name: "Вернуть аналитику" }).click();
-  if ((await roomTurn.inputValue()) !== "0")
-    throw new Error("Room inspection did not restore the panorama");
+  if ((await spaceTurn.inputValue()) !== "0")
+    throw new Error("Space exploration did not restore the panorama");
   await page.getByLabel("Приблизить дашборд").selectOption("1");
   await page.waitForTimeout(300);
   await page.screenshot({
@@ -90,8 +90,8 @@ try {
     manifest: true,
     questControllerProfiles: true,
     offlineDemo: true,
-    offlineRoom,
-    offlineProceduralRoom: true,
+    offlineSpace,
+    offlineSpaceEnvironment: true,
     offlineWebGL: true,
     offlineDashboardCount: 9,
     errors,

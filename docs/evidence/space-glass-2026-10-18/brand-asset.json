@@ -1,0 +1,10 @@
+{
+  "asset": "src/assets/privatbank.svg",
+  "source": "https://raw.githubusercontent.com/zakon033/Splata/ec522912632298aba50ed13ad70ae1b1e7f2d67b/img/PrivatBank.svg",
+  "sourceKind": "Public pinned copy of the PrivatBank brand SVG; not fetched from official website",
+  "sha256": "e1e31093ff1cee2f7dfe38bcaa2711f40ed1aa9111784aa1ecd8eb9a378a68b6",
+  "bytes": 3726,
+  "geometry": "Original SVG paths unchanged; trailing whitespace normalized. Monochrome via CSS brightness(0)",
+  "inspection": "SVG contains only svg/g/path/polygon/rect; no scripts, external links or fonts. Logo symbol and Cyrillic wordmark visually inspected.",
+  "originalSourceSha256": "3a943eccb76d86b8d30fb83e912ed55c16ef5c83eae8cdac4f74fb195b779e1b"
+}

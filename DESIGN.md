@@ -6,22 +6,23 @@ colors:
   background: '#0d1017'
   light-background: '#eef2f6'
   light-surface: '#ffffff'
-  light-glass-top: 'rgba(248, 252, 255, 0.68)'
-  light-glass-bottom: 'rgba(240, 246, 252, 0.58)'
+  light-glass-top: 'rgba(248, 252, 255, 0.72)'
+  light-glass-bottom: 'rgba(240, 246, 252, 0.68)'
   light-chrome: 'rgba(248, 252, 255, 0.76)'
   light-modal: 'rgba(246, 250, 254, 0.9)'
   light-elevated: '#e2e7ef'
   light-text: '#182232'
-  light-muted: '#46566b'
+  light-muted: '#26364b'
   light-primary: '#35305c'
   light-border: 'rgba(15, 23, 42, 0.08)'
   light-success: '#059669'
   light-warning: '#d97706'
-  light-success-text: '#047857'
-  light-warning-text: '#92400e'
+  light-success-text: '#063f32'
+  light-warning-text: '#63290a'
+  light-danger-text: '#70122c'
   light-danger: '#e11d48'
   light-cyan: '#0284c7'
-  light-cyan-text: '#0369a1'
+  light-cyan-text: '#0b3c59'
   light-purple: '#6252a5'
   light-focus: '#6344b5'
   surface: 'rgba(22, 26, 35, 0.94)'
@@ -65,6 +66,14 @@ colors:
   room-light: '#fff0d5'
   room-night: '#272f3a'
   room-night-light: '#b3c9dc'
+  space-night: '#050a16'
+  space-blue: '#102442'
+  space-light: '#a9bed3'
+  space-light-mid: '#829db8'
+  space-light-horizon: '#d1dfec'
+  space-star: '#f0f7ff'
+  space-orbit: '#aacde8'
+  space-atmosphere: '#5cbbff'
 typography:
   display:
     fontFamily: 'Manrope Variable, Inter Variable, sans-serif'
@@ -188,3 +197,10 @@ RoomBackdrop — отдельный ленивый demand Canvas с фиксир
 Дополнение к этому этапу: верхняя source-pill удалена по прямому запросу. Вместо текстового wordmark — локальный оригинальный SVG начертания ПриватБанка, CSS brightness(0), тонкий разделитель и Орбіта. Небольшая светлая матовая подложка сохраняет чёрный логотип читаемым и в тёмном окружении. Заголовок и месяц выровнены по центру в одном горизонтальном блоке, без наложений на мобильные вкладки.
 
 Все hover-правила кнопок сведены к нейтральным прозрачным состояниям для fine pointer; цвет текста соответствует фону выбранного состояния. Нет фиолетового hover XR-entry, статичной двойной рамки и сдвига при active. Touch не получает отдельного desktop-hover, keyboard focus остаётся одним контрастным контуром. Исходный SVG и происхождение — docs/evidence/glass-room-2026-10-18/brand-asset.json.
+
+## Финальное окружение: космос · 2026-10-18
+По последнему прямому запросу комната заменена космическим пространством. Общий настоящий 3D-фон DOM и VR содержит далёкое звёздное поле, Землю с локальной текстурой, тонкую атмосферу и одну спокойную орбиту. Светлая тема — прохладный рассеянный свет; тёмная — глубокий синий космос. Матовые прозрачные карточки и читаемость данных сохраняются. Никакого автоматического полёта камеры, вращения Земли, мерцания звёзд или постоянной анимации.
+
+SpaceBackdrop использует demand и снимается в spatial modal; активный XR рисует head tracking каждый кадр, AR не монтирует непрозрачное окружение. Геометрия/звёзды локальные; Earth JPG включён в сборку, PWA precache и standalone. Текстура из pinned three.js r180, происхождение/хеш в evidence/space-glass-2026-10-18/space-assets.json. Указания про комнату выше — предыдущая итерация, сохранённая в Git 8fa40fb.
+
+Светлое стекло окончательной космической версии имеет alpha0,72/0,68 и отдельные более тёмные текстовые токены. Даже нижняя подложка над чёрной ночной стороной Земли сохраняет расчётный контраст текста >=4,5:1; насыщенные цвета заливок графиков не изменены.

@@ -29,7 +29,7 @@ import { colors, dashboardModel, type DashboardModel } from "../api/model";
 import { formatSource } from "../api/format";
 import { drawOverviewPanel, drawFocusPanel } from "./drawPanel";
 import { SpatialSurface, SpatialControl, SpatialWing } from "./SpatialSurface";
-import { ProceduralRoom } from "./ProceduralRoom";
+import { SpaceEnvironment } from "./SpaceEnvironment";
 import { spatialStands, FOCUS_ROWS, focusSurfaceHeight } from "./layout";
 import { Button, NativeSelect } from "../components/ui";
 import { formatReportDate, t, useLocale } from "../i18n";
@@ -122,7 +122,7 @@ function Scene({
   yaw,
   setFocused,
   focused,
-  roomOnly,
+  environmentOnly,
   dataContext,
   recenter,
   onRecenter,
@@ -131,7 +131,7 @@ function Scene({
 }: {
   yaw: number;
   focused: number | null;
-  roomOnly: boolean;
+  environmentOnly: boolean;
   dataContext: string;
   setFocused: (v: number | null) => void;
   recenter: number;
@@ -198,7 +198,7 @@ function Scene({
     anchor.current.position.set(p.x, p.y - 1.6, p.z);
     anchor.current.rotation.set(0, Math.atan2(-d.x, -d.z), 0);
     invalidate();
-  }, [recenter, session, camera, gl, invalidate, roomOnly]);
+  }, [recenter, session, camera, gl, invalidate, environmentOnly]);
   const hasFocus = focused !== null;
   useEffect(() => {
     if (hasFocus) {
@@ -223,9 +223,11 @@ function Scene({
       focusGroup.current.quaternion.copy(focusPose.current.q);
     }
   });
-  const room =
-    mode !== "immersive-ar" ? <ProceduralRoom dark={theme === "dark"} /> : null;
-  if (roomOnly && !session) return <>{room}</>;
+  const environment =
+    mode !== "immersive-ar" ? (
+      <SpaceEnvironment dark={theme === "dark"} />
+    ) : null;
+  if (environmentOnly && !session) return <>{environment}</>;
   const focusHeight =
     focused && data
       ? focusSurfaceHeight(models[focused - 1].facts.length)
@@ -237,7 +239,7 @@ function Scene({
   return (
     <>
       <XROrigin />
-      {room}
+      {environment}
       <group ref={anchor}>
         {!hasFocus && data
           ? spatialStands.map((stand) => (
@@ -399,7 +401,7 @@ export default function SpatialView() {
     setYaw(nextYaw);
   }
   const [expanded, setExpanded] = useState(false);
-  const [roomOnly, setRoomOnly] = useState(false);
+  const [environmentOnly, setEnvironmentOnly] = useState(false);
   const theme = useDashboardStore((s) => s.theme);
   const [error, setError] = useState(""),
     [busy, setBusy] = useState(false),
@@ -408,7 +410,7 @@ export default function SpatialView() {
     // A focus pose belongs to its current viewing space; start each XR/preview transition in panorama.
     setFocused(null);
     setYaw(0);
-    setRoomOnly(false);
+    setEnvironmentOnly(false);
   }, [sessionActive]);
   useEffect(() => {
     let active = true;
@@ -493,7 +495,7 @@ export default function SpatialView() {
             onClick={() => useDashboardStore.setState({ theme: "office" })}
           >
             <Sun size={15} />
-            {t("Кабинет")}
+            {t("Светлое окружение")}
           </Button>
           <Button
             className={theme === "dark" ? "selected" : ""}
@@ -506,17 +508,19 @@ export default function SpatialView() {
         </div>
         <div className="xr-preview-actions">
           <Button
-            className="xr-room-toggle"
-            aria-pressed={roomOnly}
+            className="xr-environment-toggle"
+            aria-pressed={environmentOnly}
             disabled={sessionActive}
             onClick={() => {
-              setRoomOnly(!roomOnly);
+              setEnvironmentOnly(!environmentOnly);
               setFocused(null);
               setYaw(0);
             }}
           >
-            {roomOnly ? <Eye size={16} /> : <EyeOff size={16} />}
-            {t(roomOnly ? "Вернуть аналитику" : "Осмотреть комнату")}
+            {environmentOnly ? <Eye size={16} /> : <EyeOff size={16} />}
+            {t(
+              environmentOnly ? "Вернуть аналитику" : "Осмотреть пространство",
+            )}
           </Button>
           <Button
             className="xr-expand"
@@ -539,12 +543,12 @@ export default function SpatialView() {
       <div
         className={`xr-canvas ${expanded ? "expanded" : ""}`}
         data-environment={theme}
-        data-panorama-wings={data && !focused && !roomOnly ? 3 : 0}
+        data-panorama-wings={data && !focused && !environmentOnly ? 3 : 0}
         data-focus-view={focused ? "combined" : "panorama"}
         role="group"
         aria-label={t(
-          roomOnly
-            ? "Процедурный 3D-кабинет"
+          environmentOnly
+            ? "Космическое окружение"
             : "Интерактивный 3D-просмотр десяти дашбордов",
         )}
       >
@@ -565,7 +569,7 @@ export default function SpatialView() {
                 yaw={yaw}
                 focused={focused}
                 setFocused={setFocused}
-                roomOnly={roomOnly}
+                environmentOnly={environmentOnly}
                 dataContext={dataContext}
                 recenter={recenter}
                 onRecenter={recenterSpace}
@@ -575,7 +579,7 @@ export default function SpatialView() {
             </XR>
           </Canvas>
         </GraphicsBoundary>
-        {!data && !roomOnly ? (
+        {!data && !environmentOnly ? (
           <div className="xr-no-data">
             <Database size={30} />
             <h3>
@@ -596,7 +600,7 @@ export default function SpatialView() {
           </div>
         ) : null}
       </div>
-      {!roomOnly ? (
+      {!environmentOnly ? (
         <>
           <div className="xr-focus-picker">
             <label htmlFor="xr-focus">{t("Приблизить дашборд")}</label>
@@ -684,8 +688,8 @@ export default function SpatialView() {
         <input
           aria-label={t("Поворот взгляда в градусах")}
           type="range"
-          min={roomOnly ? -180 : -45}
-          max={roomOnly ? 180 : 45}
+          min={environmentOnly ? -180 : -45}
+          max={environmentOnly ? 180 : 45}
           value={yaw}
           onChange={(e) => lookAt(Number(e.target.value))}
         />

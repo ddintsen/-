@@ -1,10 +1,10 @@
 import { Component, memo, useEffect, type ReactNode } from "react";
 import { Canvas, useThree } from "@react-three/fiber";
 import { colors } from "../api/model";
-import { ProceduralRoom } from "./ProceduralRoom";
+import { SpaceEnvironment } from "./SpaceEnvironment";
 
 // A decorative renderer must never prevent access to the dashboard on devices without WebGL.
-class RoomBoundary extends Component<
+class SpaceBoundary extends Component<
   { children: ReactNode },
   { failed: boolean }
 > {
@@ -20,15 +20,15 @@ function BackgroundScene({ dark }: { dark: boolean }) {
   const { camera, gl, invalidate } = useThree();
   useEffect(() => {
     camera.lookAt(0.35, 1.45, -4);
-    gl.setClearColor(dark ? colors["room-night"] : colors["room-horizon"], 1);
-    gl.domElement.dataset.roomReady = "true";
+    gl.setClearColor(dark ? colors["space-night"] : colors["space-light"], 1);
+    gl.domElement.dataset.spaceReady = "true";
     invalidate();
   }, [camera, gl, dark, invalidate]);
-  return <ProceduralRoom dark={dark} />;
+  return <SpaceEnvironment dark={dark} />;
 }
-const RoomBackdrop = memo(function RoomBackdrop({ dark }: { dark: boolean }) {
+const SpaceBackdrop = memo(function SpaceBackdrop({ dark }: { dark: boolean }) {
   return (
-    <RoomBoundary>
+    <SpaceBoundary>
       <Canvas
         frameloop="demand"
         dpr={[1, 1.25]}
@@ -38,7 +38,7 @@ const RoomBackdrop = memo(function RoomBackdrop({ dark }: { dark: boolean }) {
       >
         <BackgroundScene dark={dark} />
       </Canvas>
-    </RoomBoundary>
+    </SpaceBoundary>
   );
 });
-export default RoomBackdrop;
+export default SpaceBackdrop;

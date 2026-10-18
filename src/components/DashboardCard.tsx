@@ -95,8 +95,8 @@ export function DashboardContent({ model: m }: { model: DashboardModel }) {
               style={{
                 color:
                   m.metrics[0].value > 20
-                    ? "var(--color-danger)"
-                    : "var(--color-warning)",
+                    ? "var(--color-danger-text, var(--color-danger))"
+                    : "var(--color-warning-text, var(--color-warning))",
               }}
             >
               {m.metrics[0].value}

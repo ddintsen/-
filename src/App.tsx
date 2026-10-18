@@ -35,7 +35,7 @@ import { t, useLocale, setLocale, formatReportDate, type Locale } from "./i18n";
 import "./styles/app.css";
 import privatbankLogo from "./assets/privatbank.svg";
 const SpatialView = lazy(() => import("./spatial/SpatialView"));
-const RoomBackdrop = lazy(() => import("./spatial/RoomBackdrop"));
+const SpaceBackdrop = lazy(() => import("./spatial/SpaceBackdrop"));
 type View = "overview" | "payments" | "cash" | "equipment";
 const viewConfig = [
   { id: "overview" as const, label: "Обзор", icon: LayoutDashboard },
@@ -168,13 +168,13 @@ export default function App() {
   return (
     <>
       <div
-        className="room-backdrop"
+        className="space-backdrop"
         aria-hidden="true"
-        data-room-theme={s.theme}
+        data-space-theme={s.theme}
       >
         {!spatial ? (
           <Suspense fallback={null}>
-            <RoomBackdrop dark={s.theme === "dark"} />
+            <SpaceBackdrop dark={s.theme === "dark"} />
           </Suspense>
         ) : null}
       </div>
@@ -278,7 +278,7 @@ export default function App() {
                 aria-label={
                   s.theme === "office"
                     ? t("Включить тёмное окружение")
-                    : t("Включить окружение кабинета")
+                    : t("Включить светлое окружение")
                 }
                 title={t("Сменить окружение")}
                 onClick={() =>

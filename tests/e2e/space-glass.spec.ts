@@ -1,10 +1,10 @@
 import { test, expect } from "@playwright/test";
 
-test("the glass overview has a real themed room and stops drawing while idle", async ({
+test("the glass overview has a real themed space environment and stops drawing while idle", async ({
   page,
 }) => {
   await page.addInitScript(() => {
-    Object.assign(window, { __roomDraws: 0 });
+    Object.assign(window, { __spaceDraws: 0 });
     for (const Constructor of [WebGLRenderingContext, WebGL2RenderingContext]) {
       for (const name of ["drawArrays", "drawElements"] as const) {
         const original = Constructor.prototype[name];
@@ -12,9 +12,9 @@ test("the glass overview has a real themed room and stops drawing while idle", a
           value: function (this: WebGLRenderingContext, ...args: number[]) {
             if (
               this.canvas instanceof HTMLCanvasElement &&
-              this.canvas.closest(".room-backdrop")
+              this.canvas.closest(".space-backdrop")
             )
-              (window as unknown as { __roomDraws: number }).__roomDraws++;
+              (window as unknown as { __spaceDraws: number }).__spaceDraws++;
             return Reflect.apply(original, this, args);
           },
           configurable: true,
@@ -26,10 +26,10 @@ test("the glass overview has a real themed room and stops drawing while idle", a
   await page.goto("/");
   const drawCount = () =>
     page.evaluate(
-      () => (window as unknown as { __roomDraws: number }).__roomDraws,
+      () => (window as unknown as { __spaceDraws: number }).__spaceDraws,
     );
   await expect(
-    page.locator('.room-backdrop canvas[data-room-ready="true"]'),
+    page.locator('.space-backdrop canvas[data-space-ready="true"]'),
   ).toBeVisible();
   await expect.poll(drawCount).toBeGreaterThan(0);
   await page.evaluate(() => document.fonts.ready);
@@ -38,8 +38,8 @@ test("the glass overview has a real themed room and stops drawing while idle", a
   await page.waitForTimeout(600);
   expect(await drawCount()).toBe(before);
   await page.locator(".topbar-right button").first().click();
-  await expect(page.locator(".room-backdrop")).toHaveAttribute(
-    "data-room-theme",
+  await expect(page.locator(".space-backdrop")).toHaveAttribute(
+    "data-space-theme",
     "dark",
   );
   await expect.poll(drawCount).toBeGreaterThan(before);
@@ -56,7 +56,7 @@ test("the glass overview has a real themed room and stops drawing while idle", a
   );
 });
 
-test("dashboard and exact values stay usable when the decorative WebGL room is unsupported", async ({
+test("dashboard and exact values stay usable when the decorative WebGL background is unsupported", async ({
   page,
 }) => {
   await page.addInitScript(() => {

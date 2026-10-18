@@ -11,9 +11,7 @@ test("nine overview cards, ten focus dashboards, actionable attention and real l
   await page.getByRole("button", { name: "Увімкнути темне оточення" }).click();
   const dark = await surface.evaluate((el) => getComputedStyle(el).background);
   expect(light).not.toBe(dark);
-  await page
-    .getByRole("button", { name: "Увімкнути оточення кабінету" })
-    .click();
+  await page.getByRole("button", { name: "Увімкнути світле оточення" }).click();
   await page
     .getByLabel("Зони уваги", { exact: true })
     .getByRole("button", { name: /Recycle/ })

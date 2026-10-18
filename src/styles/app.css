@@ -137,7 +137,7 @@ select {
 .skip-link:focus {
   transform: translateY(0);
 }
-.room-backdrop {
+.space-backdrop {
   position: fixed;
   inset: 0;
   pointer-events: none;
@@ -145,7 +145,7 @@ select {
   overflow: hidden;
   background: var(--color-background);
 }
-.room-backdrop::after {
+.space-backdrop::after {
   content: "";
   position: absolute;
   inset: 0;
@@ -166,7 +166,7 @@ select {
   --panel-shadow:
     inset 0 1px 0 var(--color-rim-light), 0 24px 60px -24px rgba(0, 0, 0, 0.55);
 }
-[data-theme="dark"] .room-backdrop::after {
+[data-theme="dark"] .space-backdrop::after {
   background: linear-gradient(
     180deg,
     rgba(6, 12, 22, 0.18),
@@ -2150,7 +2150,7 @@ textarea::placeholder {
   .gauge-fill {
     stroke: Highlight;
   }
-  .room-backdrop {
+  .space-backdrop {
     display: none;
   }
   .button.selected {
@@ -2183,7 +2183,7 @@ textarea::placeholder {
   }
 }
 
-/* The 3D preview renders its own procedural room; no photographic canvas backdrop. */
+/* The 3D preview renders its own space environment; no photographic canvas backdrop. */
 .xr-preview-toolbar {
   display: flex;
   align-items: center;
@@ -2244,7 +2244,7 @@ textarea::placeholder {
   .xr-preview-actions {
     margin-left: auto;
   }
-  .xr-room-toggle {
+  .xr-environment-toggle {
     font-size: 11px;
   }
   .xr-environments .button {
@@ -2845,7 +2845,7 @@ textarea::placeholder {
   font-weight: 500;
 }
 
-/* Theme semantics keep data readable over the shared empty room. */
+/* Theme semantics keep data readable over the shared space environment. */
 [data-theme="office"] {
   color-scheme: light;
   --color-background: var(--color-light-background);
@@ -3150,12 +3150,12 @@ textarea::placeholder {
   }
 }
 
-/* Empty spatial room behind frosted glass in both themes. */
-.room-backdrop > div {
+/* Cosmic environment behind frosted glass in both themes. */
+.space-backdrop > div {
   width: 100%;
   height: 100%;
 }
-.room-backdrop canvas {
+.space-backdrop canvas {
   display: block;
 }
 .dashboard-card,
@@ -3321,4 +3321,13 @@ summary:focus-visible,
 }
 .report-period strong {
   overflow-wrap: anywhere;
+}
+/* Readable text over the night side of Earth; semantic chart fills stay unchanged. */
+[data-theme="office"] {
+  --color-warning-text: var(--color-light-warning-text);
+  --color-danger-text: var(--color-light-danger-text);
+}
+[data-theme="office"] .progress-gauge[data-tone="danger"] .progress-percent,
+[data-theme="office"] .tone-danger {
+  color: var(--color-light-danger-text);
 }
