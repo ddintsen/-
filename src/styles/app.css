@@ -3193,12 +3193,8 @@ textarea::placeholder {
 }
 .wordmark {
   gap: 12px;
-  padding: 7px 10px;
-  border-radius: 12px;
-  color: #111;
-  background: rgba(248, 252, 255, 0.8);
-  -webkit-backdrop-filter: blur(18px);
-  backdrop-filter: blur(18px);
+  min-height: 40px;
+  color: #000;
   flex-shrink: 0;
 }
 .privatbank-logo {
@@ -3210,7 +3206,14 @@ textarea::placeholder {
 .brand-divider {
   height: 21px;
   width: 1px;
-  background: rgba(0, 0, 0, 0.23);
+  background: currentColor;
+  opacity: 0.28;
+}
+[data-theme="dark"] .wordmark {
+  color: #fff;
+}
+[data-theme="dark"] .privatbank-logo {
+  filter: brightness(0) invert(1);
 }
 .heading-copy {
   display: flex;
@@ -3279,7 +3282,6 @@ summary:focus-visible,
   }
   .wordmark {
     gap: 6px;
-    padding: 6px;
     font-size: 13px;
     letter-spacing: -0.3px;
   }
