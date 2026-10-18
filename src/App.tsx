@@ -33,7 +33,9 @@ import { Admin } from "./components/Admin";
 import { AppUpdate } from "./components/AppUpdate";
 import { t, useLocale, setLocale, formatReportDate, type Locale } from "./i18n";
 import "./styles/app.css";
+import privatbankLogo from "./assets/privatbank.svg";
 const SpatialView = lazy(() => import("./spatial/SpatialView"));
+const RoomBackdrop = lazy(() => import("./spatial/RoomBackdrop"));
 type View = "overview" | "payments" | "cash" | "equipment";
 const viewConfig = [
   { id: "overview" as const, label: "Обзор", icon: LayoutDashboard },
@@ -165,7 +167,17 @@ export default function App() {
   };
   return (
     <>
-      <div className="room-backdrop" aria-hidden="true" />
+      <div
+        className="room-backdrop"
+        aria-hidden="true"
+        data-room-theme={s.theme}
+      >
+        {!spatial ? (
+          <Suspense fallback={null}>
+            <RoomBackdrop dark={s.theme === "dark"} />
+          </Suspense>
+        ) : null}
+      </div>
       <a href="#analytics" className="skip-link">
         {t("Перейти к аналитике")}
       </a>
@@ -235,15 +247,20 @@ export default function App() {
               }
               aria-label={t("Орбита — обзор")}
             >
-              {t("Орбита")}
+              <img
+                className="privatbank-logo"
+                src={privatbankLogo}
+                alt="ПриватБанк"
+                width="142"
+                height="24"
+              />
+              <span className="brand-divider" aria-hidden="true" />
+              <span>{t("Орбита")}</span>
             </a>
             <div className="topbar-right">
-              <div className="source-item source-pill" role="status">
-                <span
-                  className={`live-dot ${s.source === "live" ? "live" : ""}`}
-                />
-                <strong>{sourceLabel}</strong>
-              </div>
+              <span className="source-item sr-only" role="status">
+                {sourceLabel}
+              </span>
               <label className="language-switch">
                 <span className="sr-only">{t("Язык")}</span>
                 <select

@@ -32,6 +32,7 @@ try {
   await page.evaluate(() => navigator.serviceWorker.ready);
   await page.reload();
   await page.waitForFunction(() => !!navigator.serviceWorker.controller);
+  await page.locator('.room-backdrop canvas[data-room-ready="true"]').waitFor();
   const manifest = await (
     await page.request.get(new URL("manifest.webmanifest", baseURL).href)
   ).json();
@@ -51,13 +52,9 @@ try {
   await context.setOffline(true);
   await page.reload();
   await page.waitForSelector('[data-dashboard-id="1"]');
-  const offlineRoom = await page.evaluate(async (url) => {
-    const image = new Image();
-    image.src = url;
-    await image.decode();
-    return image.naturalWidth > 1000;
-  }, new URL("images/room.png", baseURL).href);
-  if (!offlineRoom) throw new Error("Offline room asset unavailable");
+  await page.locator('.room-backdrop canvas[data-room-ready="true"]').waitFor();
+  const offlineRoom = await page.locator(".room-backdrop canvas").isVisible();
+  if (!offlineRoom) throw new Error("Offline empty 3D room unavailable");
   const offlineCards = await page.locator("[data-dashboard-id]").count();
   if (offlineCards !== 9)
     throw new Error("Default offline dashboard set incomplete");

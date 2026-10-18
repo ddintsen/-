@@ -1,0 +1,17 @@
+{
+  "legacyCommit": "552750e8b3c624cb428729a8b570be3e2ff51663",
+  "scope": "/-/",
+  "recoveryModes": [
+    "during-install",
+    "after-activation"
+  ],
+  "realLegacyCachedUI": true,
+  "cleanOverview": true,
+  "savedDemoAndConfigPreserved": true,
+  "legacyRecycleLabel": true,
+  "siblingNotReloaded": true,
+  "subsequentUpdateWaitsForClick": true,
+  "unsavedDraftAndGuardPreserved": true,
+  "offlineAfterUpdate": true,
+  "errors": []
+}

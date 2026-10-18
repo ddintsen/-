@@ -1,0 +1,22 @@
+{
+  "capturedAt": "2026-10-18T04:34:33.457Z",
+  "source": "Actual browser captures of local production; not generated images or physical headset captures",
+  "baseCommit": "d08a020d7d236bc140fe52df0bd78d618a7db505",
+  "files": [
+    "desktop-light.png",
+    "hover-light.png",
+    "focus-light.png",
+    "desktop-lower-light.png",
+    "desktop-dark.png",
+    "hover-dark.png",
+    "focus-dark.png",
+    "desktop-lower-dark.png",
+    "mobile-light.png",
+    "mobile-dark.png",
+    "panorama-light.png",
+    "empty-room-light.png",
+    "panorama-dark.png",
+    "empty-room-dark.png"
+  ],
+  "errors": []
+}

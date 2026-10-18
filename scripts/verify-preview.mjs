@@ -34,6 +34,7 @@ try {
   });
   await page.goto(entry);
   await page.evaluate(() => document.fonts.ready);
+  await page.locator('.room-backdrop canvas[data-room-ready="true"]').waitFor();
   await page.getByRole("button", { name: "Объём", exact: true }).click();
   await page.locator('[data-dashboard-id="3"]').waitFor();
   if ((await page.locator("[data-dashboard-id]").count()) !== 9)
