@@ -1,0 +1,16 @@
+{
+  "checkedAt": "2026-10-18T05:32:52.316931+00:00",
+  "sourceCommit": "57d17697a83a13d24a35f804eea118ec50d0096f",
+  "runId": "39100736300",
+  "localAssets": [
+    "/-/assets/index-BZeyTcZW.css",
+    "/-/assets/index-Cgd_YCSg.js"
+  ],
+  "publishedAssets": [
+    "/-/assets/index-BZeyTcZW.css",
+    "/-/assets/index-Cgd_YCSg.js"
+  ],
+  "match": true,
+  "liveBrowserVerification": "success",
+  "captureSource": "Local production with matching published assets, not physical Quest or direct live capture"
+}
