@@ -31,7 +31,7 @@ const INTRO_SECONDS = 2.8;
 const PARALLAX = { x: 0.22, y: 0.13 };
 // The surface drift is a few pixels per second, so a low redraw rate stays smooth and cheap
 // for the frosted glass that resamples the canvas.
-const DRIFT_FPS = 12;
+const DRIFT_FPS = 20;
 
 /** Software rasterisers (no GPU) pay for every frame on the CPU the dashboard needs. */
 function softwareRenderer(
@@ -83,7 +83,7 @@ function BackgroundScene({ dark }: { dark: boolean }) {
     return () => window.clearInterval(timer);
   }, [reduced, invalidate]);
   // A sunrise reveal: the view lifts from the night side toward the limb once per load.
-  useFrame((_, delta) => {
+  useFrame(({ clock }, delta) => {
     const running = intro.current < INTRO_SECONDS;
     intro.current = Math.min(
       INTRO_SECONDS,
@@ -95,7 +95,9 @@ function BackgroundScene({ dark }: { dark: boolean }) {
     p.x += (p.tx - p.x) * ease;
     p.y += (p.ty - p.y) * ease;
     look.lerpVectors(LOOK_FROM, LOOK_TO, k);
-    look.x += p.x * PARALLAX.x;
+    // Even without a pointer the view drifts like a slow orbit (about ±0.6° over 40 s).
+    const orbit = reduced ? 0 : Math.sin(clock.elapsedTime * 0.157) * 0.09;
+    look.x += p.x * PARALLAX.x + orbit;
     look.y -= p.y * PARALLAX.y;
     camera.lookAt(look);
     const settling = Math.abs(p.tx - p.x) + Math.abs(p.ty - p.y) > 0.002;

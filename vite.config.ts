@@ -33,16 +33,16 @@ export default defineConfig(({ mode }) => ({
             injectRegister: false,
             includeAssets: ["icon.svg", "icon-192.png", "icon-512.png"],
             manifest: {
-              name: "Орбита — аналитика департамента",
-              short_name: "Орбита",
+              name: "Орбіта — аналітика департаменту",
+              short_name: "Орбіта",
               description:
-                "Пространственная аналитика платежей, касс и оборудования",
-              lang: "ru",
+                "Платежі, каси й обладнання департаменту в одному просторі",
+              lang: "uk",
               start_url: ".",
               scope: ".",
               display: "standalone",
-              background_color: "#24262b",
-              theme_color: "#24262b",
+              background_color: "#050a16",
+              theme_color: "#050a16",
               icons: [
                 {
                   src: "icon-192.png",

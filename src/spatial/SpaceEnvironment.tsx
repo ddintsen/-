@@ -194,18 +194,85 @@ const haloFragment = /* glsl */ `
   }
 `;
 
-// One revolution in about 40 minutes: the surface drifts, the limb and the stands stay still.
-const EARTH_SPIN = 0.0026;
+// Procedural cloud deck: value-noise fbm on the unit sphere, lit by the same sun as the
+// surface. It drifts faster than the ground, so the planet visibly lives even at a glance.
+const cloudVertex = /* glsl */ `
+  varying vec3 vObject;
+  varying vec3 vNormal;
+  varying vec3 vView;
+  void main() {
+    vObject = normalize(position);
+    vec4 world = modelMatrix * vec4(position, 1.0);
+    vNormal = normalize(mat3(modelMatrix) * normal);
+    vView = normalize(cameraPosition - world.xyz);
+    gl_Position = projectionMatrix * viewMatrix * world;
+  }
+`;
+const cloudFragment = /* glsl */ `
+  uniform float time;
+  uniform vec3 sunDir;
+  uniform vec3 sunColor;
+  uniform float opacity;
+  uniform vec3 nightTint;
+  varying vec3 vObject;
+  varying vec3 vNormal;
+  varying vec3 vView;
+  float hash(vec3 p) {
+    p = fract(p * 0.3183099 + 0.1);
+    p *= 17.0;
+    return fract(p.x * p.y * p.z * (p.x + p.y + p.z));
+  }
+  float noise(vec3 x) {
+    vec3 i = floor(x);
+    vec3 f = fract(x);
+    f = f * f * (3.0 - 2.0 * f);
+    return mix(
+      mix(mix(hash(i), hash(i + vec3(1, 0, 0)), f.x),
+          mix(hash(i + vec3(0, 1, 0)), hash(i + vec3(1, 1, 0)), f.x), f.y),
+      mix(mix(hash(i + vec3(0, 0, 1)), hash(i + vec3(1, 0, 1)), f.x),
+          mix(hash(i + vec3(0, 1, 1)), hash(i + vec3(1, 1, 1)), f.x), f.y),
+      f.z);
+  }
+  float fbm(vec3 p) {
+    float sum = 0.0, amp = 0.5;
+    for (int i = 0; i < 5; i++) {
+      sum += amp * noise(p);
+      p = p * 2.03 + vec3(1.7, 9.2, 3.1);
+      amp *= 0.5;
+    }
+    return sum;
+  }
+  void main() {
+    vec3 p = vObject * 7.0 + vec3(time * 0.012, 0.0, time * 0.006);
+    float warp = fbm(p * 0.5 + vec3(0.0, time * 0.004, 0.0));
+    float density = smoothstep(0.47, 0.72, fbm(p + warp * 1.6));
+    vec3 n = normalize(vNormal);
+    float light = smoothstep(-0.25, 0.45, dot(n, sunDir));
+    float facing = pow(max(dot(-vView, sunDir), 0.0), 10.0);
+    vec3 color = mix(nightTint, vec3(1.0), light) + sunColor * facing * 0.6;
+    float limb = smoothstep(0.0, 0.18, dot(n, vView));
+    gl_FragColor = vec4(color, density * opacity * (0.18 + 0.82 * max(light, 0.25)) * limb);
+  }
+`;
 
-/** A distant environment with slow motion (Earth spin, star breathing); no remote runtime resources. AR omits it. */
+// About one revolution in ten minutes: the surface drifts visibly, the limb and the stands stay still.
+const EARTH_SPIN = 0.0105;
+const CLOUD_SPIN = 0.016;
+
+/** A distant environment with slow motion (Earth and clouds spin, star breathing, sunrise breathing); no remote runtime resources. AR omits it. */
 export function SpaceEnvironment({
   dark,
   motion = true,
+  clouds = true,
 }: {
   dark: boolean;
   motion?: boolean;
+  /** The cloud deck is fill-heavy; an active headset session renders without it. */
+  clouds?: boolean;
 }) {
   const spin = useRef<Group>(null);
+  const cloudSpin = useRef<Group>(null);
+  const sun = useRef<Group>(null);
   const pixelRatio = useThree((state) => state.gl.getPixelRatio());
   const starUniforms = useMemo(
     () => ({
@@ -215,11 +282,35 @@ export function SpaceEnvironment({
     }),
     [dark, pixelRatio],
   );
+  const cloudUniforms = useMemo(
+    () => ({
+      time: { value: 0 },
+      sunDir: {
+        value: (dark ? SUN_DARK : SUN_LIGHT)
+          .clone()
+          .sub(EARTH_CENTER)
+          .normalize(),
+      },
+      sunColor: { value: new Color(colors["space-sun"]) },
+      opacity: { value: dark ? 0.72 : 0.9 },
+      nightTint: {
+        value: dark ? new Color(0.06, 0.1, 0.18) : new Color(0.62, 0.7, 0.8),
+      },
+    }),
+    [dark],
+  );
   useFrame((_, delta) => {
     if (!motion) return;
     const step = Math.min(delta, 0.2);
     if (spin.current) spin.current.rotation.y += step * EARTH_SPIN;
+    if (cloudSpin.current) cloudSpin.current.rotation.y += step * CLOUD_SPIN;
     starUniforms.time.value += step;
+    cloudUniforms.time.value += step;
+    // The sunrise breathes: about ±4% over nine seconds.
+    if (sun.current)
+      sun.current.scale.setScalar(
+        1 + 0.04 * Math.sin(starUniforms.time.value * 0.7),
+      );
   });
   const sky = useMemo(() => skyTexture(dark), [dark]);
   const glow = useMemo(glowTexture, []);
@@ -289,6 +380,21 @@ export function SpaceEnvironment({
             />
           </mesh>
         </group>
+        {clouds ? (
+          <group ref={cloudSpin}>
+            <mesh raycast={() => {}} renderOrder={-7.5}>
+              <sphereGeometry args={[EARTH_RADIUS * 1.004, 192, 128]} />
+              <shaderMaterial
+                uniforms={cloudUniforms}
+                vertexShader={cloudVertex}
+                fragmentShader={cloudFragment}
+                transparent
+                depthWrite={false}
+                toneMapped={false}
+              />
+            </mesh>
+          </group>
+        ) : null}
         <mesh raycast={() => {}} renderOrder={-7}>
           <sphereGeometry args={[EARTH_RADIUS * 1.014, 192, 128]} />
           <shaderMaterial
@@ -304,7 +410,7 @@ export function SpaceEnvironment({
         </mesh>
       </group>
       {dark && (
-        <group position={SUN_DARK.toArray()}>
+        <group position={SUN_DARK.toArray()} ref={sun}>
           <sprite scale={[520, 520, 1]} renderOrder={-6}>
             <spriteMaterial
               map={glow}

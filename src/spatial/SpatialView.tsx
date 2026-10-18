@@ -243,7 +243,7 @@ function Scene({
   });
   const environment =
     mode !== "immersive-ar" ? (
-      <SpaceEnvironment dark={theme === "dark"} />
+      <SpaceEnvironment dark={theme === "dark"} clouds={!session} />
     ) : null;
   if (environmentOnly && !session) return <>{environment}</>;
   const focusHeight =

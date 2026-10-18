@@ -33,6 +33,8 @@ import { Admin } from "./components/Admin";
 import { AppUpdate } from "./components/AppUpdate";
 import { t, useLocale, setLocale, formatReportDate, type Locale } from "./i18n";
 import "./styles/app.css";
+import "./styles/charts.css";
+import "./styles/controls.css";
 import privatbankLogo from "./assets/privatbank.svg";
 const SpatialView = lazy(() => import("./spatial/SpatialView"));
 const SpaceBackdrop = lazy(() => import("./spatial/SpaceBackdrop"));
