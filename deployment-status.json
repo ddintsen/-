@@ -1,12 +1,12 @@
 {
-  "checkedAt": "2026-10-18T07:45:00.677Z",
+  "checkedAt": "2026-10-18T07:46:31.935Z",
   "repository": "ddintsen/-",
   "sourceCommit": "b5fb648280133aa96dee8237aab7d5e3646a86e5",
   "runId": "39108822040",
-  "phase": "preflight",
-  "buildResult": null,
-  "deployResult": null,
-  "verificationResult": null,
+  "phase": "complete",
+  "buildResult": "failure",
+  "deployResult": "skipped",
+  "verificationResult": "skipped",
   "artifacts": [],
   "repositoryAccess": {
     "status": 200,
