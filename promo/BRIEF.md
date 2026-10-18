@@ -41,7 +41,7 @@ From screen to space: the same three glass stands that sit on the screen are the
 - 1920×1080, 30 fps, H.264 High, yuv420p, CRF ~18, under 40 MB; render at 2× and downscale.
 - Deterministic frame-by-frame rendering: three.js scenes stepped by a fixed clock; DOM captures with CSS animations seeked through the Web Animations API (`document.getAnimations()`, `currentTime`) and Playwright's clock for rAF. No screen-recording jitter.
 - Tools: three.js (already in the repo), Playwright (repo), ffmpeg (system binary or an isolated `promo/` package such as `ffmpeg-static`, checked with `npm view` first). Do not use Remotion (company licence required). Do not add dependencies to the app.
-- Silent master. No music unless the owner supplies a licensed track.
+- Music: «Sci-Fi Score» by Arulo (Mixkit Stock Music Free License), `promo/music/mixkit-sci-fi-score-464.mp3`, chosen by the owner; licence and edit notes in `promo/music/LICENSE.md`. Cut to picture: the section change lands on the lens bloom; fade in 0.3 s, fade out over the last 2.5 s, -14 LUFS, true peak ≤ -1 dBTP.
 
 ## Deliverables
 - `promo/SCRIPT.md` (screenwriter): shot list with timecodes, camera paths in scene units, UI states and how to reach them (selectors, URL, locale), titles in Ukrainian and English, transitions and easing, a QA checklist.
