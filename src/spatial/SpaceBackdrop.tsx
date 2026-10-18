@@ -7,7 +7,7 @@ import {
   type ReactNode,
 } from "react";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
-import { Vector3 } from "three";
+import { PerspectiveCamera, Vector3 } from "three";
 import { colors } from "../api/model";
 import { SpaceEnvironment } from "./SpaceEnvironment";
 
@@ -24,8 +24,18 @@ class SpaceBoundary extends Component<
     return this.state.failed ? null : this.props.children;
   }
 }
-const LOOK_FROM = new Vector3(0, 1.75, -9);
-const LOOK_TO = new Vector3(0, 2.45, -9);
+// A long lens: a wide angle stretches the sphere near the frame edges into an egg. The forward
+// limb lies about 4° below the horizontal; the view looks down about 8° so the limb crosses
+// just below the centre and the sunrise (about 2° below the horizontal) sits right above it.
+const LOOK_FROM = new Vector3(0, -0.2, -9);
+const LOOK_TO = new Vector3(0, 0.25, -9);
+/** Vertical field of view for a horizontal field of about 58°, never wider than 50° vertically. */
+function backdropFov(aspect: number) {
+  const horizontal = (58 * Math.PI) / 180;
+  const vertical =
+    2 * Math.atan(Math.tan(horizontal / 2) / Math.max(aspect, 0.01));
+  return Math.min(50, (vertical * 180) / Math.PI);
+}
 const INTRO_SECONDS = 2.8;
 // About ±1.4° of yaw and ±0.8° of pitch at the look distance.
 const PARALLAX = { x: 0.22, y: 0.13 };
@@ -47,7 +57,13 @@ function softwareRenderer(
 }
 
 function BackgroundScene({ dark }: { dark: boolean }) {
-  const { camera, gl, invalidate } = useThree();
+  const { camera, gl, invalidate, size } = useThree();
+  useEffect(() => {
+    if (!(camera instanceof PerspectiveCamera)) return;
+    camera.fov = backdropFov(size.width / Math.max(1, size.height));
+    camera.updateProjectionMatrix();
+    invalidate();
+  }, [camera, size.width, size.height, invalidate]);
   const reduced = useMemo(
     () =>
       matchMedia("(prefers-reduced-motion: reduce)").matches ||
@@ -111,7 +127,7 @@ const SpaceBackdrop = memo(function SpaceBackdrop({ dark }: { dark: boolean }) {
       <Canvas
         frameloop="demand"
         dpr={[1, 1.25]}
-        camera={{ position: [0, 1.6, 0.7], fov: 68 }}
+        camera={{ position: [0, 1.6, 0.7], fov: 38 }}
         gl={{ antialias: true, alpha: false, powerPreference: "low-power" }}
         fallback={null}
       >
