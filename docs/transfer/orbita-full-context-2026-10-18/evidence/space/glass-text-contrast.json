@@ -1,0 +1,31 @@
+{
+  "checkedAt": "2026-10-18T04:45:59.137156+00:00",
+  "method": "Conservative CSS sRGB alpha blend: darkest endpoint rgba(240,246,252,.68) over pure black; all lighter backdrops increase contrast for these dark text tokens",
+  "ratioRequired": 4.5,
+  "results": {
+    "light-text": {
+      "foreground": "#182232",
+      "minimumContrastOverBlackBackdrop": 6.62
+    },
+    "light-muted": {
+      "foreground": "#26364b",
+      "minimumContrastOverBlackBackdrop": 5.08
+    },
+    "light-success-text": {
+      "foreground": "#063f32",
+      "minimumContrastOverBlackBackdrop": 4.93
+    },
+    "light-warning-text": {
+      "foreground": "#63290a",
+      "minimumContrastOverBlackBackdrop": 4.7
+    },
+    "light-cyan-text": {
+      "foreground": "#0b3c59",
+      "minimumContrastOverBlackBackdrop": 4.82
+    },
+    "light-danger-text": {
+      "foreground": "#70122c",
+      "minimumContrastOverBlackBackdrop": 4.8
+    }
+  }
+}

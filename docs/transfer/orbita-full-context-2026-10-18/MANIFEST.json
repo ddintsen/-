@@ -1,0 +1,394 @@
+{
+  "createdAt": "2026-10-18T08:50:05+03:00",
+  "timezone": "Europe/Kiev",
+  "baselineMainCommit": "32d2821ad8073c45401232b569d24ae9e0fa5b3a",
+  "publishedRuntimeCommit": "57d17697a83a13d24a35f804eea118ec50d0096f",
+  "publishedRunId": "39100736300",
+  "appChangedForThisPackage": false,
+  "currentCaptureMatchesPublishedAssets": true,
+  "files": [
+    {
+      "path": "00-START-HERE.md",
+      "bytes": 4608,
+      "sha256": "ac95bbb89895f6b25f05a7c9ec614fe6481b4891d50b4606ef0772648d3cd2a6"
+    },
+    {
+      "path": "01-FULL-CONTEXT.md",
+      "bytes": 31408,
+      "sha256": "9b6c87db6070a08002390b985a5fc1f130db9986555a6f67d74f00c71b35b807"
+    },
+    {
+      "path": "02-REQUESTS-AND-SCREENSHOTS.md",
+      "bytes": 20370,
+      "sha256": "ca2a7e57fda8f801000b70897f37d1852191c79fcc6a8efa02f346c93569aabf"
+    },
+    {
+      "path": "03-AUDIT-PROMPT.md",
+      "bytes": 8032,
+      "sha256": "8446e342a7b9bcf93dd61984b1c1c495eb39ef0b0e9da786d23a0715a76fd956"
+    },
+    {
+      "path": "04-VERSIONS-AND-VERIFICATION.md",
+      "bytes": 7802,
+      "sha256": "206a33af07530e1daa56c084388547444d1db54d4c5f28eb81a80d15cc4c434a"
+    },
+    {
+      "path": "05-FILES-AND-LINKS.md",
+      "bytes": 5817,
+      "sha256": "2546cde136e2b506637021cdb43bbb82b01beb624663ca44d40ada7d093d23ff"
+    },
+    {
+      "path": "evidence/brand-theme/asset-match.json",
+      "bytes": 504,
+      "sha256": "c387f89f0c29c5ebdba1366ad5e9fb1f1fb8bdc4eb9a054897fabebb1c2de04d"
+    },
+    {
+      "path": "evidence/brand-theme/browser-check.json",
+      "bytes": 10734,
+      "sha256": "bac092a400bbb66fd80978cc071d0ec7a55cee85777470bb66bb022d940446f0"
+    },
+    {
+      "path": "evidence/brand-theme/published.json",
+      "bytes": 1324,
+      "sha256": "209b987cbce5ca59cc542bbfea375afe383b381bc514ce38e6d2c7a019cb496f"
+    },
+    {
+      "path": "evidence/hotfix/audit-crosscheck.md",
+      "bytes": 6852,
+      "sha256": "d4eeb9c824ee51925a9473b3ba2d8b634b619cefed6539117c2961bfae988233"
+    },
+    {
+      "path": "evidence/hotfix/document-check.json",
+      "bytes": 554,
+      "sha256": "4471d64d423a696acd55d3c9fcc1d1601e68621b0cb2d13583df966e1ad2d6f2"
+    },
+    {
+      "path": "evidence/space/asset-match.json",
+      "bytes": 504,
+      "sha256": "4cc035f0325762516d08eea66b1d219f6618bb3f2954ddd3451e979c2080d74f"
+    },
+    {
+      "path": "evidence/space/brand-asset.json",
+      "bytes": 725,
+      "sha256": "7faa8c61f65f34d98d76cb3d038c049a9a014134f202ff78410114797238394f"
+    },
+    {
+      "path": "evidence/space/checks.json",
+      "bytes": 1467,
+      "sha256": "d4046897a41be66568446cc1e8a6e80de3953e919e627872d94f1840af23aa67"
+    },
+    {
+      "path": "evidence/space/glass-text-contrast.json",
+      "bytes": 927,
+      "sha256": "b26eb76d7cd6a377be7ce320f3afdf533d3fb84602ed2f01e8371c684d6b2eb3"
+    },
+    {
+      "path": "evidence/space/header-hover-check.json",
+      "bytes": 11215,
+      "sha256": "90f01dc0dd735d8c1201e739fa625f629e591ac841feaa3ea047d3dfa0ec4c98"
+    },
+    {
+      "path": "evidence/space/production/production-smoke.json",
+      "bytes": 312,
+      "sha256": "8ebae54b08d7fd7fdceb14476261ebca1e1b50b9a4dbad19328466103f855abf"
+    },
+    {
+      "path": "evidence/space/published.json",
+      "bytes": 1324,
+      "sha256": "f46ca0e89d0648fa6c3d835b9169dbb3404d8e3701a5498c4763f5577ddb70ed"
+    },
+    {
+      "path": "evidence/space/space-assets.json",
+      "bytes": 604,
+      "sha256": "57c2080b67070032e0283be0071ede1d0fde0539825b581cd3dd669b6a45c704"
+    },
+    {
+      "path": "evidence/space/standalone/standalone-smoke.json",
+      "bytes": 173,
+      "sha256": "f415f634dd9f2153cfa7ea6757dba6279f0868d1db1c14c45f71707bfcb564e7"
+    },
+    {
+      "path": "evidence/space/update/update-smoke.json",
+      "bytes": 436,
+      "sha256": "84dc58455d044217926bb809a8708f8b7bf4077bde9a6d6441e2f9a01bf55764"
+    },
+    {
+      "path": "reference-docs/AGENTS.md",
+      "bytes": 17100,
+      "sha256": "144f3b5392c86f2cf2eccae72369070d36a893a2edb4466fdb3ce8e37ac34048"
+    },
+    {
+      "path": "reference-docs/API_CONTRACT.md",
+      "bytes": 8609,
+      "sha256": "9a527b8ecfb812fe9d2052de6ca5887e9b6b9ddc9bafbc16c41bd354776c4068"
+    },
+    {
+      "path": "reference-docs/AUDIT-CONTEXT.md",
+      "bytes": 3190,
+      "sha256": "2f49ae2139b2eebb960526fed44c5ec4785336240c2f594fb3cf5f4740369ed1"
+    },
+    {
+      "path": "reference-docs/CONTEXT.md",
+      "bytes": 30596,
+      "sha256": "341a68e709c6290fe6504ecd04faebf9106b65fda3f5f86dc338032fc72fd259"
+    },
+    {
+      "path": "reference-docs/DECISIONS.md",
+      "bytes": 43709,
+      "sha256": "44a76ebfbaf22ec37b7bab42dd22953be6061944970e4c0524a795bdbaa57fcb"
+    },
+    {
+      "path": "reference-docs/DEPLOYMENT.md",
+      "bytes": 18484,
+      "sha256": "36cf439c137e2d2b00bbe082574637dd0f1f464648cfff1cccb567cfc794c5e5"
+    },
+    {
+      "path": "reference-docs/DESIGN.md",
+      "bytes": 35033,
+      "sha256": "9f300ce4ae86d04ebd0f7d9500918b0e263292899fda035a8018345d2ebdbb0c"
+    },
+    {
+      "path": "reference-docs/HANDOFF.md",
+      "bytes": 67464,
+      "sha256": "db7ca14c026fd05a1dadadebc6262d24e33dd413977aba5817d25d971fcb6355"
+    },
+    {
+      "path": "reference-docs/QUEST_ACCEPTANCE.md",
+      "bytes": 6586,
+      "sha256": "20ea91e7d69c8f1d2259305762f90255e27aed1bce0dca3bf069e96dac8f828a"
+    },
+    {
+      "path": "reference-docs/SPEC.md",
+      "bytes": 47542,
+      "sha256": "de62c179bf9bef3ad3b19fb4430094fbde201410cb0d257d48b2f1a7bd02d076"
+    },
+    {
+      "path": "reference-docs/UX-CONTRACT.md",
+      "bytes": 24260,
+      "sha256": "8a62aa59f9f1f280b749ca17cf958d1914ebf4c395a75c86568a57a3787c9f9e"
+    },
+    {
+      "path": "reference-docs/VERIFICATION.md",
+      "bytes": 21680,
+      "sha256": "ec515b2c4b25dc8a5192b58135f63b9f08b9b9c94792a6689a4305b9f8c84625"
+    },
+    {
+      "path": "reference-docs/WORKLOG.md",
+      "bytes": 118464,
+      "sha256": "5ea9663a537e0555d60937b87e8eca9f480a6a75e5c6444f842e88b3ea123179"
+    },
+    {
+      "path": "screens/current/desktop-combined-light.png",
+      "bytes": 925585,
+      "sha256": "75d95f683557b6ca856cf6568aab840aabedb2b0fd8a8082d2fdb03c0c5147c3"
+    },
+    {
+      "path": "screens/current/desktop-dark.png",
+      "bytes": 826090,
+      "sha256": "2426d1346d706af96012fdd699127259f0a106a214808cae105345914c1f43d0"
+    },
+    {
+      "path": "screens/current/desktop-light.png",
+      "bytes": 929306,
+      "sha256": "675c7f134281756302dd4b4918972ad9a81b2358e34d8c1c5a9e032a8e8c48cd"
+    },
+    {
+      "path": "screens/current/desktop-lower-dark.png",
+      "bytes": 741445,
+      "sha256": "a793c9704d92f60332a0163ffa18fd43c66e8cf31e1e0cec2c60326cb62f784d"
+    },
+    {
+      "path": "screens/current/desktop-lower-light.png",
+      "bytes": 851451,
+      "sha256": "0cdaa745f11f507965e3c3cdef235767b354e094cb58f70e30c46c8319a08567"
+    },
+    {
+      "path": "screens/current/desktop-volume-light.png",
+      "bytes": 932052,
+      "sha256": "83c62fd58cd5d2a9950df746fe6dd941bf401dc5df4af98ece49abe89ba8ec6e"
+    },
+    {
+      "path": "screens/current/focus-dark.png",
+      "bytes": 241321,
+      "sha256": "d29af7743ab28772eb7170c04229c1208c3a39091dfff403d0f07e14a0bb3bdc"
+    },
+    {
+      "path": "screens/current/focus-light.png",
+      "bytes": 242603,
+      "sha256": "d3439259742fa00cad73e74e1ab9a46680465a3c3747d8121840fc0e5d764443"
+    },
+    {
+      "path": "screens/current/hover-dark.png",
+      "bytes": 826694,
+      "sha256": "128eb637e05aa8f616b5f1a6ba650db3c22c79a7ed81b79e78af6010baca247d"
+    },
+    {
+      "path": "screens/current/hover-light.png",
+      "bytes": 930104,
+      "sha256": "7b6a25a7bd59a1340b63808633b80674bb9a876465e9c2e60eda06b65f7e8e41"
+    },
+    {
+      "path": "screens/current/manifest.json",
+      "bytes": 822,
+      "sha256": "6cc905ae47f6e11f0ff90345dd3b59bc4359ce31b195097dd02588ee5caef4ac"
+    },
+    {
+      "path": "screens/current/mobile-dark.png",
+      "bytes": 187155,
+      "sha256": "62ca855cc0c53a275dced414fa96b526f51df9481fee1fb3a5f94e9e06f88ff4"
+    },
+    {
+      "path": "screens/current/mobile-en-light.png",
+      "bytes": 221576,
+      "sha256": "da564db241ae07762f2f03921b1608e12de10c48953094ce18509ed344c67792"
+    },
+    {
+      "path": "screens/current/mobile-light.png",
+      "bytes": 217920,
+      "sha256": "471484508faf0813b8cfd9ac478912cd3f0c5bb397c88ab7361d9688800f85ce"
+    },
+    {
+      "path": "screens/current/panorama-dark.png",
+      "bytes": 377047,
+      "sha256": "96501ed2604061e5f55662ff16e0c1b8787c5de3c48b1f461c844a36203ea976"
+    },
+    {
+      "path": "screens/current/panorama-light.png",
+      "bytes": 374945,
+      "sha256": "1f7ad85d8a8d4d7d8ff42cf84df76bf385afdb69106e255473df8e5fb18efdd6"
+    },
+    {
+      "path": "screens/current/space-environment-dark.png",
+      "bytes": 362143,
+      "sha256": "963da717003d581afaaf2a4727e6c8d09fd1a9e68f0f5efa212f1433594c84c5"
+    },
+    {
+      "path": "screens/current/space-environment-light.png",
+      "bytes": 356566,
+      "sha256": "4b7b71907e1b02ba9aeb412a6a3bf6534fd0621ac7069c5dd253ffd300f3deb5"
+    },
+    {
+      "path": "screens/current/spatial-equipment-focus-dark.png",
+      "bytes": 339067,
+      "sha256": "a5dff628fb4c67e24db9cf9f273ff34c0cc15359a1acd8bc339502780abd23fb"
+    },
+    {
+      "path": "screens/history-iteration-1/desktop-dark-ua.png",
+      "bytes": 1212800,
+      "sha256": "02a2830536e1cfc40f7075f81d894d1f43efc561958902a7658be591604931ed"
+    },
+    {
+      "path": "screens/history-iteration-1/desktop-ua.png",
+      "bytes": 1573278,
+      "sha256": "8a65f8143a4a1c301ba5929873d9d6bc2682ea98fafeab46d654f6d403a1c5e2"
+    },
+    {
+      "path": "screens/history-iteration-1/focus-ua.png",
+      "bytes": 525528,
+      "sha256": "2d04843446776675098ba5fa5dc96720f6d7827bcaf1e460b7a55f4e82f119e2"
+    },
+    {
+      "path": "screens/history-iteration-1/mobile-en-390x844.png",
+      "bytes": 253212,
+      "sha256": "4aa37241832aad87097cc5d89fefcd191e8569322bf99c9085632dfd652f9b09"
+    },
+    {
+      "path": "screens/history-iteration-1/mobile-en-fullpage.png",
+      "bytes": 787352,
+      "sha256": "b8536feeb38077692bf43062f0489733f83ecc22595627597bcbba573cd5a823"
+    },
+    {
+      "path": "screens/history-iteration-1/settings-api-ua.png",
+      "bytes": 458166,
+      "sha256": "076d501aa9951a57b1ae7f6ef942cc225612731839217d5b0c6b9927400e378d"
+    },
+    {
+      "path": "screens/history-iteration-1/settings-demo-ua.png",
+      "bytes": 483251,
+      "sha256": "f743d33f697faf824c2288d13f54ec98e335ad656a8a0f00f9f858836df55c83"
+    },
+    {
+      "path": "screens/history-iteration-1/spatial-panorama-canvas-uk.png",
+      "bytes": 357376,
+      "sha256": "509a27e61d734c7a3ba9b9b1f728d5e07901b24f9c8c6dfdc520d1861a4fbada"
+    },
+    {
+      "path": "screens/history-iteration-1/spatial-room-uk-1600x1000.png",
+      "bytes": 616047,
+      "sha256": "52f4a0fa22d4bddc36be55d7f614ebe3b3e30b4dfb5e1835e89c2f0a4a0f6416"
+    },
+    {
+      "path": "screens/history-iteration-2/desktop-dark-uk.png",
+      "bytes": 906638,
+      "sha256": "2c7b182f19e60a45ce5904398eff340bcd8a5923b8ffdb8745f86692fdd4d07d"
+    },
+    {
+      "path": "screens/history-iteration-2/desktop-light-uk.png",
+      "bytes": 388093,
+      "sha256": "a272dc09f96b6164897554a03b988fa545057319a2a1b617c43b360cb0b0a281"
+    },
+    {
+      "path": "screens/history-iteration-2/focus-monthly-uk.png",
+      "bytes": 421430,
+      "sha256": "6a9056890e8ee1423b175c040681032c5e7a7e21c278f17e62fdb9361b2334b2"
+    },
+    {
+      "path": "screens/history-iteration-2/spatial-equipment-focus.png",
+      "bytes": 319483,
+      "sha256": "aba9b8140b77f622004db0fb01c982fede95985ea00acce9280189e300d1a94b"
+    },
+    {
+      "path": "screens/history-iteration-2/spatial-equipment.png",
+      "bytes": 339052,
+      "sha256": "073361b8b8276161d8ac5905997807cbdbb947ce23339d8e813b26659bcd9e04"
+    },
+    {
+      "path": "screens/history-iteration-2/spatial-exact-facts.png",
+      "bytes": 283159,
+      "sha256": "efd0ea090e9026d76422acbb41c93ef4281fcc0cfbc221507542f0e28a1f34a7"
+    },
+    {
+      "path": "screens/history-iteration-2/spatial-payments.png",
+      "bytes": 341837,
+      "sha256": "70e5731e1c3b930eb9f971305b6a56b38e0caf83ae64930801fee1e540999ed0"
+    },
+    {
+      "path": "source-documents/01-Pasted-text.md",
+      "bytes": 15541,
+      "sha256": "f754983688de20e415dcd679a0531fc7755f8b6608ebd13db5e72e278b5815b8"
+    },
+    {
+      "path": "source-documents/02-orbita-review-and-prompt-original.md",
+      "bytes": 36433,
+      "sha256": "c36aa9378ea6a94818fbbd6b6b30702ab2b21a1ca14ad3eb821cf5788aa48939"
+    },
+    {
+      "path": "source-documents/03-orbita-earlier-review.md",
+      "bytes": 25607,
+      "sha256": "73c2ca3ab3cb3b790d1e1ab3d1d0fb1e745c5e20fc7d09bb983a3c4c5bac84f7"
+    },
+    {
+      "path": "source-documents/04-chat-hotfix-summary.md",
+      "bytes": 3811,
+      "sha256": "93a753c3acc4da93988f35cd880f22290d78ce7637b24ae895fd4b61ab7bb072"
+    },
+    {
+      "path": "source-documents/05-glass-room-and-header-request.md",
+      "bytes": 2332,
+      "sha256": "94b1e77b66758c142e28cb813a55472ce6f4ce5b885bf1f0e1b5f8e66ea96793"
+    },
+    {
+      "path": "source-documents/06-space-environment-request.md",
+      "bytes": 1103,
+      "sha256": "b75cef4e628b14f4efe0352f59a3e3fd5d1a1bf5846d2e076a28de18ed34e87c"
+    }
+  ],
+  "counts": {
+    "files": 75,
+    "markdown": 26,
+    "png": 34
+  },
+  "missingOriginals": [
+    "Four inline chat crops CHAT-01 through CHAT-04; described in 02-REQUESTS-AND-SCREENSHOTS.md, no replacement originals fabricated"
+  ]
+}

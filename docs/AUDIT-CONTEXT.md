@@ -1,5 +1,7 @@
 # Контекст для визуального аудита Орбіты
 
+Полный скачиваемый контекст, исходные документы, история запросов и скриншоты: [пакет передачи](transfer/orbita-full-context-2026-10-18/00-START-HERE.md), [один полный MD](transfer/orbita-full-context-2026-10-18/01-FULL-CONTEXT.md). ZIP: [только Markdown](downloads/orbita-context-markdown-2026-10-18.zip) или [полный пакет с PNG](downloads/orbita-full-context-2026-10-18.zip).
+
 Сайт: https://ddintsen.github.io/-/?orbita-update=1. Репозиторий: https://github.com/ddintsen/-. История версий сохранена в Git; актуальный статус публикации — в начале HANDOFF.md.
 
 Это аналитический интерфейс на React/Three.js с обычным и пространственным режимами. Сейчас отображаются демоданные. Оформление: космос, Земля, матовые стеклянные карточки с blur, светлая и тёмная темы; языки UA/EN/RU.

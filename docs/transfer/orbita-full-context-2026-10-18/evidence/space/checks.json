@@ -1,0 +1,37 @@
+{
+  "checkedAt": "2026-10-18T04:48:46.257417+00:00",
+  "phase": "published-verified",
+  "baseCommit": "8fa40fb5a734cb2754a6ff4248cb741b577d6e43",
+  "unitPassed": 61,
+  "e2e": {
+    "startTime": "2026-10-18T04:45:00.551Z",
+    "duration": 186349.458,
+    "expected": 37,
+    "skipped": 0,
+    "unexpected": 0,
+    "flaky": 0
+  },
+  "deploymentTests": 6,
+  "format": "passed",
+  "tokens": "passed",
+  "typecheckAndBuild": "passed",
+  "productionOffline": "Space, Earth texture, PWA, nine overview slots and all ten focus dashboards passed",
+  "upgrade": "Real legacy 552750e; both activation orders; saved JSON/config, sibling tab and unsaved draft guard passed",
+  "standalone": "Single HTML, no external runtime requests, no JavaScript errors",
+  "headerHover": "72 viewport/locale/theme/view combinations passed; no overflow or pointer outline, stable bounds and selected text",
+  "contrast": "All light text tokens >=4.5:1 over the darkest glass endpoint on a black backdrop; fills retained",
+  "screenshots": 14,
+  "limitations": [
+    "No physical Quest optics, controls/pinch, passthrough or FPS test",
+    "Real API endpoint not supplied; demo remains demo",
+    "Intermediate room iteration archived in Git 8fa40fb, not separately deployed"
+  ],
+  "sourceCommit": "9af132f821a90268e941d61b466e26c00cd07495",
+  "publication": {
+    "runId": "39098410015",
+    "build": "success",
+    "deploy": "success",
+    "browser": "success",
+    "assetsMatch": true
+  }
+}

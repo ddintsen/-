@@ -1,0 +1,27 @@
+{
+  "capturedAt": "2026-10-18T05:44:10.090Z",
+  "source": "Actual browser captures of local production; matching verified live assets; not direct live captures or physical headset captures",
+  "sourceCommit": "57d17697a83a13d24a35f804eea118ec50d0096f",
+  "publishedRunId": "39100736300",
+  "files": [
+    "desktop-light.png",
+    "hover-light.png",
+    "desktop-volume-light.png",
+    "desktop-combined-light.png",
+    "focus-light.png",
+    "desktop-lower-light.png",
+    "desktop-dark.png",
+    "hover-dark.png",
+    "focus-dark.png",
+    "desktop-lower-dark.png",
+    "mobile-light.png",
+    "mobile-dark.png",
+    "mobile-en-light.png",
+    "panorama-light.png",
+    "space-environment-light.png",
+    "panorama-dark.png",
+    "space-environment-dark.png",
+    "spatial-equipment-focus-dark.png"
+  ],
+  "errors": []
+}

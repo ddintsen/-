@@ -1,0 +1,12 @@
+{
+  "earth": {
+    "path": "src/assets/earth-atmosphere.jpg",
+    "source": "https://raw.githubusercontent.com/mrdoob/three.js/r180/examples/textures/planets/earth_atmos_2048.jpg",
+    "sha256": "2faa400d1eade3bc44caf6750d1b772bd9bbb6d87362c02bc7c3304e78fa0a9d",
+    "bytes": 512606,
+    "transformation": "Unmodified texture applied to a Three.js sphere; bundled locally and precached for offline use"
+  },
+  "sky": "Deterministic local procedural sky and 1400 distant star points",
+  "motion": "Static, no automatic rotation or camera animation",
+  "ar": "Opaque environment omitted in immersive-ar"
+}
