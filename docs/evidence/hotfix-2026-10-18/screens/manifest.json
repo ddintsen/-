@@ -1,6 +1,6 @@
 {
   "capturedAt": "2026-10-18T04:09:51.255Z",
-  "source": "Local production of the hotfix, pending publication",
+  "source": "Local production with assets matching the CI-verified published runtime",
   "baseCommit": "f341e1ffedd3fba9270a32b564c66d3b15415fa4",
   "files": [
     "desktop-light-uk.png",
@@ -16,5 +16,7 @@
     "spatial-channels-focus.png",
     "spatial-equipment-focus.png"
   ],
-  "errors": []
+  "errors": [],
+  "sourceCommit": "d8a444ffbd50d27fd99cc6d7f17d2fea2a94a707",
+  "publicationRunId": "39096215072"
 }

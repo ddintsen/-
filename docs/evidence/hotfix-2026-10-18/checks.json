@@ -1,6 +1,6 @@
 {
   "checkedAt": "2026-10-18T04:10:55.129121+00:00",
-  "phase": "local-validated",
+  "phase": "published-verified",
   "baseCommit": "f341e1ffedd3fba9270a32b564c66d3b15415fa4",
   "unitPassed": 61,
   "e2e": {
@@ -37,5 +37,14 @@
     "Canvas document inaccessible; applied chat table and user-endorsed uploaded full audit"
   ],
   "screenshots": 12,
-  "configuration": "start_skill updated and saved in cloud draft; no new cloud snapshot publication claimed"
+  "configuration": "start_skill updated and saved in cloud draft; no new cloud snapshot publication claimed",
+  "sourceCommit": "d8a444ffbd50d27fd99cc6d7f17d2fea2a94a707",
+  "publication": {
+    "runId": "39096215072",
+    "build": "success",
+    "deploy": "success",
+    "liveBrowser": "success",
+    "assetsMatch": true,
+    "receipt": "published.json"
+  }
 }

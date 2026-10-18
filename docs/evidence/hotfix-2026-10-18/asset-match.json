@@ -1,0 +1,16 @@
+{
+  "checkedAt": "2026-10-18T04:14:39.558012+00:00",
+  "sourceCommit": "d8a444ffbd50d27fd99cc6d7f17d2fea2a94a707",
+  "runId": "39096215072",
+  "localAssets": [
+    "/-/assets/index-CUxdnTvX.css",
+    "/-/assets/index-y4kuNWFi.js"
+  ],
+  "publishedAssets": [
+    "/-/assets/index-CUxdnTvX.css",
+    "/-/assets/index-y4kuNWFi.js"
+  ],
+  "match": true,
+  "liveBrowserVerification": "success",
+  "screenshotSource": "Local production with matching published runtime assets; not direct live or physical headset captures"
+}

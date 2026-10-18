@@ -17,5 +17,14 @@
     "both": 401.5
   },
   "combinedVolumeFocus": true,
-  "errors": []
+  "errors": [],
+  "combinedMobileWidths": [
+    360,
+    390
+  ],
+  "combinedMobileLocales": [
+    "uk",
+    "en",
+    "ru"
+  ]
 }
