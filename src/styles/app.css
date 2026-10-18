@@ -3806,3 +3806,15 @@ select:not([multiple]) {
     gap: 10px;
   }
 }
+
+/* The planet never ends: overscroll and collapsing mobile toolbars reveal the same sky. */
+:root {
+  background: var(--color-space-night);
+}
+:root[data-theme="office"] {
+  background: var(--color-space-light);
+}
+.space-backdrop {
+  bottom: auto;
+  height: 100lvh;
+}

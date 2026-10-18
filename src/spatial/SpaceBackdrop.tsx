@@ -31,19 +31,35 @@ const INTRO_SECONDS = 2.8;
 // for the frosted glass that resamples the canvas.
 const DRIFT_FPS = 12;
 
+/** Software rasterisers (no GPU) pay for every frame on the CPU the dashboard needs. */
+function softwareRenderer(
+  context: WebGLRenderingContext | WebGL2RenderingContext,
+) {
+  const info = context.getExtension("WEBGL_debug_renderer_info");
+  const name = String(
+    context.getParameter(
+      info ? info.UNMASKED_RENDERER_WEBGL : context.RENDERER,
+    ),
+  );
+  return /swiftshader|llvmpipe|software|basic render/i.test(name);
+}
+
 function BackgroundScene({ dark }: { dark: boolean }) {
   const { camera, gl, invalidate } = useThree();
   const reduced = useMemo(
-    () => matchMedia("(prefers-reduced-motion: reduce)").matches,
-    [],
+    () =>
+      matchMedia("(prefers-reduced-motion: reduce)").matches ||
+      softwareRenderer(gl.getContext()),
+    [gl],
   );
   const intro = useRef(reduced ? INTRO_SECONDS : 0);
   const look = useMemo(() => new Vector3(), []);
   useEffect(() => {
     gl.setClearColor(dark ? colors["space-night"] : colors["space-light"], 1);
     gl.domElement.dataset.spaceReady = "true";
+    gl.domElement.dataset.spaceMotion = reduced ? "still" : "drift";
     invalidate();
-  }, [gl, dark, invalidate]);
+  }, [gl, dark, invalidate, reduced]);
   useEffect(() => {
     if (reduced) return;
     const timer = window.setInterval(() => {

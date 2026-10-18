@@ -119,9 +119,16 @@ test("the animated backdrop redraws at a low, throttled rate", async ({
     page.evaluate(
       () => (window as unknown as { __spaceFrames: number }).__spaceFrames,
     );
+  const motion = await page
+    .locator(".space-backdrop canvas")
+    .getAttribute("data-space-motion");
   const before = await frames();
   await page.waitForTimeout(2000);
   const perSecond = ((await frames()) - before) / 2;
-  expect(perSecond).toBeGreaterThan(3);
-  expect(perSecond).toBeLessThan(20);
+  // Without a GPU the backdrop stays still so the dashboard keeps the CPU.
+  if (motion === "still") expect(perSecond).toBe(0);
+  else {
+    expect(perSecond).toBeGreaterThan(3);
+    expect(perSecond).toBeLessThan(20);
+  }
 });

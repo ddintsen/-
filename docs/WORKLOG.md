@@ -460,3 +460,8 @@
 
 ### Pryvat Sans опубликован по решению владельца
 - Владелец ответил: «Риск понимаю, закоммить woff2 шрифта в публичный репо, чтобы он был на Pages и в Quest». public/fonts/*.woff2 (7 начертаний, ~40KB каждое) убраны из .gitignore и закоммичены; PWA precache включает woff2, поэтому Quest получает шрифт и офлайн. Лицензионная пометка в метаданных шрифта сохранена без изменений.
+
+### Деплой Pages: фон без GPU
+- После 5a4c709 все четыре публикации падали на шаге «Verify upgrade from the legacy installed PWA»: сайт на Pages не обновлялся. Локально (с GPU) проверка проходит полностью; в CI нет GPU (SwiftShader), а анимированный фон рисует 12 кадров/с на CPU и тормозит страницу до тайм-аутов. Это и продуктовый дефект для слабых устройств.
+- Исправление: при программном рендере (SwiftShader/llvmpipe/software) фон статичный, как при reduced-motion; canvas помечается data-space-motion=still|drift, тест частоты redraw учитывает режим. Overscroll и сворачивающиеся мобильные панели показывают цвет неба текущей темы, фон на 100lvh.
+- Локально: test:update (legacy-фикстура собрана вручную, на Windows tar скрипта не работает), test:deployment, export:stackblitz, build:preview, unit, e2e space-glass.
