@@ -1,13 +1,26 @@
 {
-  "checkedAt": "2026-10-18T11:44:12.204Z",
+  "checkedAt": "2026-10-18T11:47:19.707Z",
   "repository": "ddintsen/-",
   "sourceCommit": "48cd20ccbd69eae67497685e3daf8fa44c30c8ef",
   "runId": "39124423311",
-  "phase": "preflight",
-  "buildResult": null,
-  "deployResult": null,
-  "verificationResult": null,
-  "artifacts": [],
+  "phase": "complete",
+  "buildResult": "success",
+  "deployResult": "success",
+  "verificationResult": "success",
+  "artifacts": [
+    {
+      "name": "orbita-stackblitz",
+      "url": "https://github.com/ddintsen/-/actions/runs/39124423311/artifacts/12134704383"
+    },
+    {
+      "name": "orbita-preview",
+      "url": "https://github.com/ddintsen/-/actions/runs/39124423311/artifacts/12135581128"
+    },
+    {
+      "name": "orbita-live-smoke",
+      "url": "https://github.com/ddintsen/-/actions/runs/39124423311/artifacts/12135576176"
+    }
+  ],
   "repositoryAccess": {
     "status": 200,
     "visibility": "public",
@@ -27,11 +40,11 @@
     "app": true,
     "assets": [
       {
-        "path": "/-/assets/index-DCsiUwAf.js",
+        "path": "/-/assets/index-C465YKfp.js",
         "status": 200
       },
       {
-        "path": "/-/assets/index-2hNDc_ov.css",
+        "path": "/-/assets/index-DFm1vtz7.css",
         "status": 200
       }
     ]
