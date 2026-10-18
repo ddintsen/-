@@ -145,6 +145,7 @@ export function DashboardCard({
           </div>
           {model.subtitle ? <p>{t(model.subtitle)}</p> : null}
         </div>
+        {controls ? <div className="card-controls">{controls}</div> : null}
         <Button
           className="focus-button icon-button"
           aria-label={`${t("В фокус")}: ${t(model.title)}`}
@@ -154,7 +155,6 @@ export function DashboardCard({
           <Maximize2 size={15} />
         </Button>
       </header>
-      {controls ? <div className="card-controls">{controls}</div> : null}
       {comparison ? (
         <div className="monthly-comparison">
           {[model, comparison].map((item) => (

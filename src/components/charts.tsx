@@ -127,41 +127,13 @@ export function GroupedBars({ bars }: { bars: Bar[] }) {
   const height = 210,
     base = 160,
     plot = 114,
-    max = Math.max(1, ...bars.flatMap((b) => b.values)) * 1.2,
+    max = Math.max(1, ...bars.flatMap((b) => b.values)) * 1.28,
     group = width / bars.length,
     barWidth = Math.max(8, Math.min(24, (group - 36) / 2)),
     pairGap = Math.max(10, Math.min(18, group * 0.14));
-  const valueLabels: {
-    x: number;
-    y: number;
-    text: string;
-    halfWidth: number;
-  }[] = [];
-  bars.forEach((bar, i) =>
-    bar.values.forEach((value, j) => {
-      const text = formatNumber(value);
-      const label = {
-        x:
-          i * group +
-          group / 2 +
-          (j === 0 ? -(barWidth + pairGap) / 2 : (barWidth + pairGap) / 2),
-        y: base - (value / max) * plot - 8,
-        text,
-        halfWidth: text.length * 3.9,
-      };
-      // Make room above the true bar rather than shrinking the financial labels.
-      let collision;
-      do {
-        collision = valueLabels.find(
-          (other) =>
-            Math.abs(label.x - other.x) <
-              label.halfWidth + other.halfWidth + 3 &&
-            Math.abs(label.y - other.y) < 18,
-        );
-        if (collision) label.y = collision.y - 18;
-      } while (collision);
-      valueLabels.push(label);
-    }),
+  // Both values of a pair share one baseline above the taller bar, so pairs read as a row.
+  const pairLabelY = bars.map(
+    (bar) => base - (Math.max(...bar.values) / max) * plot - 9,
   );
   return (
     <div className="grouped-bars" ref={ref}>
@@ -209,7 +181,6 @@ export function GroupedBars({ bars }: { bars: Bar[] }) {
           return (
             <g key={b.label}>
               {b.values.map((v, j) => {
-                const valueLabel = valueLabels[i * 2 + j];
                 const x =
                     i * group +
                     group / 2 +
@@ -218,6 +189,8 @@ export function GroupedBars({ bars }: { bars: Bar[] }) {
                 return (
                   <g key={j}>
                     <rect
+                      className="grow-bar"
+                      style={{ animationDelay: `${i * 45 + j * 20}ms` }}
                       x={x}
                       y={base - h}
                       width={barWidth}
@@ -233,11 +206,11 @@ export function GroupedBars({ bars }: { bars: Bar[] }) {
                       strokeWidth=".5"
                     />
                     <text
-                      x={x + barWidth / 2}
-                      y={valueLabel.y}
-                      className="chart-value"
+                      x={i * group + group / 2}
+                      y={pairLabelY[i] - (j === 0 ? 0 : 14)}
+                      className={`chart-value${j === 0 ? " is-reference" : ""}`}
                       textAnchor="middle"
-                      style={{ fontSize: 12 }}
+                      style={{ fontSize: j === 0 ? 10.5 : 12.5 }}
                     >
                       {formatNumber(v)}
                     </text>
@@ -280,7 +253,7 @@ export function PlanBars({ bars }: { bars: Bar[] }) {
   const base = 160,
     plot = 124,
     group = width / Math.max(1, bars.length);
-  const barWidth = Math.min(52, group * 0.62);
+  const barWidth = Math.min(56, group * 0.72);
   return (
     <div className="plan-bars" ref={ref}>
       <svg
@@ -305,7 +278,12 @@ export function PlanBars({ bars }: { bars: Bar[] }) {
             </linearGradient>
           ))}
         </defs>
-        <text x="6" y="15" className="chart-label">
+        <text
+          x={width - 6}
+          y={base - (100 / max) * plot - 7}
+          textAnchor="end"
+          className="chart-label plan-label"
+        >
           {t("План 100%")}
         </text>
         <line
@@ -318,10 +296,11 @@ export function PlanBars({ bars }: { bars: Bar[] }) {
         {bars.map((bar, i) => {
           const height = (bar.values[0] / max) * plot,
             x = (i + 0.5) * group;
-          const inside = height >= 38;
           return (
             <g key={bar.label}>
               <rect
+                className="grow-bar"
+                style={{ animationDelay: `${i * 70}ms` }}
                 x={x - barWidth / 2}
                 y={base - height}
                 width={barWidth}
@@ -331,13 +310,10 @@ export function PlanBars({ bars }: { bars: Bar[] }) {
               />
               <text
                 x={x}
-                y={inside ? base - height + 22 : base - height - 8}
+                y={base - height + 20}
                 textAnchor="middle"
                 className="bar-percent"
-                style={{
-                  fontSize: 14,
-                  fill: inside ? colors["on-primary"] : "var(--color-text)",
-                }}
+                style={{ fontSize: 12.5, fill: colors["on-primary"] }}
               >
                 {formatPercent(bar.values[0])}
               </text>

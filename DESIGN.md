@@ -74,13 +74,17 @@ colors:
   space-star: '#f0f7ff'
   space-orbit: '#aacde8'
   space-atmosphere: '#5cbbff'
+  space-sun: '#ffc58a'
+  space-sun-core: '#fff4e2'
+  space-day-haze: '#d8e8f6'
+  space-day-sky: '#5d7fa8'
 typography:
   display:
-    fontFamily: 'Manrope Variable, Inter Variable, sans-serif'
+    fontFamily: 'PrivatSans, Manrope Variable, Inter Variable, sans-serif'
   body:
-    fontFamily: 'Inter Variable, system-ui, sans-serif'
+    fontFamily: 'PrivatSans, Inter Variable, system-ui, sans-serif'
   data:
-    fontFamily: 'Inter Variable, system-ui, sans-serif'
+    fontFamily: 'PrivatSans, Inter Variable, system-ui, sans-serif'
 rounded:
   DEFAULT: '1.5rem'
   control: '0.75rem'
@@ -207,3 +211,6 @@ SpaceBackdrop использует demand и снимается в spatial modal
 
 ## Бренд без подложки · последнее уточнение 2026-10-18
 По прямому запросу пользователя «ПриватБанк | Орбіта» размещается непосредственно над фоном: без заливки, blur, скруглённой плашки и тени. В светлой теме весь исходный SVG и текст чёрные, в тёмной — белые; разделитель наследует тот же цвет с opacity0,28. Это заменяет прежнее правило о постоянно чёрном логотипе на светлой подложке. Фирменные paths не меняются; CSS brightness/invert отвечает только за монохром. Прозрачная область ссылки сохраняет высоту40px и видимый keyboard focus.
+
+## Stands over orbit (18 October 2026)
+The overview is three glass stands over Earth seen from low orbit: one material surface per subject (blur 40, saturate 160%), dashboards inside are tonal sections (`--section-bg`) without their own shadow or blur. Side stands turn 6° toward the viewer like the XR arc; rows stay a shared 3×3 subgrid. The environment is the only hero image: the limb sits below eye level, the sun rises from behind it in the dark theme (`space-sun`, `space-sun-core`), the day side and haze (`space-day-sky`, `space-day-haze`) carry the light theme. Motion: one slow Earth spin, a one-time sunrise reveal, stand/section arrival and value growth once per load; nothing moves under `prefers-reduced-motion`. In XR a hovered panel rises 3.5 cm toward the viewer. Typeface: PrivatSans first, Inter/Manrope fallback until licensed files are added.

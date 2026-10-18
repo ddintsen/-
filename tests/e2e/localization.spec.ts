@@ -1,6 +1,7 @@
 import { test, expect, type Page } from "@playwright/test";
 import AxeBuilder from "@axe-core/playwright";
 import data from "../../public/mock/dashboard-data.json" with { type: "json" };
+import { settleAnimations } from "./helpers";
 
 const headerLanguage = (page: Page) => page.locator(".language-switch select");
 const card = (page: Page, id: number) =>
@@ -219,6 +220,7 @@ test("plan and downtime meters expose exact values and truthful overachievement"
   page,
 }) => {
   await page.goto("/");
+  await settleAnimations(page);
   await headerLanguage(page).selectOption("en");
   const downtime = card(page, 10).getByRole("meter");
   const source =
@@ -258,6 +260,7 @@ test("plan and downtime meters expose exact values and truthful overachievement"
   await expect(card(page, 4).locator(".progress-percent").first()).toHaveText(
     "102%",
   );
+  await settleAnimations(page);
   const trackWidth = await overPlan.evaluate(
     (element) => element.getBoundingClientRect().width,
   );

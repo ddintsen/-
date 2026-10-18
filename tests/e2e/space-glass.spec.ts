@@ -3,6 +3,8 @@ import { test, expect } from "@playwright/test";
 test("the glass overview has a real themed space environment and stops drawing while idle", async ({
   page,
 }) => {
+  // The slow Earth drift is decorative motion; with reduced motion the backdrop must be still.
+  await page.emulateMedia({ reducedMotion: "reduce" });
   await page.addInitScript(() => {
     Object.assign(window, { __spaceDraws: 0 });
     for (const Constructor of [WebGLRenderingContext, WebGL2RenderingContext]) {
@@ -44,7 +46,8 @@ test("the glass overview has a real themed space environment and stops drawing w
   );
   await expect.poll(drawCount).toBeGreaterThan(before);
   await expect(page.locator("[data-dashboard-id]")).toHaveCount(9);
-  const surface = await page.locator(".card-2").evaluate((el) => {
+  // Glass is the stand material; dashboards inside it are tonal sections.
+  const surface = await page.locator(".payments-wing").evaluate((el) => {
     const style = getComputedStyle(el);
     return { background: style.backgroundImage, blur: style.backdropFilter };
   });
@@ -85,4 +88,40 @@ test("dashboard and exact values stay usable when the decorative WebGL backgroun
   await page.locator(".topbar-right button").first().click();
   await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
   expect(errors).toEqual([]);
+});
+
+test("the animated backdrop redraws at a low, throttled rate", async ({
+  page,
+}) => {
+  await page.addInitScript(() => {
+    Object.assign(window, { __spaceFrames: 0 });
+    const original = WebGL2RenderingContext.prototype.clear;
+    Object.defineProperty(WebGL2RenderingContext.prototype, "clear", {
+      value: function (this: WebGL2RenderingContext, mask: number) {
+        if (
+          this.canvas instanceof HTMLCanvasElement &&
+          this.canvas.closest(".space-backdrop")
+        )
+          (window as unknown as { __spaceFrames: number }).__spaceFrames++;
+        return Reflect.apply(original, this, [mask]);
+      },
+      configurable: true,
+      writable: true,
+    });
+  });
+  await page.goto("/");
+  await expect(
+    page.locator('.space-backdrop canvas[data-space-ready="true"]'),
+  ).toBeVisible();
+  // Let the one-time sunrise reveal finish before sampling the drift rate.
+  await page.waitForTimeout(3500);
+  const frames = () =>
+    page.evaluate(
+      () => (window as unknown as { __spaceFrames: number }).__spaceFrames,
+    );
+  const before = await frames();
+  await page.waitForTimeout(2000);
+  const perSecond = ((await frames()) - before) / 2;
+  expect(perSecond).toBeGreaterThan(3);
+  expect(perSecond).toBeLessThan(20);
 });

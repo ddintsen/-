@@ -34,6 +34,9 @@ import { spatialStands, FOCUS_ROWS, focusSurfaceHeight } from "./layout";
 import { Button, NativeSelect } from "../components/ui";
 import { formatReportDate, t, useLocale } from "../i18n";
 
+const PREVIEW_PULLBACK = 1.5;
+// Payments first, then the side stands, matching the DOM arrival.
+const STAND_ORDER = [1, 0, 1];
 // No remote hand/controller model download. Local profile JSON resolves controller buttons.
 const xrStore = createXRStore({
   emulate: false,
@@ -83,7 +86,9 @@ function Panel({
   width = 1.28,
   height = 0.8,
   wide = false,
+  appearDelay = 0,
 }: {
+  appearDelay?: number;
   factsOffset?: number;
   width?: number;
   height?: number;
@@ -114,6 +119,7 @@ function Panel({
         opacity={opacity}
         focused={focused}
         onSelect={onSelect}
+        appearDelay={appearDelay}
       />
     </group>
   );
@@ -165,7 +171,13 @@ function Scene({
   }, [session, setFrameloop, invalidate]);
   useEffect(() => {
     if (!session) {
-      camera.position.set(0, 1.6, 0.7);
+      // The browser preview steps back from the arc so a narrower lens shows all three
+      // stands at their true relative size; the headset always stands at the arc centre.
+      camera.position.set(
+        0,
+        1.6,
+        focused !== null ? 0.7 : 0.7 + PREVIEW_PULLBACK,
+      );
       camera.rotation.set(0, (yaw * Math.PI) / 180, 0);
       if (camera instanceof PerspectiveCamera) {
         camera.fov =
@@ -178,10 +190,8 @@ function Scene({
                   Math.PI,
               )
             : Math.max(
-                68,
-                (2 *
-                  Math.atan(2.05 / ((1.2 * size.width) / size.height)) *
-                  180) /
+                34,
+                (2 * Math.atan(0.9 / (size.width / size.height)) * 180) /
                   Math.PI,
               );
         camera.updateProjectionMatrix();
@@ -193,7 +203,9 @@ function Scene({
   useEffect(() => {
     if (!anchor.current) return;
     const viewer = session ? gl.xr.getCamera() : camera;
-    const p = viewer.getWorldPosition(new Vector3());
+    const p = session
+      ? viewer.getWorldPosition(new Vector3())
+      : new Vector3(0, 1.6, 0.7);
     const d = viewer.getWorldDirection(new Vector3());
     anchor.current.position.set(p.x, p.y - 1.6, p.z);
     anchor.current.rotation.set(0, Math.atan2(-d.x, -d.z), 0);
@@ -240,22 +252,46 @@ function Scene({
     <>
       <XROrigin />
       {environment}
+      <ambientLight intensity={theme === "dark" ? 0.35 : 0.8} />
+      <directionalLight
+        position={[-3, 4, 2]}
+        intensity={theme === "dark" ? 1.4 : 1.8}
+      />
       <group ref={anchor}>
         {!hasFocus && data
-          ? spatialStands.map((stand) => (
+          ? spatialStands.map((stand, standIndex) => (
               <group
                 key={stand.key}
                 position={[stand.x, 1.6, stand.z]}
                 rotation={[0, stand.angle, 0]}
               >
+                <mesh
+                  position={[0, 0, -0.05]}
+                  renderOrder={0}
+                  raycast={() => {}}
+                >
+                  <boxGeometry args={[1.3, 1.14, 0.028]} />
+                  <meshStandardMaterial
+                    color={colors["space-blue"]}
+                    roughness={0.35}
+                    metalness={0.15}
+                    transparent
+                    opacity={0.55}
+                    depthWrite={false}
+                  />
+                </mesh>
                 <SpatialWing
+                  appearDelay={STAND_ORDER[standIndex] * 0.12}
                   title={t(stand.title)}
                   width={1.28}
                   height={1.12}
                   position={[0, 0, -0.025]}
                 />
-                {stand.panels.map((panel) => (
+                {stand.panels.map((panel, panelIndex) => (
                   <Panel
+                    appearDelay={
+                      STAND_ORDER[standIndex] * 0.12 + 0.18 + panelIndex * 0.07
+                    }
                     key={panel.id}
                     model={models[panel.id - 1]}
                     position={[panel.x, panel.y, 0]}
@@ -306,7 +342,7 @@ function Scene({
         ) : null}
       </group>
       {focused && data ? (
-        <group ref={focusGroup}>
+        <group ref={focusGroup} key={focused}>
           <Panel
             model={models[focused - 1]}
             position={[0, 0, 0]}

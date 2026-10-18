@@ -1,5 +1,6 @@
 import { test, expect } from "@playwright/test";
 import data from "../../public/mock/dashboard-data.json" with { type: "json" };
+import { settleAnimations } from "./helpers";
 
 test("overview stays 3 by 3 in all monthly modes, languages and themes", async ({
   page,
@@ -20,12 +21,16 @@ test("overview stays 3 by 3 in all monthly modes, languages and themes", async (
           await expect(
             page.locator(`.${wing}-wing .dashboard-card`),
           ).toHaveCount(3);
+        await settleAnimations(page);
+        // Layout boxes: the side stands' tilt toward the viewer is a projection, not the grid.
         const rows = await page.locator(".wing").evaluateAll((wings) =>
           wings.map((w) =>
-            [...w.querySelectorAll(".dashboard-card")].map((c) => ({
-              top: c.getBoundingClientRect().top,
-              bottom: c.getBoundingClientRect().bottom,
-            })),
+            [...w.querySelectorAll<HTMLElement>(".dashboard-card")].map(
+              (c) => ({
+                top: c.offsetTop,
+                bottom: c.offsetTop + c.offsetHeight,
+              }),
+            ),
           ),
         );
         for (let row = 0; row < 3; row++)
@@ -55,6 +60,7 @@ test("risk uses actual 17/46/72 percent lengths and only two operational alerts"
   page,
 }) => {
   await page.goto("/");
+  await settleAnimations(page);
   const meters = page.locator(".card-10 .downtime-gauge");
   for (const [index, expected] of [17, 46, 72].entries()) {
     const ratio = await meters.nth(index).evaluate((el) => {

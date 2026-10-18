@@ -15,3 +15,5 @@ playwright-report/
 *.pfx
 standalone-dist/
 stackblitz-export/
+.qa/
+.claude/

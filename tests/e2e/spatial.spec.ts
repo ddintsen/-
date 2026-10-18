@@ -24,18 +24,19 @@ async function clickWorld(page: Page, x: number, y: number, distance: number) {
   await canvas.scrollIntoViewIfNeeded();
   const box = (await canvas.boundingBox())!;
   const focus = await page.locator("#xr-focus").inputValue();
-  const fov =
-    focus !== "0"
-      ? Math.max(
-          68,
-          (2 * Math.atan(1.1 / ((1.5 * box.width) / box.height)) * 180) /
-            Math.PI,
-        )
-      : Math.max(
-          68,
-          (2 * Math.atan(2.05 / ((1.2 * box.width) / box.height)) * 180) /
-            Math.PI,
-        );
+  // The panorama preview steps back 1.5 m from the arc with a narrower lens (see SpatialView).
+  const panorama = focus === "0";
+  if (panorama) distance += 1.5;
+  const fov = panorama
+    ? Math.max(
+        34,
+        (2 * Math.atan(0.9 / (box.width / box.height)) * 180) / Math.PI,
+      )
+    : Math.max(
+        68,
+        (2 * Math.atan(1.1 / ((1.5 * box.width) / box.height)) * 180) /
+          Math.PI,
+      );
   const px =
     box.height / (2 * distance * Math.tan(((fov / 2) * Math.PI) / 180));
   await page.mouse.move(

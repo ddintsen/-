@@ -1,4 +1,30 @@
 @import "./tokens.css";
+/* PrivatBank brand typeface. Resolved from an installed copy until licensed files are added
+   to src/assets/fonts (see docs/DECISIONS.md); Inter/Manrope stay the shipped fallback. */
+@font-face {
+  font-family: PrivatSans;
+  src: local("PrivatSans"), local("Privat Sans"), local("PrivatSans-Regular");
+  font-weight: 400;
+  font-display: swap;
+}
+@font-face {
+  font-family: PrivatSans;
+  src: local("PrivatSans Medium"), local("PrivatSans-Medium");
+  font-weight: 500;
+  font-display: swap;
+}
+@font-face {
+  font-family: PrivatSans;
+  src: local("PrivatSans SemiBold"), local("PrivatSans-SemiBold");
+  font-weight: 600;
+  font-display: swap;
+}
+@font-face {
+  font-family: PrivatSans;
+  src: local("PrivatSans Bold"), local("PrivatSans-Bold");
+  font-weight: 700;
+  font-display: swap;
+}
 * {
   box-sizing: border-box;
   scrollbar-width: thin;
@@ -3332,4 +3358,299 @@ summary:focus-visible,
 [data-theme="office"] .progress-gauge[data-tone="danger"] .progress-percent,
 [data-theme="office"] .tone-danger {
   color: var(--color-light-danger-text);
+}
+
+/* Three glass stands over the planet (v3). Each block is one material surface;
+   dashboards inside are tonal sections, not cards on cards. Side stands turn toward
+   the viewer like the XR arc, so the overview reads as the same space as the headset. */
+:root {
+  --stand-bg: linear-gradient(
+    165deg,
+    rgba(250, 252, 255, 0.5),
+    rgba(232, 240, 249, 0.36)
+  );
+  --stand-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.9),
+    inset 0 -1px 0 rgba(15, 23, 42, 0.04),
+    0 30px 70px -30px rgba(18, 38, 66, 0.4);
+  --section-bg: rgba(255, 255, 255, 0.46);
+  --section-hover: rgba(255, 255, 255, 0.72);
+  --section-rim: inset 0 1px 0 rgba(255, 255, 255, 0.85);
+}
+[data-theme="dark"] {
+  --stand-bg: linear-gradient(
+    165deg,
+    rgba(40, 50, 72, 0.4),
+    rgba(10, 15, 26, 0.56)
+  );
+  --stand-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.16),
+    inset 1px 0 0 rgba(255, 255, 255, 0.05),
+    0 40px 90px -36px rgba(0, 0, 0, 0.8);
+  --section-bg: rgba(255, 255, 255, 0.045);
+  --section-hover: rgba(255, 255, 255, 0.075);
+  --section-rim: inset 0 1px 0 rgba(255, 255, 255, 0.06);
+}
+.cockpit .wing {
+  padding: 18px 12px 12px;
+  border-radius: 36px;
+  background: var(--stand-bg);
+  -webkit-backdrop-filter: blur(40px) saturate(160%);
+  backdrop-filter: blur(40px) saturate(160%);
+  box-shadow: var(--stand-shadow);
+}
+.cockpit .wing-heading {
+  padding: 0 12px 14px;
+}
+.cockpit .wing-heading h2 {
+  padding: 0;
+  background: none;
+  box-shadow: none;
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+  font-size: 18px;
+  line-height: 24px;
+  font-weight: 600;
+  letter-spacing: -0.4px;
+}
+.cockpit .wing-cards {
+  gap: 10px;
+}
+.cockpit .dashboard-card,
+[data-theme="office"] .cockpit .dashboard-card,
+[data-theme="dark"] .cockpit .dashboard-card {
+  background: var(--section-bg);
+  border: 0;
+  border-radius: 26px;
+  box-shadow: var(--section-rim);
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+  transition: background 0.2s;
+}
+@media (hover: hover) and (pointer: fine) {
+  .cockpit .dashboard-card:hover {
+    background: var(--section-hover);
+  }
+}
+@media (min-width: 1251px) {
+  /* Stands keep a shared 3x3 row grid: each stand is a subgrid with its heading row. */
+  .cockpit.view-overview,
+  .cockpit.view-overview:has(.card-2):has(.card-3) {
+    grid-template-rows: auto auto auto auto;
+    align-items: stretch;
+    column-gap: 22px;
+    row-gap: 10px;
+    perspective: 2600px;
+  }
+  .view-overview .wing,
+  .view-overview:has(.card-2):has(.card-3) .wing {
+    display: grid;
+    grid-template-rows: subgrid;
+    grid-row: 1 / span 4;
+  }
+  .view-overview .wing-cards {
+    display: contents;
+  }
+  .view-overview .wing-cards > .dashboard-card,
+  .view-overview:has(.card-2):has(.card-3) .card-7,
+  .view-overview:has(.card-2):has(.card-3) .card-10 {
+    grid-row: auto;
+    align-self: stretch;
+  }
+  .view-overview .cash-wing {
+    rotate: y 6deg;
+    transform-origin: 100% 50%;
+  }
+  .view-overview .equipment-wing {
+    rotate: y -6deg;
+    transform-origin: 0 50%;
+  }
+}
+@media (max-width: 760px) {
+  .cockpit .wing {
+    padding: 14px 8px 8px;
+    border-radius: 28px;
+  }
+  .cockpit .dashboard-card {
+    border-radius: 22px;
+  }
+}
+@supports not (
+  (backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))
+) {
+  .cockpit .wing {
+    background: rgba(240, 245, 251, 0.95);
+  }
+  [data-theme="dark"] .cockpit .wing {
+    background: rgba(18, 24, 36, 0.95);
+  }
+}
+.cockpit .card-heading {
+  align-items: flex-start;
+  flex-wrap: wrap;
+  row-gap: 12px;
+}
+.cockpit .card-heading > div:first-child {
+  flex: 1 1 auto;
+}
+.cockpit .card-heading .card-controls {
+  order: 3;
+  flex: 1 0 100%;
+}
+.cockpit .card-heading .monthly-switch {
+  margin: 0;
+  justify-content: flex-start;
+}
+.cockpit .card-heading p {
+  font-size: 12px;
+  margin-top: 4px;
+}
+.cockpit .card-heading h3 {
+  font-size: 15px;
+  font-weight: 600;
+}
+.chart-value.is-reference {
+  fill: var(--color-muted);
+}
+.plan-label {
+  font-size: 11px;
+}
+.cockpit .progress-detail,
+.cockpit .progress-reference,
+.cockpit .progress-actual small {
+  font-size: 11px;
+}
+.workspace-footer {
+  background: none;
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+  padding: 0 4px;
+  font-size: 12px;
+}
+.workspace-footer .attention-items .button {
+  background: var(--stand-bg);
+  -webkit-backdrop-filter: blur(24px) saturate(150%);
+  backdrop-filter: blur(24px) saturate(150%);
+  box-shadow: var(--section-rim);
+  border-color: transparent;
+}
+
+/* Spatial preview: one control row above the scene, one below; the scene is the hero. */
+@media (min-width: 1024px) {
+  .spatial-view {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto auto;
+    grid-template-areas:
+      "env actions recenter entry"
+      "canvas canvas canvas canvas"
+      "picker nav controls controls"
+      "msg msg msg msg";
+    align-items: center;
+    gap: 14px 12px;
+  }
+  .spatial-view > * {
+    grid-column: 1 / -1;
+    margin: 0;
+  }
+  .spatial-view .xr-preview-toolbar {
+    display: contents;
+  }
+  .spatial-view .xr-environments {
+    grid-area: env;
+  }
+  .spatial-view .xr-preview-actions {
+    grid-area: actions;
+    justify-self: end;
+  }
+  .spatial-view .xr-panorama-tools {
+    grid-area: recenter;
+  }
+  .spatial-view .xr-toolbar {
+    grid-area: entry;
+  }
+  .spatial-view .xr-canvas {
+    grid-area: canvas;
+    border-radius: 28px;
+    min-height: min(62vh, 640px);
+  }
+  .spatial-view .xr-focus-picker {
+    grid-area: picker;
+  }
+  .spatial-view .xr-focus-navigation {
+    grid-area: nav;
+  }
+  .spatial-view .xr-controls {
+    grid-area: controls;
+    justify-self: end;
+  }
+  .spatial-view .xr-facts-scroll,
+  .spatial-view .inline-warning,
+  .spatial-view .xr-support {
+    grid-column: 1 / -1;
+  }
+}
+
+/* Arrival motion: stands, then their sections, then values grow from their baseline.
+   Once per load; nothing loops over the data. */
+@media (prefers-reduced-motion: no-preference) {
+  .cockpit .wing {
+    animation: stand-arrive 0.9s cubic-bezier(0.16, 1, 0.3, 1) backwards;
+  }
+  .cockpit .payments-wing {
+    animation-delay: 0.05s;
+  }
+  .cockpit .cash-wing {
+    animation-delay: 0.16s;
+  }
+  .cockpit .equipment-wing {
+    animation-delay: 0.22s;
+  }
+  .cockpit .wing-cards > .dashboard-card {
+    animation: section-arrive 0.7s cubic-bezier(0.16, 1, 0.3, 1) backwards;
+    animation-delay: 0.3s;
+  }
+  .cockpit .wing-cards > .dashboard-card:nth-child(2) {
+    animation-delay: 0.38s;
+  }
+  .cockpit .wing-cards > .dashboard-card:nth-child(3) {
+    animation-delay: 0.46s;
+  }
+  .grow-bar {
+    transform-box: fill-box;
+    transform-origin: 50% 100%;
+    animation: bar-grow 0.9s cubic-bezier(0.22, 1, 0.36, 1) 0.45s backwards;
+  }
+  .progress-fill {
+    transform-origin: 0 50%;
+    animation: fill-grow 1s cubic-bezier(0.22, 1, 0.36, 1) 0.5s backwards;
+  }
+}
+@keyframes stand-arrive {
+  from {
+    opacity: 0;
+    transform: translateY(28px) scale(0.985);
+  }
+}
+@keyframes section-arrive {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+}
+@keyframes bar-grow {
+  from {
+    transform: scaleY(0);
+  }
+}
+@keyframes fill-grow {
+  from {
+    transform: scaleX(0);
+  }
+}
+@media (min-width: 1024px) {
+  .spatial-view .xr-focus-navigation {
+    border-top: 0;
+    padding-top: 0;
+    justify-content: center;
+  }
 }
