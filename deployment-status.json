@@ -1,26 +1,13 @@
 {
-  "checkedAt": "2026-10-18T21:28:45.231Z",
+  "checkedAt": "2026-10-18T22:19:12.974Z",
   "repository": "ddintsen/-",
-  "sourceCommit": "8ee28139028ecc9da35f213f3991b8cea8877fd7",
-  "runId": "39167822288",
-  "phase": "complete",
-  "buildResult": "success",
-  "deployResult": "success",
-  "verificationResult": "success",
-  "artifacts": [
-    {
-      "name": "orbita-stackblitz",
-      "url": "https://github.com/ddintsen/-/actions/runs/39167822288/artifacts/12151621259"
-    },
-    {
-      "name": "orbita-preview",
-      "url": "https://github.com/ddintsen/-/actions/runs/39167822288/artifacts/12151327927"
-    },
-    {
-      "name": "orbita-live-smoke",
-      "url": "https://github.com/ddintsen/-/actions/runs/39167822288/artifacts/12150969309"
-    }
-  ],
+  "sourceCommit": "d34c0ded583217bd5aa875134f0ba9026cb52bbc",
+  "runId": "39171689869",
+  "phase": "preflight",
+  "buildResult": null,
+  "deployResult": null,
+  "verificationResult": null,
+  "artifacts": [],
   "repositoryAccess": {
     "status": 200,
     "visibility": "public",
