@@ -7,6 +7,7 @@ import {
   CanvasTexture,
   Color,
   type Group,
+  type ShaderMaterial,
   Float32BufferAttribute,
   NoColorSpace,
   SRGBColorSpace,
@@ -306,6 +307,10 @@ export function SpaceEnvironment({
   const spin = useRef<Group>(null);
   const cloudSpin = useRef<Group>(null);
   const sun = useRef<Group>(null);
+  // R3F copies a `uniforms` prop into the material, so per-frame values are written through refs.
+  const starMaterial = useRef<ShaderMaterial>(null);
+  const cloudMaterial = useRef<ShaderMaterial>(null);
+  const clock = useRef(0);
   const pixelRatio = useThree((state) => state.gl.getPixelRatio());
   const starUniforms = useMemo(
     () => ({
@@ -337,13 +342,14 @@ export function SpaceEnvironment({
     const step = Math.min(delta, 0.2);
     if (spin.current) spin.current.rotation.y += step * EARTH_SPIN;
     if (cloudSpin.current) cloudSpin.current.rotation.y += step * CLOUD_SPIN;
-    starUniforms.time.value += step;
-    cloudUniforms.time.value += step;
+    clock.current += step;
+    if (starMaterial.current)
+      starMaterial.current.uniforms.time.value = clock.current;
+    if (cloudMaterial.current)
+      cloudMaterial.current.uniforms.time.value = clock.current;
     // The sunrise breathes: about ±4% over nine seconds.
     if (sun.current)
-      sun.current.scale.setScalar(
-        1 + 0.04 * Math.sin(starUniforms.time.value * 0.7),
-      );
+      sun.current.scale.setScalar(1 + 0.04 * Math.sin(clock.current * 0.7));
   });
   const sky = useMemo(() => skyTexture(dark), [dark]);
   const glow = useMemo(glowTexture, []);
@@ -400,6 +406,7 @@ export function SpaceEnvironment({
       </mesh>
       <points geometry={stars} raycast={() => {}} renderOrder={-9}>
         <shaderMaterial
+          ref={starMaterial}
           uniforms={starUniforms}
           vertexShader={starVertex}
           fragmentShader={starFragment}
@@ -425,6 +432,7 @@ export function SpaceEnvironment({
             <mesh raycast={() => {}} renderOrder={-7.5}>
               <sphereGeometry args={[EARTH_RADIUS * 1.004, 192, 128]} />
               <shaderMaterial
+                ref={cloudMaterial}
                 uniforms={cloudUniforms}
                 vertexShader={cloudVertex}
                 fragmentShader={cloudFragment}
