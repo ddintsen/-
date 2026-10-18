@@ -1,7 +1,7 @@
 @import "./tokens.css";
 /* Pryvat Sans, PrivatBank's typeface ("Exclusively for JSC CB PRIVATBANK", embedding allowed).
-   An installed copy wins; public/fonts holds local woff2 copies that are not committed to the
-   public repository. Without either, Inter/Manrope render. See docs/DECISIONS.md. */
+   An installed copy wins; otherwise the shipped woff2 in public/fonts (committed at the owner's
+   explicit request, see docs/DECISIONS.md). Inter/Manrope remain the fallback. */
 @font-face {
   font-family: "Pryvat Sans";
   src:
