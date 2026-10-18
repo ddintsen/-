@@ -25,6 +25,14 @@ export function AppUpdate() {
       url.searchParams.delete("orbita-update");
       history.replaceState(history.state, "", url);
     }
+    // This tab has the update button: a later release must wait for it, never navigate it.
+    const announce = (worker?: ServiceWorker | null) => {
+      try {
+        worker?.postMessage({ type: "ORBITA_CLIENT_READY" });
+      } catch {
+        // A worker that cannot receive messages only loses the announcement.
+      }
+    };
     const showWaiting = () => {
       if (!disposed && registration.current?.waiting) setReady(true);
     };
@@ -38,6 +46,7 @@ export function AppUpdate() {
     const onControllerChange = () => {
       const previous = controller;
       controller = navigator.serviceWorker.controller;
+      announce(controller);
       if (!previous || disposed) return;
       if (applying.current) location.reload();
       else setReady(true);
@@ -61,6 +70,7 @@ export function AppUpdate() {
       .then((value) => {
         if (disposed) return;
         registration.current = value;
+        announce(navigator.serviceWorker.controller ?? value.active);
         value.addEventListener("updatefound", onUpdateFound);
         onUpdateFound();
         showWaiting();

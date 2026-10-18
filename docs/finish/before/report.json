@@ -1,0 +1,209 @@
+{
+  "url": "http://localhost:5173",
+  "channel": "C:/Program Files/Google/Chrome/Application/chrome.exe",
+  "results": [
+    {
+      "route": "/",
+      "viewport": {
+        "width": 390,
+        "height": 844,
+        "label": "390"
+      },
+      "reducedMotion": false,
+      "name": "home__390",
+      "status": 200,
+      "loadMs": 4315,
+      "shot": "home__390.png",
+      "fullShot": "home__390__full.png",
+      "layout": {
+        "scrollWidth": 390,
+        "clientWidth": 390,
+        "overflowX": false,
+        "offenders": [],
+        "clipped": [
+          {
+            "selector": "span.source-item.sr-only",
+            "text": "Демодані"
+          },
+          {
+            "selector": "span.sr-only",
+            "text": "Мова"
+          }
+        ],
+        "smallTargets": 13,
+        "smallTargetSamples": [
+          "button.button.ghost.icon-button 32x36",
+          "button.button.ghost.icon-button 32x36",
+          "button.button.ghost.icon-button 32x36",
+          "button.button.ghost 38x40",
+          "button.button.ghost.focus-button 40x40",
+          "button.button.ghost.focus-button 40x40"
+        ],
+        "imgNoAlt": 0,
+        "brokenImages": [],
+        "h1Count": 1,
+        "headingSkips": [],
+        "tinyText": 61,
+        "docHeight": 4371,
+        "title": "Огляд · Орбіта",
+        "lang": "uk",
+        "metaViewport": true
+      },
+      "axe": [],
+      "console": [],
+      "pageErrors": [],
+      "failedRequests": [],
+      "badResponses": []
+    },
+    {
+      "route": "/",
+      "viewport": {
+        "width": 390,
+        "height": 844,
+        "label": "390"
+      },
+      "reducedMotion": true,
+      "name": "home__390__reduced",
+      "status": 200,
+      "loadMs": 4281,
+      "shot": "home__390__reduced.png",
+      "fullShot": "home__390__reduced__full.png",
+      "layout": {
+        "scrollWidth": 390,
+        "clientWidth": 390,
+        "overflowX": false,
+        "offenders": [],
+        "clipped": [
+          {
+            "selector": "span.source-item.sr-only",
+            "text": "Демодані"
+          },
+          {
+            "selector": "span.sr-only",
+            "text": "Мова"
+          }
+        ],
+        "smallTargets": 13,
+        "smallTargetSamples": [
+          "button.button.ghost.icon-button 32x36",
+          "button.button.ghost.icon-button 32x36",
+          "button.button.ghost.icon-button 32x36",
+          "button.button.ghost 38x40",
+          "button.button.ghost.focus-button 40x40",
+          "button.button.ghost.focus-button 40x40"
+        ],
+        "imgNoAlt": 0,
+        "brokenImages": [],
+        "h1Count": 1,
+        "headingSkips": [],
+        "tinyText": 61,
+        "docHeight": 4371,
+        "title": "Огляд · Орбіта",
+        "lang": "uk",
+        "metaViewport": true
+      },
+      "console": [],
+      "pageErrors": [],
+      "failedRequests": [],
+      "badResponses": []
+    },
+    {
+      "route": "/",
+      "viewport": {
+        "width": 1440,
+        "height": 900,
+        "label": "1440"
+      },
+      "reducedMotion": false,
+      "name": "home__1440",
+      "status": 200,
+      "loadMs": 4515,
+      "shot": "home__1440.png",
+      "fullShot": "home__1440__full.png",
+      "layout": {
+        "scrollWidth": 1440,
+        "clientWidth": 1440,
+        "overflowX": false,
+        "offenders": [],
+        "clipped": [
+          {
+            "selector": "span.source-item.sr-only",
+            "text": "Демодані"
+          },
+          {
+            "selector": "span.sr-only",
+            "text": "Мова"
+          }
+        ],
+        "smallTargets": 0,
+        "smallTargetSamples": [],
+        "imgNoAlt": 0,
+        "brokenImages": [],
+        "h1Count": 1,
+        "headingSkips": [],
+        "tinyText": 67,
+        "docHeight": 1699,
+        "title": "Огляд · Орбіта",
+        "lang": "uk",
+        "metaViewport": true
+      },
+      "axe": [],
+      "console": [],
+      "pageErrors": [],
+      "failedRequests": [],
+      "badResponses": []
+    },
+    {
+      "route": "/",
+      "viewport": {
+        "width": 1440,
+        "height": 900,
+        "label": "1440"
+      },
+      "reducedMotion": true,
+      "name": "home__1440__reduced",
+      "status": 200,
+      "loadMs": 4769,
+      "shot": "home__1440__reduced.png",
+      "fullShot": "home__1440__reduced__full.png",
+      "layout": {
+        "scrollWidth": 1440,
+        "clientWidth": 1440,
+        "overflowX": false,
+        "offenders": [],
+        "clipped": [
+          {
+            "selector": "span.source-item.sr-only",
+            "text": "Демодані"
+          },
+          {
+            "selector": "span.sr-only",
+            "text": "Мова"
+          }
+        ],
+        "smallTargets": 0,
+        "smallTargetSamples": [],
+        "imgNoAlt": 0,
+        "brokenImages": [],
+        "h1Count": 1,
+        "headingSkips": [],
+        "tinyText": 67,
+        "docHeight": 1699,
+        "title": "Огляд · Орбіта",
+        "lang": "uk",
+        "metaViewport": true
+      },
+      "console": [],
+      "pageErrors": [],
+      "failedRequests": [],
+      "badResponses": []
+    }
+  ],
+  "sheets": [
+    "_sheet_home.png"
+  ],
+  "blockingPasses": 0,
+  "axeScans": 2,
+  "missingRequiredAxe": false,
+  "exitCode": 0
+}

@@ -1,0 +1,595 @@
+{
+  "date": "2026-10-18T07:48:43.629Z",
+  "url": "http://localhost:5173",
+  "src": "src",
+  "counts": {
+    "high": 3,
+    "medium": 1,
+    "low": 1
+  },
+  "notes": [
+    "Pages: 1 at 1440 px; unknown URL answered 200; 1 internal link targets.",
+    "Source: 22 files scanned under src, 1 lines flagged (at most five per rule per file).",
+    "Click probe: 24 controls clicked on 1 pages: 2 with no visible effect, 0 skipped (risky label or submit button: check them by hand), 0 unstable, 0 not clickable."
+  ],
+  "pages": [
+    {
+      "url": "http://localhost:5173/",
+      "status": 200,
+      "title": "Огляд · Орбіта",
+      "error": ""
+    }
+  ],
+  "findings": [
+    {
+      "sev": "high",
+      "id": "no-404",
+      "page": "(unknown URL)",
+      "where": "",
+      "detail": "an unknown URL renders the start page with status 200"
+    },
+    {
+      "sev": "high",
+      "id": "no-effect",
+      "page": "/",
+      "where": "button",
+      "detail": "\"Оновити\" did nothing visible: no navigation, change on the page, request or focus move"
+    },
+    {
+      "sev": "high",
+      "id": "no-effect",
+      "page": "/",
+      "where": "button",
+      "detail": "\"Кількість\" did nothing visible: no navigation, change on the page, request or focus move"
+    },
+    {
+      "sev": "medium",
+      "id": "placeholder-contact",
+      "page": "(source)",
+      "where": "src/components/Admin.tsx:358",
+      "detail": "placeholder=\"https://api.example.com/dashboard\""
+    },
+    {
+      "sev": "low",
+      "id": "no-open-graph",
+      "page": "/",
+      "where": "og:title, og:image",
+      "detail": "missing"
+    }
+  ],
+  "clicks": [
+    {
+      "page": "/",
+      "results": [
+        {
+          "index": 0,
+          "text": "Огляд",
+          "tag": "button",
+          "visible": true,
+          "disabled": false,
+          "submit": false,
+          "outcome": "effect",
+          "signals": {
+            "requests": 0,
+            "popups": 0,
+            "dialogs": 0,
+            "choosers": 0,
+            "downloads": 0,
+            "mutations": 0,
+            "selfAttr": 0,
+            "textChanged": true,
+            "scrolled": false,
+            "focusMoved": false,
+            "navigated": false
+          }
+        },
+        {
+          "index": 1,
+          "text": "Платежі",
+          "tag": "button",
+          "visible": true,
+          "disabled": false,
+          "submit": false,
+          "outcome": "effect",
+          "signals": {
+            "requests": 1,
+            "popups": 0,
+            "dialogs": 0,
+            "choosers": 0,
+            "downloads": 0,
+            "mutations": 90,
+            "selfAttr": 1,
+            "textChanged": true,
+            "scrolled": false,
+            "focusMoved": false,
+            "navigated": true
+          }
+        },
+        {
+          "index": 2,
+          "text": "Каси",
+          "tag": "button",
+          "visible": true,
+          "disabled": false,
+          "submit": false,
+          "outcome": "effect",
+          "signals": {
+            "requests": 1,
+            "popups": 0,
+            "dialogs": 0,
+            "choosers": 0,
+            "downloads": 0,
+            "mutations": 30,
+            "selfAttr": 1,
+            "textChanged": true,
+            "scrolled": false,
+            "focusMoved": false,
+            "navigated": true
+          }
+        },
+        {
+          "index": 3,
+          "text": "Обладнання",
+          "tag": "button",
+          "visible": true,
+          "disabled": false,
+          "submit": false,
+          "outcome": "effect",
+          "signals": {
+            "requests": 1,
+            "popups": 0,
+            "dialogs": 0,
+            "choosers": 0,
+            "downloads": 0,
+            "mutations": 40,
+            "selfAttr": 1,
+            "textChanged": true,
+            "scrolled": false,
+            "focusMoved": false,
+            "navigated": true
+          }
+        },
+        {
+          "index": 4,
+          "text": "Як користуватися",
+          "tag": "button",
+          "visible": true,
+          "disabled": false,
+          "submit": false,
+          "outcome": "effect",
+          "signals": {
+            "requests": 0,
+            "popups": 0,
+            "dialogs": 0,
+            "choosers": 0,
+            "downloads": 0,
+            "mutations": 51,
+            "selfAttr": 0,
+            "textChanged": false,
+            "scrolled": false,
+            "focusMoved": true,
+            "navigated": false
+          }
+        },
+        {
+          "index": 5,
+          "text": "Джерела даних",
+          "tag": "button",
+          "visible": true,
+          "disabled": false,
+          "submit": false,
+          "outcome": "effect",
+          "signals": {
+            "requests": 1,
+            "popups": 0,
+            "dialogs": 0,
+            "choosers": 0,
+            "downloads": 0,
+            "mutations": 51,
+            "selfAttr": 0,
+            "textChanged": false,
+            "scrolled": false,
+            "focusMoved": true,
+            "navigated": true
+          }
+        },
+        {
+          "index": 6,
+          "text": "Увімкнути темне оточення",
+          "tag": "button",
+          "visible": true,
+          "disabled": false,
+          "submit": false,
+          "outcome": "effect",
+          "signals": {
+            "requests": 0,
+            "popups": 0,
+            "dialogs": 0,
+            "choosers": 0,
+            "downloads": 0,
+            "mutations": 4,
+            "selfAttr": 0,
+            "textChanged": true,
+            "scrolled": false,
+            "focusMoved": false,
+            "navigated": false
+          }
+        },
+        {
+          "index": 9,
+          "text": "Стисло",
+          "tag": "button",
+          "visible": true,
+          "disabled": false,
+          "submit": false,
+          "outcome": "effect",
+          "signals": {
+            "requests": 0,
+            "popups": 0,
+            "dialogs": 0,
+            "choosers": 0,
+            "downloads": 0,
+            "mutations": 17,
+            "selfAttr": 1,
+            "textChanged": true,
+            "scrolled": false,
+            "focusMoved": false,
+            "navigated": false
+          }
+        },
+        {
+          "index": 10,
+          "text": "Оновити",
+          "tag": "button",
+          "visible": true,
+          "disabled": false,
+          "submit": false,
+          "outcome": "no-effect",
+          "signals": {
+            "requests": 0,
+            "popups": 0,
+            "dialogs": 0,
+            "choosers": 0,
+            "downloads": 0,
+            "mutations": 0,
+            "selfAttr": 0,
+            "textChanged": false,
+            "scrolled": false,
+            "focusMoved": false,
+            "navigated": false
+          }
+        },
+        {
+          "index": 11,
+          "text": "Відкрити в просторі",
+          "tag": "button",
+          "visible": true,
+          "disabled": false,
+          "submit": false,
+          "outcome": "effect",
+          "signals": {
+            "requests": 6,
+            "popups": 0,
+            "dialogs": 0,
+            "choosers": 0,
+            "downloads": 0,
+            "mutations": 66,
+            "selfAttr": 0,
+            "textChanged": false,
+            "scrolled": false,
+            "focusMoved": true,
+            "navigated": false
+          }
+        },
+        {
+          "index": 16,
+          "text": "У фокус: Операції в касах",
+          "tag": "button",
+          "visible": true,
+          "disabled": false,
+          "submit": false,
+          "outcome": "effect",
+          "signals": {
+            "requests": 0,
+            "popups": 0,
+            "dialogs": 0,
+            "choosers": 0,
+            "downloads": 0,
+            "mutations": 51,
+            "selfAttr": 0,
+            "textChanged": false,
+            "scrolled": false,
+            "focusMoved": true,
+            "navigated": false
+          }
+        },
+        {
+          "index": 17,
+          "text": "У фокус: Каси з початку року",
+          "tag": "button",
+          "visible": true,
+          "disabled": false,
+          "submit": false,
+          "outcome": "effect",
+          "signals": {
+            "requests": 0,
+            "popups": 0,
+            "dialogs": 0,
+            "choosers": 0,
+            "downloads": 0,
+            "mutations": 51,
+            "selfAttr": 0,
+            "textChanged": false,
+            "scrolled": false,
+            "focusMoved": true,
+            "navigated": false
+          }
+        },
+        {
+          "index": 18,
+          "text": "У фокус: Каси й команда",
+          "tag": "button",
+          "visible": true,
+          "disabled": false,
+          "submit": false,
+          "outcome": "effect",
+          "signals": {
+            "requests": 0,
+            "popups": 0,
+            "dialogs": 0,
+            "choosers": 0,
+            "downloads": 0,
+            "mutations": 68,
+            "selfAttr": 0,
+            "textChanged": false,
+            "scrolled": true,
+            "focusMoved": true,
+            "navigated": false
+          }
+        },
+        {
+          "index": 19,
+          "text": "У фокус: Платежі за каналами",
+          "tag": "button",
+          "visible": true,
+          "disabled": false,
+          "submit": false,
+          "outcome": "effect",
+          "signals": {
+            "requests": 0,
+            "popups": 0,
+            "dialogs": 0,
+            "choosers": 0,
+            "downloads": 0,
+            "mutations": 105,
+            "selfAttr": 0,
+            "textChanged": false,
+            "scrolled": false,
+            "focusMoved": true,
+            "navigated": false
+          }
+        },
+        {
+          "index": 20,
+          "text": "Кількість",
+          "tag": "button",
+          "visible": true,
+          "disabled": false,
+          "submit": false,
+          "outcome": "no-effect",
+          "signals": {
+            "requests": 0,
+            "popups": 0,
+            "dialogs": 0,
+            "choosers": 0,
+            "downloads": 0,
+            "mutations": 0,
+            "selfAttr": 0,
+            "textChanged": false,
+            "scrolled": false,
+            "focusMoved": false,
+            "navigated": false
+          }
+        },
+        {
+          "index": 21,
+          "text": "Обсяг",
+          "tag": "button",
+          "visible": true,
+          "disabled": false,
+          "submit": false,
+          "outcome": "effect",
+          "signals": {
+            "requests": 0,
+            "popups": 0,
+            "dialogs": 0,
+            "choosers": 0,
+            "downloads": 0,
+            "mutations": 17,
+            "selfAttr": 0,
+            "textChanged": true,
+            "scrolled": false,
+            "focusMoved": false,
+            "navigated": false
+          }
+        },
+        {
+          "index": 22,
+          "text": "Разом",
+          "tag": "button",
+          "visible": true,
+          "disabled": false,
+          "submit": false,
+          "outcome": "effect",
+          "signals": {
+            "requests": 0,
+            "popups": 0,
+            "dialogs": 0,
+            "choosers": 0,
+            "downloads": 0,
+            "mutations": 5,
+            "selfAttr": 1,
+            "textChanged": false,
+            "scrolled": false,
+            "focusMoved": false,
+            "navigated": false
+          }
+        },
+        {
+          "index": 23,
+          "text": "У фокус: Кількість платежів",
+          "tag": "button",
+          "visible": true,
+          "disabled": false,
+          "submit": false,
+          "outcome": "effect",
+          "signals": {
+            "requests": 0,
+            "popups": 0,
+            "dialogs": 0,
+            "choosers": 0,
+            "downloads": 0,
+            "mutations": 63,
+            "selfAttr": 0,
+            "textChanged": false,
+            "scrolled": false,
+            "focusMoved": true,
+            "navigated": false
+          }
+        },
+        {
+          "index": 24,
+          "text": "У фокус: Платежі з початку року",
+          "tag": "button",
+          "visible": true,
+          "disabled": false,
+          "submit": false,
+          "outcome": "effect",
+          "signals": {
+            "requests": 0,
+            "popups": 0,
+            "dialogs": 0,
+            "choosers": 0,
+            "downloads": 0,
+            "mutations": 51,
+            "selfAttr": 0,
+            "textChanged": false,
+            "scrolled": true,
+            "focusMoved": true,
+            "navigated": false
+          }
+        },
+        {
+          "index": 25,
+          "text": "У фокус: Операції пристроїв",
+          "tag": "button",
+          "visible": true,
+          "disabled": false,
+          "submit": false,
+          "outcome": "effect",
+          "signals": {
+            "requests": 0,
+            "popups": 0,
+            "dialogs": 0,
+            "choosers": 0,
+            "downloads": 0,
+            "mutations": 51,
+            "selfAttr": 0,
+            "textChanged": false,
+            "scrolled": false,
+            "focusMoved": true,
+            "navigated": false
+          }
+        },
+        {
+          "index": 26,
+          "text": "У фокус: Обсяг операцій пристроїв",
+          "tag": "button",
+          "visible": true,
+          "disabled": false,
+          "submit": false,
+          "outcome": "effect",
+          "signals": {
+            "requests": 0,
+            "popups": 0,
+            "dialogs": 0,
+            "choosers": 0,
+            "downloads": 0,
+            "mutations": 51,
+            "selfAttr": 0,
+            "textChanged": false,
+            "scrolled": false,
+            "focusMoved": true,
+            "navigated": false
+          }
+        },
+        {
+          "index": 27,
+          "text": "У фокус: Стан обладнання",
+          "tag": "button",
+          "visible": true,
+          "disabled": false,
+          "submit": false,
+          "outcome": "effect",
+          "signals": {
+            "requests": 0,
+            "popups": 0,
+            "dialogs": 0,
+            "choosers": 0,
+            "downloads": 0,
+            "mutations": 78,
+            "selfAttr": 0,
+            "textChanged": false,
+            "scrolled": true,
+            "focusMoved": true,
+            "navigated": false
+          }
+        },
+        {
+          "index": 28,
+          "text": "Recycle: 7,2%",
+          "tag": "button",
+          "visible": true,
+          "disabled": false,
+          "submit": false,
+          "outcome": "effect",
+          "signals": {
+            "requests": 0,
+            "popups": 0,
+            "dialogs": 0,
+            "choosers": 0,
+            "downloads": 0,
+            "mutations": 78,
+            "selfAttr": 0,
+            "textChanged": false,
+            "scrolled": true,
+            "focusMoved": true,
+            "navigated": false
+          }
+        },
+        {
+          "index": 29,
+          "text": "Регулярні: 84%",
+          "tag": "button",
+          "visible": true,
+          "disabled": false,
+          "submit": false,
+          "outcome": "effect",
+          "signals": {
+            "requests": 0,
+            "popups": 0,
+            "dialogs": 0,
+            "choosers": 0,
+            "downloads": 0,
+            "mutations": 63,
+            "selfAttr": 0,
+            "textChanged": false,
+            "scrolled": true,
+            "focusMoved": true,
+            "navigated": false
+          }
+        }
+      ]
+    }
+  ]
+}
