@@ -16,9 +16,10 @@ test("all ten dashboards open, show exact data, close with focus restored", asyn
   const errors: string[] = [];
   page.on("pageerror", (e) => errors.push(e.message));
   await page.goto("/");
-  await page.getByRole("button", { name: "Вместе", exact: true }).click();
-  await expect(page.locator("[data-dashboard-id]")).toHaveCount(10);
+  await expect(page.locator("[data-dashboard-id]")).toHaveCount(9);
   for (let id = 1; id <= 10; id++) {
+    if (id === 3)
+      await page.getByRole("button", { name: "Объём", exact: true }).click();
     const trigger = page.locator(`[data-dashboard-id="${id}"] .focus-button`);
     await trigger.click();
     const dialog = page.getByRole("dialog");

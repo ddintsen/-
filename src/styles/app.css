@@ -2962,27 +2962,19 @@ textarea::placeholder {
   z-index: 1;
 }
 .downtime-gauge .progress-track {
-  height: 12px;
-  background: linear-gradient(
-    90deg,
-    var(--color-success),
-    var(--color-warning) 50%,
-    var(--color-danger)
-  );
-  border-radius: 2px;
+  height: 7px;
+  background: var(--color-border);
+  border-radius: var(--radius-pill);
 }
 .downtime-gauge .progress-fill {
-  position: absolute;
-  top: -4px;
-  height: 20px;
-  width: 3px !important;
-  margin-left: calc(var(--risk-position, 0%) - 1px);
-  background: var(--color-text);
-  border-radius: 1px;
+  position: relative;
+  height: 100%;
+  background: var(--meter-color);
+  border-radius: inherit;
 }
 .downtime-gauge .progress-target {
-  top: 0;
-  height: 12px;
+  top: -4px;
+  height: 15px;
   opacity: 0.7;
 }
 .plan-meters {
@@ -3020,7 +3012,10 @@ textarea::placeholder {
 .focus-jump .button {
   min-width: 38px;
   min-height: 40px;
-  padding: 6px;
+  padding: 6px 10px;
+  font-size: 12px;
+  white-space: normal;
+  text-align: left;
 }
 .focus-navigation .button {
   max-width: 48%;
@@ -3059,5 +3054,134 @@ textarea::placeholder {
   }
   .view-tabs .button svg {
     display: none;
+  }
+}
+
+/* Hotfix: one monthly slot keeps the nine-card overview aligned in either mode. */
+.monthly-switch {
+  justify-content: flex-end;
+  margin-top: -8px;
+}
+[data-theme="office"] .progress-gauge[data-tone="warning"] .progress-percent,
+[data-theme="office"] .tone-warning {
+  color: var(--color-light-warning-text);
+}
+[data-theme="office"] .progress-gauge[data-tone="success"] .progress-percent,
+[data-theme="office"] .tone-success {
+  color: var(--color-light-success-text);
+}
+.attention-items {
+  flex-wrap: nowrap;
+  min-width: 0;
+}
+.attention-items .button {
+  flex: 0 0 auto;
+  white-space: nowrap;
+  font-size: 12px;
+  padding: 8px 12px;
+}
+.xr-facts-scroll {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: center;
+  margin-top: 16px;
+  font-size: 12px;
+}
+.xr-facts-scroll input {
+  flex: 1;
+  min-width: 140px;
+}
+.xr-panorama-tools {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 10px;
+}
+@media (max-width: 760px) {
+  .attention-items {
+    overflow-x: auto;
+    padding-bottom: 4px;
+  }
+  .attention-items > span {
+    flex-shrink: 0;
+    font-size: 11px;
+  }
+}
+
+/* Final master prompt: paired monthly comparison shares the same overview slot. */
+.monthly-comparison {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+  align-items: start;
+}
+.monthly-comparison section {
+  min-width: 0;
+}
+.monthly-comparison .button {
+  padding: 6px 8px;
+  font-size: 12px;
+  white-space: normal;
+  text-align: left;
+}
+.monthly-comparison strong {
+  display: block;
+  margin: 12px 0 8px;
+  font-size: clamp(15px, 1.4vw, 22px);
+  font-weight: 500;
+}
+.monthly-comparison strong small {
+  font-size: 12px;
+  color: var(--color-muted);
+  white-space: nowrap;
+}
+.monthly-comparison .plan-bars {
+  min-width: 0;
+}
+[data-theme="office"] .room-backdrop {
+  background: linear-gradient(180deg, #eef2f6 0%, #e3e9f2 100%);
+}
+[data-theme="office"] {
+  --panel-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.8),
+    0 8px 24px -4px rgba(15, 23, 42, 0.06);
+}
+[data-theme="office"] .dashboard-card {
+  border: 1px solid rgba(15, 23, 42, 0.08);
+}
+[data-theme="office"] .progress-gauge[data-tone="cyan"] .progress-percent {
+  color: var(--color-light-cyan-text);
+}
+.downtime-gauge .progress-track {
+  background: rgba(255, 255, 255, 0.08);
+}
+[data-theme="office"] .downtime-gauge .progress-track {
+  background: rgba(15, 23, 42, 0.08);
+}
+
+.monthly-comparison .sparkline {
+  width: 100%;
+  height: 48px;
+  margin: 16px 0;
+}
+.monthly-comparison dl {
+  margin: 0;
+  color: var(--color-muted);
+  font-size: 12px;
+}
+.monthly-comparison dl div {
+  display: flex;
+  justify-content: space-between;
+  gap: 6px;
+  padding: 6px 0;
+}
+.monthly-comparison dd {
+  margin: 0;
+  color: var(--color-text);
+}
+@media (min-width: 1251px) {
+  .view-overview .monthly-comparison,
+  .view-overview .monthly-layout {
+    min-height: 231px;
   }
 }

@@ -3,6 +3,7 @@ import {
   formatDelta,
   formatReportDate,
   getLocale,
+  localizeJsonDates,
   setLocale,
   t,
 } from "../src/i18n";
@@ -19,6 +20,25 @@ import { parseData } from "../src/api/schema";
 afterEach(() => setLocale("uk"));
 
 describe("Language and report formatting", () => {
+  it("projects editor dates in three languages without altering drafts or custom periods", () => {
+    const original = JSON.stringify(baseline, null, 2);
+    for (const [language, report, since] of [
+      ["uk", "Жовтень 2026", "з 01.01.2026"],
+      ["en", "October 2026", "since 01.01.2026"],
+      ["ru", "Октябрь 2026", "с 01.01.2026"],
+    ] as const) {
+      setLocale(language);
+      expect(JSON.parse(localizeJsonDates(original)).meta).toMatchObject({
+        reportDate: report,
+        ytdStartLabel: since,
+      });
+      expect(localizeJsonDates('{"meta":')).toBe('{"meta":');
+      expect(
+        localizeJsonDates('{"reportDate":"Custom fiscal period"}'),
+      ).toContain("Custom fiscal period");
+    }
+    expect(JSON.stringify(baseline, null, 2)).toBe(original);
+  });
   it("starts in Ukrainian and translates known labels without changing custom API text", () => {
     setLocale("uk");
     expect(getLocale()).toBe("uk");

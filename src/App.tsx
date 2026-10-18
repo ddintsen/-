@@ -21,12 +21,8 @@ import {
 } from "lucide-react";
 import { useDashboardStore, startSync } from "./store/dashboard";
 import { dashboardModel } from "./api/model";
-import {
-  formatSource,
-  formatTime,
-  formatPercent,
-  DOWNTIME_LIMIT,
-} from "./api/format";
+import { attentionItems } from "./api/attention";
+import { formatSource, formatTime, formatPercent } from "./api/format";
 import {
   DashboardCard,
   DashboardContent,
@@ -61,7 +57,7 @@ export default function App() {
   const [focus, setFocus] = useState<number | null>(null),
     [spatial, setSpatial] = useState(false),
     [help, setHelp] = useState(false),
-    [monthly, setMonthly] = useState<"count" | "volume" | "both">("both");
+    [monthly, setMonthly] = useState<"count" | "volume" | "both">("count");
   const models = useMemo(
     () =>
       s.data
@@ -125,29 +121,13 @@ export default function App() {
     setAdmin(open);
   }
   const sourceLabel = formatSource(s.source, !!s.lastLive);
-  const attention = models.flatMap((model) => [
-    ...model.gauges
-      .filter((g) =>
-        g.mode === "downtime" ? g.percent > DOWNTIME_LIMIT : g.percent < 85,
-      )
-      .map((g) => ({
-        id: model.id,
-        label: `${g.label}: ${formatPercent(g.percent)} · ${t(g.mode === "downtime" ? "Простой" : "Выполнение плана")}`,
-      })),
-    ...model.bars
-      .filter((b) => model.kind === "monthly" && b.values[0] < 85)
-      .map((b) => ({
-        id: model.id,
-        label: `${model.title} · ${b.label}: ${formatPercent(b.values[0])}`,
-      })),
-  ]);
+  const attention = attentionItems(models);
   const monthlyControls = (
     <div
       className="monthly-switch"
       role="group"
       aria-label={t("Показатель платежей")}
     >
-      <span>{t("За месяц")}</span>
       <div>
         {[
           { id: "count" as const, label: "Количество" },
@@ -171,11 +151,8 @@ export default function App() {
       key={id}
       model={models[id - 1]}
       onFocus={setFocus}
-      controls={
-        id === 2 || (id === 3 && monthly === "volume")
-          ? monthlyControls
-          : undefined
-      }
+      controls={id === 2 || id === 3 ? monthlyControls : undefined}
+      comparison={id === 2 && monthly === "both" ? models[2] : undefined}
     />
   );
   const blockHeading = (title: string) => {
@@ -450,12 +427,7 @@ export default function App() {
                     {blockHeading("Платежи")}
                     <div className="wing-cards">
                       {renderCard(1)}
-                      {monthly === "count" || monthly === "both"
-                        ? renderCard(2)
-                        : null}
-                      {monthly === "volume" || monthly === "both"
-                        ? renderCard(3)
-                        : null}
+                      {renderCard(monthly === "volume" ? 3 : 2)}
                       {renderCard(4)}
                     </div>
                   </section>
@@ -490,8 +462,12 @@ export default function App() {
                     <Activity size={16} />
                     <span>{t("Зоны внимания")}</span>
                     {attention.map((item, index) => (
-                      <Button key={index} onClick={() => setFocus(item.id)}>
-                        {item.label}
+                      <Button
+                        key={index}
+                        onClick={() => setFocus(item.id)}
+                        aria-label={`${item.label}: ${formatPercent(item.percent)} · ${item.title}`}
+                      >
+                        {item.label}: {formatPercent(item.percent)}
                         <ArrowUpRight size={14} />
                       </Button>
                     ))}
@@ -538,7 +514,7 @@ export default function App() {
                 className={focus === m.id ? "selected" : ""}
                 onClick={() => setFocus(m.id)}
               >
-                {m.id}
+                {m.id}. {m.title}
               </Button>
             ))}
           </nav>

@@ -13,6 +13,7 @@ export type Gauge = {
   label: string;
   percent: number;
   value?: number;
+  planValue?: number;
   unit?: string;
   mode: "plan" | "downtime";
 };
@@ -25,7 +26,7 @@ export type Metric = {
   color: string;
 };
 export type Series = { label: string; points: number[]; color: string };
-export type Bar = { label: string; values: number[] };
+export type Bar = { label: string; values: number[]; planValue?: number };
 export type Slice = { label: string; value: number; color: string };
 export type DashboardModel = {
   id: number;
@@ -75,7 +76,12 @@ export function dashboardModel(
     facts: [],
   };
   const plans = (
-    items: { label: string; percent: number; value: number }[],
+    items: {
+      label: string;
+      percent: number;
+      value: number;
+      planValue?: number;
+    }[],
     currency: (i: number) => boolean,
   ) =>
     items.map((x, i): Gauge => ({
@@ -119,6 +125,7 @@ export function dashboardModel(
     m.bars = d.planBars.map((x) => ({
       label: t(x.label),
       values: [x.percent],
+      planValue: x.planValue,
     }));
     m.metrics = d.cards.map((x, i) => ({
       label: t(x.title.replace(/ \(₴\)/g, "")),
@@ -263,7 +270,10 @@ export function comparisonRows(model: DashboardModel) {
     return model.metrics.map((metric, index) => ({
       label: metric.label,
       actual: `${formatNumber(metric.value)} ${model.unit ?? ""}`,
-      reference: t("План 100%"),
+      reference:
+        model.bars[index].planValue === undefined
+          ? t("Не передано")
+          : `${formatNumber(model.bars[index].planValue)} ${model.unit ?? ""} (100%)`,
       status: formatPercent(model.bars[index].values[0]),
     }));
   const gaugeLabels = model.gauges.map((g) => g.label);
@@ -278,8 +288,10 @@ export function comparisonRows(model: DashboardModel) {
             : `${formatNumber(g.value)} ${g.unit ?? t("шт.")}`,
       reference:
         g.mode === "downtime"
-          ? `${t("Порог внимания")} ${formatPercent(DOWNTIME_LIMIT)}`
-          : t("План 100%"),
+          ? `SLA ${formatPercent(DOWNTIME_LIMIT)}`
+          : g.planValue === undefined
+            ? t("Не передано")
+            : `${formatNumber(g.planValue)} ${g.unit ?? t("шт.")} (100%)`,
       status:
         g.mode === "downtime"
           ? downtimeLabel(g.percent)
@@ -287,7 +299,12 @@ export function comparisonRows(model: DashboardModel) {
     })),
     ...model.facts
       .filter(
-        ([label]) => !gaugeLabels.some((g) => label.startsWith(`${g} · `)),
+        ([label]) =>
+          !gaugeLabels.some((g) =>
+            [t("выполнение плана"), t("простой"), t("значение")].some(
+              (suffix) => label === `${g} · ${suffix}`,
+            ),
+          ),
       )
       .map(([label, actual]) => ({
         label,

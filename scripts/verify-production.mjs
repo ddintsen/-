@@ -59,13 +59,16 @@ try {
   }, new URL("images/room.png", baseURL).href);
   if (!offlineRoom) throw new Error("Offline room asset unavailable");
   const offlineCards = await page.locator("[data-dashboard-id]").count();
-  if (offlineCards !== 10)
+  if (offlineCards !== 9)
     throw new Error("Default offline dashboard set incomplete");
-  await page.getByRole("button", { name: "Вместе", exact: true }).click();
-  if ((await page.locator("[data-dashboard-id]").count()) !== 10)
+  await page.getByRole("button", { name: "Объём", exact: true }).click();
+  await page.locator('[data-dashboard-id="3"]').waitFor();
+  if ((await page.locator("[data-dashboard-id]").count()) !== 9)
     throw new Error("Offline dashboard 3 unavailable");
   await page.getByRole("button", { name: /Открыть в пространстве/ }).click();
   await page.locator(".xr-canvas canvas").waitFor();
+  if ((await page.locator("#xr-focus option").count()) !== 11)
+    throw new Error("All ten focus dashboards must remain available");
   await page.getByRole("button", { name: "Осмотреть комнату" }).click();
   const roomTurn = page.getByLabel("Поворот взгляда в градусах");
   if ((await roomTurn.getAttribute("max")) !== "180")
@@ -93,7 +96,7 @@ try {
     offlineRoom,
     offlineProceduralRoom: true,
     offlineWebGL: true,
-    offlineDashboardCount: 10,
+    offlineDashboardCount: 9,
     errors,
   };
   fs.writeFileSync(

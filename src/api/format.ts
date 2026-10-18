@@ -27,8 +27,8 @@ export const formatTime = (time: number) =>
     second: "2-digit",
     timeZone: "Europe/Kyiv",
   }).format(time);
-// Display policy from the existing data contract; this is not a contractual SLA.
-export const DOWNTIME_LIMIT = 6.5;
+// Visual SLA reference explicitly requested in the 18 October hotfix.
+export const DOWNTIME_LIMIT = 5;
 export const meterMaximum = (percent: number, mode: "plan" | "downtime") =>
   mode === "plan"
     ? Math.max(120, Math.ceil(percent / 20) * 20)
@@ -49,7 +49,7 @@ export const downtimeLabel = (value: number) =>
   t(
     value <= 2
       ? "Низкий простой"
-      : value <= 6.5
+      : value <= DOWNTIME_LIMIT
         ? "Рабочий уровень"
         : "Высокий простой",
   );

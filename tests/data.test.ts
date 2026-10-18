@@ -109,8 +109,8 @@ describe("Business semantics", () => {
     [0, "success"],
     [2, "success"],
     [2.01, "warning"],
-    [6.5, "warning"],
-    [6.5001, "danger"],
+    [5, "warning"],
+    [5.0001, "danger"],
     [100, "danger"],
   ] as const)("downtime %s is %s", (percent, tone) =>
     expect(gaugeTone(percent, "downtime")).toBe(tone),

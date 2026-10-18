@@ -60,12 +60,18 @@ export function intlLocale(): string {
 // Source keys are the existing Russian UI copy. Only exact, known labels are
 // translated: arbitrary names and descriptions supplied by an API stay intact.
 const messages: Record<string, readonly [string, string]> = {
+  "Прокрутка точных значений": [
+    "Прокручування точних значень",
+    "Scroll exact values",
+  ],
   Устройства: ["Пристрої", "Devices"],
   "Кассы кратко": ["Каси", "Cash"],
   "Зоны внимания": ["Зони уваги", "Needs attention"],
   "Порог внимания": ["Поріг уваги", "Attention threshold"],
   "План / Порог": ["План / Поріг", "Plan / Threshold"],
   "Выполнение / Статус": ["Виконання / Статус", "Performance / Status"],
+  Выполнение: ["Виконання", "Performance"],
+  "Месячный план платежей": ["Місячний план платежів", "Monthly payment plan"],
   "Не передано": ["Не передано", "Not supplied"],
   "Выбрать дашборд": ["Обрати дашборд", "Choose dashboard"],
   "Центрировать пространство": ["Центрувати простір", "Recenter space"],
@@ -642,10 +648,24 @@ export function formatReportDate(text: string): string {
         timeZone: "UTC",
       }).format(date);
   }
-  const since = /^(?:с|з) (\d{2}\.\d{2}\.\d{4})$/.exec(text.trim());
+  const since = /^(?:с|з|since) (\d{2}\.\d{2}\.\d{4})$/i.exec(text.trim());
   if (since)
     return `${locale === "en" ? "since" : locale === "uk" ? "з" : "с"} ${since[1]}`;
   return text;
+}
+
+/** Project known metadata dates without changing stored data, whitespace or invalid drafts. */
+export function localizeJsonDates(text: string): string {
+  try {
+    JSON.parse(text);
+  } catch {
+    return text;
+  }
+  return text.replace(
+    /("(?:reportDate|ytdStartLabel)"\s*:\s*)("(?:[^"\\]|\\.)*")/g,
+    (_, prefix: string, value: string) =>
+      prefix + JSON.stringify(formatReportDate(JSON.parse(value))),
+  );
 }
 
 /** Delta values are textual in the API contract; parse only numeric percents. */

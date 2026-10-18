@@ -16,7 +16,7 @@ import { type ApiConfig, parseData, validateEndpoint } from "../api/schema";
 import { makeScenario } from "../api/scenarios";
 import { requestData } from "../api/client";
 import { useDashboardStore } from "../store/dashboard";
-import { getLocale, setLocale, t, useLocale } from "../i18n";
+import { getLocale, setLocale, t, useLocale, localizeJsonDates } from "../i18n";
 import { Button, Field, Modal, NativeSelect, notify } from "./ui";
 
 export function Admin({ onClose }: { onClose: () => void }) {
@@ -54,7 +54,7 @@ export function Admin({ onClose }: { onClose: () => void }) {
   const [savedQuick, setSavedQuick] = useState(JSON.stringify(quick));
   const [quickError, setQuickError] = useState("");
   const configDirty = JSON.stringify(config) !== JSON.stringify(s.config),
-    jsonDirty = json !== savedJson;
+    jsonDirty = localizeJsonDates(json) !== localizeJsonDates(savedJson);
   const quickDirty = JSON.stringify(quick) !== savedQuick;
   const dirty = configDirty || jsonDirty || quickDirty;
   const conflict = (jsonDirty || quickDirty) && revision !== s.revision;
@@ -174,7 +174,7 @@ export function Admin({ onClose }: { onClose: () => void }) {
         );
         return;
       }
-      const parsed = parseData(JSON.parse(json));
+      const parsed = parseData(JSON.parse(localizeJsonDates(json)));
       s.applyDemo(parsed);
       setConfig((draft) => ({ ...draft, mode: "mock" }));
       resetEditor();
@@ -228,7 +228,7 @@ export function Admin({ onClose }: { onClose: () => void }) {
   }
   async function copy() {
     try {
-      await navigator.clipboard.writeText(json);
+      await navigator.clipboard.writeText(localizeJsonDates(json));
       notify("JSON скопирован");
     } catch {
       setJsonError(
@@ -238,7 +238,7 @@ export function Admin({ onClose }: { onClose: () => void }) {
   }
   function download() {
     try {
-      const data = parseData(JSON.parse(json));
+      const data = parseData(JSON.parse(localizeJsonDates(json)));
       const url = URL.createObjectURL(
         new Blob([JSON.stringify(data, null, 2)], { type: "application/json" }),
       );
@@ -554,7 +554,7 @@ export function Admin({ onClose }: { onClose: () => void }) {
             <textarea
               className="resize-none"
               id="json-editor"
-              value={json}
+              value={localizeJsonDates(json)}
               onChange={(e) => {
                 setJson(e.target.value);
                 setJsonError("");

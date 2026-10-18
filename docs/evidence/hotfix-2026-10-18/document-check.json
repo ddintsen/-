@@ -1,0 +1,21 @@
+{
+  "checkedAt": "2026-10-18T04:08:40.054Z",
+  "source": "final development build",
+  "localizedEditorDates": [
+    "uk",
+    "en",
+    "ru"
+  ],
+  "localeDoesNotPersistDataset": true,
+  "invalidDraftPreserved": true,
+  "editedNumericDraftPreserved": true,
+  "unsavedGuard": true,
+  "overviewCardCount": 9,
+  "monthlyHeights": {
+    "count": 401.5,
+    "volume": 401.5,
+    "both": 401.5
+  },
+  "combinedVolumeFocus": true,
+  "errors": []
+}

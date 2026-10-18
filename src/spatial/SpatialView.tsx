@@ -27,9 +27,10 @@ import {
 import { useDashboardStore } from "../store/dashboard";
 import { colors, dashboardModel, type DashboardModel } from "../api/model";
 import { formatSource } from "../api/format";
-import { drawPanel, drawOverviewPanel, drawFacts } from "./drawPanel";
-import { SpatialSurface, SpatialControl } from "./SpatialSurface";
+import { drawOverviewPanel, drawFocusPanel } from "./drawPanel";
+import { SpatialSurface, SpatialControl, SpatialWing } from "./SpatialSurface";
 import { ProceduralRoom } from "./ProceduralRoom";
+import { spatialStands, FOCUS_ROWS, focusSurfaceHeight } from "./layout";
 import { Button, NativeSelect } from "../components/ui";
 import { formatReportDate, t, useLocale } from "../i18n";
 
@@ -78,9 +79,15 @@ function Panel({
   focused,
   opacity = 1,
   onSelect,
-  factsPage,
+  factsOffset = 0,
+  width = 1.28,
+  height = 0.8,
+  wide = false,
 }: {
-  factsPage?: number;
+  factsOffset?: number;
+  width?: number;
+  height?: number;
+  wide?: boolean;
   model: DashboardModel;
   position: [number, number, number];
   scale?: number;
@@ -92,20 +99,18 @@ function Panel({
   const locale = useLocale();
   const texture = useMemo(
     () =>
-      factsPage !== undefined
-        ? drawFacts(model, factsPage)
-        : focused
-          ? drawPanel(model, compact)
-          : drawOverviewPanel(model),
-    [model, compact, focused, locale, factsPage],
+      focused
+        ? drawFocusPanel(model, compact, factsOffset)
+        : drawOverviewPanel(model, wide),
+    [model, compact, focused, locale, factsOffset, wide],
   );
   useEffect(() => () => texture.dispose(), [texture]);
   return (
     <group position={position} scale={scale}>
       <SpatialSurface
         texture={texture}
-        width={focused ? 1.8 : 1.28}
-        height={focused ? 1.125 : 0.8}
+        width={focused ? 2.04 : width}
+        height={focused ? focusSurfaceHeight(model.facts.length) : height}
         opacity={opacity}
         focused={focused}
         onSelect={onSelect}
@@ -113,40 +118,26 @@ function Panel({
     </group>
   );
 }
-type SpatialCategory = "cash" | "payments" | "equipment";
-const spatialCategories: {
-  id: SpatialCategory;
-  label: string;
-  ids: number[];
-}[] = [
-  { id: "cash", label: "Кассовые операции", ids: [5, 6, 7] },
-  { id: "payments", label: "Платежи", ids: [1, 2, 3, 4] },
-  { id: "equipment", label: "Оборудование", ids: [8, 9, 10] },
-];
 function Scene({
   yaw,
   setFocused,
   focused,
   roomOnly,
   dataContext,
-  category,
-  setCategory,
   recenter,
   onRecenter,
-  factsPage,
-  setFactsPage,
+  factsOffset,
+  setFactsOffset,
 }: {
   yaw: number;
   focused: number | null;
   roomOnly: boolean;
   dataContext: string;
   setFocused: (v: number | null) => void;
-  category: SpatialCategory;
-  setCategory: (v: SpatialCategory) => void;
   recenter: number;
   onRecenter: () => void;
-  factsPage: number | null;
-  setFactsPage: (v: number | null) => void;
+  factsOffset: number;
+  setFactsOffset: (v: number) => void;
 }) {
   const data = useDashboardStore((s) => s.data);
   const locale = useLocale();
@@ -177,16 +168,27 @@ function Scene({
       camera.position.set(0, 1.6, 0.7);
       camera.rotation.set(0, (yaw * Math.PI) / 180, 0);
       if (camera instanceof PerspectiveCamera) {
-        camera.fov = Math.max(
-          68,
-          (2 * Math.atan(1.05 / ((1.5 * size.width) / size.height)) * 180) /
-            Math.PI,
-        );
+        camera.fov =
+          focused !== null
+            ? Math.max(
+                68,
+                (2 *
+                  Math.atan(1.1 / ((1.5 * size.width) / size.height)) *
+                  180) /
+                  Math.PI,
+              )
+            : Math.max(
+                68,
+                (2 *
+                  Math.atan(2.05 / ((1.2 * size.width) / size.height)) *
+                  180) /
+                  Math.PI,
+              );
         camera.updateProjectionMatrix();
       }
       invalidate();
     }
-  }, [camera, yaw, session, size.width, size.height, invalidate]);
+  }, [camera, yaw, session, size.width, size.height, invalidate, focused]);
   // Recenter the workspace in the viewer's horizontal heading; never move the headset camera.
   useEffect(() => {
     if (!anchor.current) return;
@@ -224,48 +226,54 @@ function Scene({
   const room =
     mode !== "immersive-ar" ? <ProceduralRoom dark={theme === "dark"} /> : null;
   if (roomOnly && !session) return <>{room}</>;
-  const ids = spatialCategories.find((c) => c.id === category)!.ids;
-  const pageCount =
-    focused && data ? Math.ceil(models[focused - 1].facts.length / 3) : 1;
+  const focusHeight =
+    focused && data
+      ? focusSurfaceHeight(models[focused - 1].facts.length)
+      : 0.9;
+  const maxOffset =
+    focused && data
+      ? Math.max(0, models[focused - 1].facts.length - FOCUS_ROWS)
+      : 0;
   return (
     <>
       <XROrigin />
       {room}
       <group ref={anchor}>
+        {!hasFocus && data
+          ? spatialStands.map((stand) => (
+              <group
+                key={stand.key}
+                position={[stand.x, 1.6, stand.z]}
+                rotation={[0, stand.angle, 0]}
+              >
+                <SpatialWing
+                  title={t(stand.title)}
+                  width={1.28}
+                  height={1.12}
+                  position={[0, 0, -0.025]}
+                />
+                {stand.panels.map((panel) => (
+                  <Panel
+                    key={panel.id}
+                    model={models[panel.id - 1]}
+                    position={[panel.x, panel.y, 0]}
+                    width={panel.width}
+                    height={panel.height}
+                    wide={panel.wide}
+                    focused={false}
+                    onSelect={() => setFocused(panel.id)}
+                  />
+                ))}
+              </group>
+            ))
+          : null}
         {!hasFocus && data ? (
-          <group position={[0, 1.6, -1.85]}>
-            {spatialCategories.map((c, index) => (
-              <SpatialControl
-                key={c.id}
-                label={t(c.label)}
-                position={[(index - 1) * 0.84, 0.92, 0]}
-                width={0.8}
-                height={0.16}
-                selected={category === c.id}
-                onSelect={() => setCategory(c.id)}
-              />
-            ))}
-            {ids.map((id, index) => (
-              <Panel
-                key={id}
-                model={models[id - 1]}
-                position={[
-                  ((index % 2) - 0.5) * 1.2,
-                  0.36 - Math.floor(index / 2) * 0.73,
-                  0,
-                ]}
-                scale={0.9}
-                focused={false}
-                onSelect={() => setFocused(id)}
-              />
-            ))}
-            <SpatialControl
-              label={dataContext}
-              position={[0, -0.88, 0]}
-              width={2.2}
-              height={0.11}
-            />
-          </group>
+          <SpatialControl
+            label={dataContext}
+            position={[0, 0.91, -1.85]}
+            width={1.6}
+            height={0.1}
+          />
         ) : null}
         {!data ? (
           <SpatialControl
@@ -301,12 +309,12 @@ function Scene({
             model={models[focused - 1]}
             position={[0, 0, 0]}
             focused
-            factsPage={factsPage ?? undefined}
+            factsOffset={factsOffset}
           />
           <SpatialControl
             label={t("← Назад")}
-            position={[-0.65, -0.69, 0]}
-            width={0.45}
+            position={[-0.79, -focusHeight / 2 - 0.12, 0]}
+            width={0.44}
             height={0.16}
             focused
             disabled={focused === 1}
@@ -314,54 +322,56 @@ function Scene({
           />
           <SpatialControl
             label={t("Панорама")}
-            position={[0, -0.69, 0]}
-            width={0.66}
+            position={[-0.26, -focusHeight / 2 - 0.12, 0]}
+            width={0.54}
             height={0.16}
             focused
             onSelect={() => setFocused(null)}
           />
           <SpatialControl
             label={t("Далее →")}
-            position={[0.65, -0.69, 0]}
-            width={0.45}
+            position={[0.27, -focusHeight / 2 - 0.12, 0]}
+            width={0.44}
             height={0.16}
             focused
             disabled={focused === 10}
             onSelect={() => setFocused(focused + 1)}
           />
           <SpatialControl
-            label={t(factsPage === null ? "Точные значения" : "График")}
-            position={[0, 0.68, 0]}
-            width={0.9}
+            label={t("Центрировать пространство")}
+            position={[0.79, -focusHeight / 2 - 0.12, 0]}
+            width={0.5}
             height={0.16}
             focused
-            onSelect={() => setFactsPage(factsPage === null ? 0 : null)}
+            onSelect={onRecenter}
           />
-          {factsPage !== null ? (
+          {maxOffset > 0 ? (
             <>
               <SpatialControl
-                label="←"
-                position={[-0.65, 0.68, 0]}
-                width={0.18}
+                label="↑"
+                position={[-0.86, focusHeight / 2 + 0.1, 0]}
+                width={0.2}
                 height={0.16}
                 focused
-                disabled={factsPage === 0}
-                onSelect={() => setFactsPage(factsPage - 1)}
+                disabled={factsOffset === 0}
+                onSelect={() => setFactsOffset(Math.max(0, factsOffset - 3))}
               />
               <SpatialControl
-                label="→"
-                position={[0.65, 0.68, 0]}
-                width={0.18}
+                label="↓"
+                position={[0.86, focusHeight / 2 + 0.1, 0]}
+                width={0.2}
                 height={0.16}
                 focused
-                disabled={factsPage >= pageCount - 1}
-                onSelect={() => setFactsPage(factsPage + 1)}
+                disabled={factsOffset >= maxOffset}
+                onSelect={() =>
+                  setFactsOffset(Math.min(maxOffset, factsOffset + 3))
+                }
               />
             </>
           ) : null}
           <SpatialControl
             label={dataContext}
-            position={[0, -0.86, 0]}
+            position={[0, -focusHeight / 2 - 0.31, 0]}
             width={1.8}
             height={0.1}
             focused
@@ -373,9 +383,8 @@ function Scene({
 }
 export default function SpatialView() {
   useLocale();
-  const [category, setCategory] = useState<SpatialCategory>("payments");
   const [recenter, setRecenter] = useState(0);
-  const [factsPage, setFactsPage] = useState<number | null>(null);
+  const [factsOffset, setFactsOffset] = useState(0);
   const recenterSpace = () => {
     setYaw(0);
     setFocused(null);
@@ -384,7 +393,7 @@ export default function SpatialView() {
   const [yaw, setYaw] = useState(0),
     [focused, setFocused] = useState<number | null>(null),
     [support, setSupport] = useState({ ar: false, vr: false, checked: false });
-  useEffect(() => setFactsPage(null), [focused]);
+  useEffect(() => setFactsOffset(0), [focused]);
   function lookAt(nextYaw: number) {
     setFocused(null);
     setYaw(nextYaw);
@@ -522,25 +531,7 @@ export default function SpatialView() {
           </Button>
         </div>
       </div>
-      <div
-        className="xr-category-tabs"
-        role="group"
-        aria-label={t("Вид аналитики")}
-      >
-        {spatialCategories.map((c) => (
-          <Button
-            key={c.id}
-            aria-pressed={category === c.id}
-            className={category === c.id ? "selected" : ""}
-            onClick={() => {
-              setCategory(c.id);
-              setFocused(null);
-              setYaw(0);
-            }}
-          >
-            {t(c.label)}
-          </Button>
-        ))}
+      <div className="xr-panorama-tools">
         <Button onClick={recenterSpace}>
           {t("Центрировать пространство")}
         </Button>
@@ -548,8 +539,8 @@ export default function SpatialView() {
       <div
         className={`xr-canvas ${expanded ? "expanded" : ""}`}
         data-environment={theme}
-        data-category={category}
-        data-focus-view={factsPage === null ? "chart" : "facts"}
+        data-panorama-wings={data && !focused && !roomOnly ? 3 : 0}
+        data-focus-view={focused ? "combined" : "panorama"}
         role="group"
         aria-label={t(
           roomOnly
@@ -576,12 +567,10 @@ export default function SpatialView() {
                 setFocused={setFocused}
                 roomOnly={roomOnly}
                 dataContext={dataContext}
-                category={category}
-                setCategory={setCategory}
                 recenter={recenter}
                 onRecenter={recenterSpace}
-                factsPage={factsPage}
-                setFactsPage={setFactsPage}
+                factsOffset={factsOffset}
+                setFactsOffset={setFactsOffset}
               />
             </XR>
           </Canvas>
@@ -630,47 +619,20 @@ export default function SpatialView() {
                 : null}
             </NativeSelect>
           </div>
-          {focused && data ? (
-            <div className="xr-focus-actions">
-              <Button
-                aria-pressed={factsPage !== null}
-                onClick={() => setFactsPage(factsPage === null ? 0 : null)}
-              >
-                {t(factsPage === null ? "Точные значения" : "График")}
-              </Button>
-              {factsPage !== null ? (
-                <>
-                  <Button
-                    aria-label={t("Предыдущая страница")}
-                    disabled={factsPage === 0}
-                    onClick={() => setFactsPage(factsPage - 1)}
-                  >
-                    ←
-                  </Button>
-                  <span>
-                    {t("Страница {page} / {count}", {
-                      page: factsPage + 1,
-                      count: Math.ceil(
-                        dashboardModel(data!, focused).facts.length / 3,
-                      ),
-                    })}
-                  </span>
-                  <Button
-                    aria-label={t("Следующая страница")}
-                    disabled={
-                      factsPage >=
-                      Math.ceil(
-                        dashboardModel(data!, focused).facts.length / 3,
-                      ) -
-                        1
-                    }
-                    onClick={() => setFactsPage(factsPage + 1)}
-                  >
-                    →
-                  </Button>
-                </>
-              ) : null}
-            </div>
+          {focused &&
+          data &&
+          dashboardModel(data, focused).facts.length > FOCUS_ROWS ? (
+            <label className="xr-facts-scroll">
+              {t("Прокрутка точных значений")}
+              <input
+                type="range"
+                aria-label={t("Прокрутка точных значений")}
+                min={0}
+                max={dashboardModel(data, focused).facts.length - FOCUS_ROWS}
+                value={factsOffset}
+                onChange={(e) => setFactsOffset(Number(e.target.value))}
+              />
+            </label>
           ) : null}
           <div className="xr-focus-navigation">
             <p role="status" className="xr-focus-status sr-only">

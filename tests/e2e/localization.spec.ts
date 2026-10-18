@@ -22,15 +22,13 @@ test("fresh sessions default to Ukrainian across demo labels, dates and exact fa
   await expect(page.getByRole("heading", { level: 1 })).toHaveText("Огляд");
   await expect(page.locator(".source-item")).toContainText("Демодані");
   await expect(page.locator(".report-period")).toHaveText("Жовтень 2026");
-  await page.getByRole("button", { name: "Разом", exact: true }).click();
-  await expect(page.locator("[data-dashboard-id]")).toHaveCount(10);
+  await expect(page.locator("[data-dashboard-id]")).toHaveCount(9);
   await expect(page.locator("[data-dashboard-id] h3")).toHaveText([
     "Операції в касах",
     "Каси з початку року",
     "Каси й команда",
     "Платежі за каналами",
     "Кількість платежів",
-    "Обсяг платежів",
     "Платежі з початку року",
     "Операції пристроїв",
     "Обсяг операцій пристроїв",
@@ -189,17 +187,15 @@ test("monthly controls belong to their card and exact focus tables start expande
   await expect(
     card(page, 2).getByRole("group", { name: "Показник платежів" }),
   ).toBeVisible();
-  await expect(card(page, 3)).toBeVisible();
+  await expect(card(page, 3)).toHaveCount(0);
   await switcher.getByRole("button", { name: "Обсяг", exact: true }).click();
   await expect(card(page, 2)).toHaveCount(0);
   await expect(
     card(page, 3).getByRole("group", { name: "Показник платежів" }),
   ).toBeVisible();
-  await switcher.getByRole("button", { name: "Разом", exact: true }).click();
-  await expect(page.locator("[data-dashboard-id]")).toHaveCount(10);
-  await expect(
-    card(page, 2).getByRole("group", { name: "Показник платежів" }),
-  ).toBeVisible();
+  await expect(page.locator("[data-dashboard-id]")).toHaveCount(9);
+  await expect(switcher.getByRole("button")).toHaveCount(3);
+  await expect(card(page, 3).locator(".plan-bars svg rect")).toHaveCount(3);
   await card(page, 3).locator(".focus-button").click();
   const dialog = page.getByRole("dialog");
   await expect(dialog.locator("details")).toHaveAttribute("open", "");

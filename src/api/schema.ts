@@ -5,9 +5,17 @@ const value = z.number().finite().nonnegative().max(Number.MAX_SAFE_INTEGER);
 const percent = value.max(1000);
 const downtime = value.max(100);
 const points = z.array(value).max(366);
-const gauge = z.object({ label, percent, value, scaleMode: z.literal("ytd") });
+const gauge = z.object({
+  label,
+  percent,
+  value,
+  planValue: value.optional(),
+  scaleMode: z.literal("ytd"),
+});
 const monthly = z.object({
-  planBars: z.array(z.object({ label, percent })).length(3),
+  planBars: z
+    .array(z.object({ label, percent, planValue: value.optional() }))
+    .length(3),
   cards: z
     .array(
       z.object({

@@ -294,7 +294,7 @@ try {
       await expect(page.locator(".report-period")).toContainText(
         data.meta.reportDate,
       );
-      assert.equal(await page.locator("[data-dashboard-id]").count(), 10);
+      assert.equal(await page.locator("[data-dashboard-id]").count(), 9);
     }
     await context.close();
   }

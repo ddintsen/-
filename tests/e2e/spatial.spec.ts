@@ -23,7 +23,21 @@ async function clickWorld(page: Page, x: number, y: number, distance: number) {
   const canvas = page.locator(".xr-canvas canvas");
   await canvas.scrollIntoViewIfNeeded();
   const box = (await canvas.boundingBox())!;
-  const px = box.height / (2 * distance * Math.tan((34 * Math.PI) / 180));
+  const focus = await page.locator("#xr-focus").inputValue();
+  const fov =
+    focus !== "0"
+      ? Math.max(
+          68,
+          (2 * Math.atan(1.1 / ((1.5 * box.width) / box.height)) * 180) /
+            Math.PI,
+        )
+      : Math.max(
+          68,
+          (2 * Math.atan(2.05 / ((1.2 * box.width) / box.height)) * 180) /
+            Math.PI,
+        );
+  const px =
+    box.height / (2 * distance * Math.tan(((fov / 2) * Math.PI) / 180));
   await page.mouse.move(
     box.x + box.width / 2 + x * px,
     box.y + box.height / 2 - y * px,
@@ -45,7 +59,7 @@ test("WebGL panel and in-scene controls navigate focus, with keyboard parity and
   await expect(
     page.getByRole("button", { name: "Предыдущий дашборд" }),
   ).toBeDisabled();
-  await clickWorld(page, -0.6, 0.36, 1.85);
+  await clickWorld(page, -0.31, 0.16, 1.85);
   await expect(picker).toHaveValue("1");
   await expect(page.locator(".xr-focus-status")).toHaveText(
     "Платежи по каналам",
@@ -53,10 +67,14 @@ test("WebGL panel and in-scene controls navigate focus, with keyboard parity and
   await expect(
     page.getByRole("button", { name: "Предыдущий дашборд" }),
   ).toBeDisabled();
-  await clickWorld(page, 0.65, -0.69, 1.5);
+  await clickWorld(page, 0.27, -0.5682421875, 1.5);
   await expect(picker).toHaveValue("2");
   await page.getByRole("button", { name: "Предыдущий дашборд" }).click();
   await expect(picker).toHaveValue("1");
+  await clickWorld(page, 0.79, -0.5682421875, 1.5);
+  await expect(picker).toHaveValue("0");
+  await expect(page.getByLabel("Поворот взгляда в градусах")).toHaveValue("0");
+  await picker.selectOption("1");
   await picker.focus();
   await page.keyboard.press("End");
   await page.keyboard.press("Enter");
@@ -184,25 +202,31 @@ test("spatial mode explains strict API failure and recovers without a reload", a
   );
 });
 
-test("spatial category raycasts, paged facts and recenter stay inside the workspace", async ({
+test("three simultaneous stands raycast into combined chart/facts and recenter", async ({
   page,
 }) => {
   await openSpatial(page);
   const canvas = page.locator(".xr-canvas");
-  await expect(canvas).toHaveAttribute("data-category", "payments");
-  await clickWorld(page, -0.84, 0.92, 1.85);
-  await expect(canvas).toHaveAttribute("data-category", "cash");
-  await clickWorld(page, -0.6, 0.36, 1.85);
-  await expect(page.getByLabel("Приблизить дашборд")).toHaveValue("5");
-  await clickWorld(page, 0, 0.68, 1.5);
-  await expect(canvas).toHaveAttribute("data-focus-view", "facts");
-  await expect(page.getByText("Страница 1 / 2", { exact: true })).toBeVisible();
-  await clickWorld(page, 0.65, 0.68, 1.5);
-  await expect(page.getByText("Страница 2 / 2", { exact: true })).toBeVisible();
+  await expect(canvas).toHaveAttribute("data-panorama-wings", "3");
+  await expect(page.locator(".xr-category-tabs")).toHaveCount(0);
+  // Left cash stand, first full-width card, on the requested arc.
+  await clickWorld(
+    page,
+    -1.85 * Math.sin((42 * Math.PI) / 180),
+    0.16,
+    1.85 * Math.cos((42 * Math.PI) / 180),
+  );
+  await expect(page.locator("#xr-focus")).toHaveValue("5");
+  await expect(canvas).toHaveAttribute("data-focus-view", "combined");
+  await expect(page.getByText(/Страница \d+ \/ \d+/)).toHaveCount(0);
+  await page.locator("#xr-focus").selectOption("10");
+  await expect(canvas).toHaveAttribute("data-focus-view", "combined");
+  await expect(page.getByLabel("Прокрутка точных значений")).toHaveCount(0);
   await page
     .getByRole("button", { name: "Центрировать пространство", exact: true })
     .click();
-  await expect(page.getByLabel("Приблизить дашборд")).toHaveValue("0");
+  await expect(page.locator("#xr-focus")).toHaveValue("0");
   await expect(page.getByLabel("Поворот взгляда в градусах")).toHaveValue("0");
-  await expect(canvas).toHaveAttribute("data-focus-view", "chart");
+  await expect(canvas).toHaveAttribute("data-focus-view", "panorama");
+  await expect(canvas).toHaveAttribute("data-panorama-wings", "3");
 });

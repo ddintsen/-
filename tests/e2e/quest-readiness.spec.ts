@@ -1,11 +1,11 @@
 import { test, expect } from "@playwright/test";
 import AxeBuilder from "@axe-core/playwright";
 
-test("ten independent dashboards, actionable attention and real light/dark surfaces", async ({
+test("nine overview cards, ten focus dashboards, actionable attention and real light/dark surfaces", async ({
   page,
 }) => {
   await page.goto("/");
-  await expect(page.locator("[data-dashboard-id]")).toHaveCount(10);
+  await expect(page.locator("[data-dashboard-id]")).toHaveCount(9);
   const surface = page.locator('[data-dashboard-id="1"]');
   const light = await surface.evaluate((el) => getComputedStyle(el).background);
   await page.getByRole("button", { name: "Увімкнути темне оточення" }).click();
@@ -22,7 +22,7 @@ test("ten independent dashboards, actionable attention and real light/dark surfa
   await expect(dialog.getByRole("heading")).toHaveText("Стан обладнання");
   const row = dialog.locator("tr").filter({ hasText: "Recycle" }).first();
   await expect(row).toContainText("7,2%");
-  await expect(row).toContainText("6,5%");
+  await expect(row).toContainText("SLA 5%");
   await expect(row).toContainText("Високий простій");
   await dialog
     .getByRole("navigation", { name: "Обрати дашборд" })
@@ -30,6 +30,11 @@ test("ten independent dashboards, actionable attention and real light/dark surfa
     .click();
   await expect(dialog.locator("tbody tr").first()).toContainText("55");
   await expect(dialog.locator("tbody tr").first()).toContainText("90,7%");
+  await expect(dialog.locator("tbody tr").first()).toContainText("Не передано");
+  const choices = dialog.getByRole("navigation", { name: "Обрати дашборд" });
+  await expect(choices.getByRole("button").first()).toHaveText(
+    "1. Платежі за каналами",
+  );
   await expect(dialog.getByRole("columnheader")).toHaveCount(4);
 });
 

@@ -9,6 +9,7 @@ import {
   GroupedBars,
   PlanBars,
   MetricRow,
+  Sparkline,
   Donut,
   LineChart,
 } from "./charts";
@@ -124,10 +125,12 @@ export function DashboardCard({
   model,
   onFocus,
   controls,
+  comparison,
 }: {
   model: DashboardModel;
   onFocus: (id: number) => void;
   controls?: ReactNode;
+  comparison?: DashboardModel;
 }) {
   useLocale();
   return (
@@ -138,7 +141,7 @@ export function DashboardCard({
       <header className="card-heading">
         <div>
           <div className="card-title">
-            <h3>{t(model.title)}</h3>
+            <h3>{t(comparison ? "Месячный план платежей" : model.title)}</h3>
           </div>
           {model.subtitle ? <p>{t(model.subtitle)}</p> : null}
         </div>
@@ -152,7 +155,33 @@ export function DashboardCard({
         </Button>
       </header>
       {controls ? <div className="card-controls">{controls}</div> : null}
-      <DashboardContent model={model} />
+      {comparison ? (
+        <div className="monthly-comparison">
+          {[model, comparison].map((item) => (
+            <section key={item.id}>
+              <Button onClick={() => onFocus(item.id)}>{item.title}</Button>
+              <strong>
+                {formatNumber(item.metrics[0].value, true)} {item.unit}
+                <small> / {formatPercent(item.bars[0].values[0])}</small>
+              </strong>
+              <Sparkline
+                points={item.metrics[0].spark ?? []}
+                color={item.metrics[0].color}
+              />
+              <dl>
+                {item.bars.slice(1).map((bar) => (
+                  <div key={bar.label}>
+                    <dt>{bar.label}</dt>
+                    <dd>{formatPercent(bar.values[0])}</dd>
+                  </div>
+                ))}
+              </dl>
+            </section>
+          ))}
+        </div>
+      ) : (
+        <DashboardContent model={model} />
+      )}
     </article>
   );
 }

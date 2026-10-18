@@ -19,6 +19,7 @@ export function SpatialSurface({
   disabled = false,
   focused = false,
   selected = false,
+  renderOrder,
 }: {
   texture: CanvasTexture;
   position?: [number, number, number];
@@ -29,6 +30,7 @@ export function SpatialSurface({
   disabled?: boolean;
   focused?: boolean;
   selected?: boolean;
+  renderOrder?: number;
 }) {
   const [hovered, setHovered] = useState(false);
   const [pressed, setPressed] = useState(false);
@@ -45,7 +47,7 @@ export function SpatialSurface({
   return (
     <group position={position}>
       <mesh
-        renderOrder={focused ? 10 : 2}
+        renderOrder={renderOrder ?? (focused ? 10 : 2)}
         onPointerOver={
           interactive
             ? (e) => {
@@ -125,6 +127,7 @@ export function SpatialWing({
       height={height}
       position={position}
       opacity={opacity}
+      renderOrder={1}
     />
   );
 }

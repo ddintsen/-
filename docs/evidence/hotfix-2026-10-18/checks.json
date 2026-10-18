@@ -1,0 +1,41 @@
+{
+  "checkedAt": "2026-10-18T04:10:55.129121+00:00",
+  "phase": "local-validated",
+  "baseCommit": "f341e1ffedd3fba9270a32b564c66d3b15415fa4",
+  "unitPassed": 61,
+  "e2e": {
+    "startTime": "2026-10-18T04:06:18.501Z",
+    "duration": 148979.117,
+    "expected": 35,
+    "skipped": 0,
+    "unexpected": 0,
+    "flaky": 0
+  },
+  "deploymentTestsPassed": 6,
+  "typecheck": "passed in build",
+  "format": "passed",
+  "tokens": "passed",
+  "build": "VITE_BASE_PATH=/-/",
+  "hotfixAssertions": [
+    "Nine overview cards, three per wing, equal rows and monthly height in count/volume/combined, UA/EN and light/dark",
+    "Three vertical monthly bars and a true 100% reference",
+    "Actual downtime fills 17/46/72% on neutral 0..10% tracks; SLA 5%",
+    "Baseline attention only Recycle 7.2% and recurring payments 84%; annual progress excluded",
+    "Three simultaneous stands on a 1.85 m arc, sides at 24 degrees, ten focus targets",
+    "Canvas includes six channel labels and values, wide equipment graph and all 21 equipment facts on combined focus",
+    "Raycasts, recenter, language, settings and unsaved token drafts preserved",
+    "Visible localized dashboard names in focus; graph and four-column shared XR table; recenter mesh in one control row",
+    "Optional supplied planValue displayed exactly, missing absolute plan explicit; rounded percentages never used to infer targets",
+    "JSON editor report/since dates projected in UA/EN/RU, locale changes do not persist dataset; edited and invalid drafts preserved"
+  ],
+  "production": "PWA/offline/9overviewcards/all10focus options/room/WebGL passed",
+  "upgrade": "Real legacy 552750e in both activation orders; saved JSON/config, sibling tab, draft/guard, Rec alias and offline passed",
+  "standalone": "Ten available dashboards, nine overview slots, focus/navigation/WebGL, no external requests; file protocol not tested",
+  "limitations": [
+    "Physical Quest hardware, optics, controls/pinch, passthrough and FPS not validated",
+    "Real API endpoint not provided",
+    "Canvas document inaccessible; applied chat table and user-endorsed uploaded full audit"
+  ],
+  "screenshots": 12,
+  "configuration": "start_skill updated and saved in cloud draft; no new cloud snapshot publication claimed"
+}

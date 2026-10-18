@@ -34,8 +34,9 @@ try {
   });
   await page.goto(entry);
   await page.evaluate(() => document.fonts.ready);
-  await page.getByRole("button", { name: "Вместе", exact: true }).click();
-  if ((await page.locator("[data-dashboard-id]").count()) !== 10)
+  await page.getByRole("button", { name: "Объём", exact: true }).click();
+  await page.locator('[data-dashboard-id="3"]').waitFor();
+  if ((await page.locator("[data-dashboard-id]").count()) !== 9)
     throw new Error("Standalone dashboards incomplete");
   await page.locator('[data-dashboard-id="1"] .focus-button').click();
   await expect(page.getByRole("dialog").locator("details")).toHaveAttribute(
@@ -54,6 +55,8 @@ try {
     throw new Error("Standalone navigation failed");
   await page.getByRole("button", { name: /Открыть в пространстве/ }).click();
   await page.locator(".xr-canvas canvas").waitFor();
+  if ((await page.locator("#xr-focus option").count()) !== 11)
+    throw new Error("All ten focus dashboards must remain available");
   await page.getByLabel("Приблизить дашборд").selectOption("3");
   await page.getByRole("button", { name: "Следующий дашборд" }).click();
   if (

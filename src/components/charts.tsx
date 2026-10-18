@@ -111,7 +111,7 @@ export function ArcGauge({
         ) : null}
         <span className="progress-reference">
           {downtime
-            ? `${status} · ${t("Порог внимания")} ${formatPercent(DOWNTIME_LIMIT)}`
+            ? `${status} · SLA ${formatPercent(DOWNTIME_LIMIT)}`
             : status}
         </span>
       </div>
@@ -271,14 +271,83 @@ export function GroupedBars({ bars }: { bars: Bar[] }) {
 /** @dashboard Д2–Д3. A 100% reference line remains at its truthful scale. */
 export function PlanBars({ bars }: { bars: Bar[] }) {
   useLocale();
+  const id = useId().replace(/:/g, "");
+  const { ref, width } = useChartWidth(260);
+  const max = Math.max(
+    115,
+    ...bars.flatMap((b) => b.values).map((v) => v * 1.14),
+  );
+  const base = 160,
+    plot = 124,
+    group = width / Math.max(1, bars.length);
+  const barWidth = Math.min(52, group * 0.62);
   return (
-    <div className="plan-bars plan-meters">
-      {bars.map((bar) => (
-        <ArcGauge
-          key={bar.label}
-          gauge={{ label: bar.label, percent: bar.values[0], mode: "plan" }}
+    <div className="plan-bars" ref={ref}>
+      <svg
+        viewBox={`0 0 ${width} 204`}
+        role="img"
+        aria-label={bars
+          .map((b) => `${b.label}: ${formatPercent(b.values[0])}`)
+          .join(", ")}
+      >
+        <defs>
+          {seriesColors.map((color, i) => (
+            <linearGradient
+              key={color}
+              id={`${id}-${i}`}
+              x1="0"
+              y1="0"
+              x2="0"
+              y2="1"
+            >
+              <stop offset="0%" stopColor={color} />
+              <stop offset="100%" stopColor={color} stopOpacity=".35" />
+            </linearGradient>
+          ))}
+        </defs>
+        <text x="6" y="15" className="chart-label">
+          {t("План 100%")}
+        </text>
+        <line
+          x1="6"
+          x2={width - 6}
+          y1={base - (100 / max) * plot}
+          y2={base - (100 / max) * plot}
+          className="plan-target"
         />
-      ))}
+        {bars.map((bar, i) => {
+          const height = (bar.values[0] / max) * plot,
+            x = (i + 0.5) * group;
+          const inside = height >= 38;
+          return (
+            <g key={bar.label}>
+              <rect
+                x={x - barWidth / 2}
+                y={base - height}
+                width={barWidth}
+                height={height}
+                rx="6"
+                fill={`url(#${id}-${i % 3})`}
+              />
+              <text
+                x={x}
+                y={inside ? base - height + 22 : base - height - 8}
+                textAnchor="middle"
+                className="bar-percent"
+                style={{
+                  fontSize: 14,
+                  fill: inside ? colors["on-primary"] : "var(--color-text)",
+                }}
+              >
+                {formatPercent(bar.values[0])}
+              </text>
+              <text x={x} y="185" textAnchor="middle" className="chart-label">
+                {i === 0 ? t("Всего") : bar.label}
+              </text>
+            </g>
+          );
+        })}
+      </svg>
     </div>
   );
 }
