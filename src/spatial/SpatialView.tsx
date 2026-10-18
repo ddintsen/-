@@ -28,7 +28,12 @@ import { useDashboardStore } from "../store/dashboard";
 import { colors, dashboardModel, type DashboardModel } from "../api/model";
 import { formatSource } from "../api/format";
 import { drawOverviewPanel, drawFocusPanel } from "./drawPanel";
-import { SpatialSurface, SpatialControl, SpatialWing } from "./SpatialSurface";
+import {
+  SpatialSurface,
+  SpatialControl,
+  SpatialWing,
+  useBrandFontReady,
+} from "./SpatialSurface";
 import { SpaceEnvironment } from "./SpaceEnvironment";
 import { spatialStands, FOCUS_ROWS, focusSurfaceHeight } from "./layout";
 import { Button, NativeSelect } from "../components/ui";
@@ -102,12 +107,13 @@ function Panel({
 }) {
   const compact = useDashboardStore((s) => s.compact);
   const locale = useLocale();
+  const fontReady = useBrandFontReady();
   const texture = useMemo(
     () =>
       focused
         ? drawFocusPanel(model, compact, factsOffset)
         : drawOverviewPanel(model, wide),
-    [model, compact, focused, locale, factsOffset, wide],
+    [model, compact, focused, locale, factsOffset, wide, fontReady],
   );
   useEffect(() => () => texture.dispose(), [texture]);
   return (

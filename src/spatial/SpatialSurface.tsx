@@ -19,6 +19,27 @@ const reducedMotion =
   typeof matchMedia === "function" &&
   matchMedia("(prefers-reduced-motion: reduce)").matches;
 
+/** Canvas text does not wait for web fonts; redraw textures once Pryvat Sans is available. */
+let brandFontReady = false;
+const brandFont =
+  typeof document !== "undefined" && document.fonts
+    ? Promise.all([
+        document.fonts.load('400 28px "Pryvat Sans"'),
+        document.fonts.load('500 28px "Pryvat Sans"'),
+        document.fonts.load('700 28px "Pryvat Sans"'),
+      ]).then(
+        () => (brandFontReady = true),
+        () => (brandFontReady = true),
+      )
+    : Promise.resolve(true);
+export function useBrandFontReady() {
+  const [ready, setReady] = useState(brandFontReady);
+  useEffect(() => {
+    if (!ready) void brandFont.then(() => setReady(true));
+  }, [ready]);
+  return ready;
+}
+
 /** @dashboard Д1–Д10. Shared XR surface: fill feedback, pointer and disabled controls. */
 export function SpatialSurface({
   texture,
@@ -163,9 +184,10 @@ export function SpatialWing({
   opacity?: number;
 }) {
   const locale = useLocale();
+  const fontReady = useBrandFontReady();
   const texture = useMemo(
     () => drawWing(title, width / height),
-    [title, width, height, locale],
+    [title, width, height, locale, fontReady],
   );
   useEffect(() => () => texture.dispose(), [texture]);
   return (
@@ -202,9 +224,10 @@ export function SpatialControl({
   selected?: boolean;
 }) {
   const locale = useLocale();
+  const fontReady = useBrandFontReady();
   const texture = useMemo(
     () => drawLabel(label, width / height, selected),
-    [label, width, height, locale, selected],
+    [label, width, height, locale, selected, fontReady],
   );
   useEffect(() => () => texture.dispose(), [texture]);
   return (

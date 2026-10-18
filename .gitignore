@@ -17,3 +17,5 @@ standalone-dist/
 stackblitz-export/
 .qa/
 .claude/
+# Pryvat Sans is licensed exclusively to PrivatBank; not redistributed in the public repo.
+public/fonts/

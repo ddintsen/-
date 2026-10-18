@@ -51,7 +51,7 @@ export function drawPanel(m: DashboardModel, compact: boolean): CanvasTexture {
     align: CanvasTextAlign = "left",
   ) => {
     size = Math.max(26, size);
-    ctx.font = `${size >= 36 ? 600 : 500} ${size}px PrivatSans, "Inter Variable", sans-serif`;
+    ctx.font = `${size >= 36 ? 600 : 500} ${size}px "Pryvat Sans", "Inter Variable", sans-serif`;
     ctx.fillStyle = color;
     ctx.textAlign = align;
     ctx.fillText(
@@ -144,7 +144,7 @@ export function drawPanel(m: DashboardModel, compact: boolean): CanvasTexture {
           "center",
         );
         ctx.save();
-        ctx.font = '500 28px PrivatSans, "Inter Variable", sans-serif';
+        ctx.font = '500 28px "Pryvat Sans", "Inter Variable", sans-serif';
         ctx.fillStyle = colors.muted;
         ctx.textAlign = "center";
         ctx.fillText(
@@ -187,7 +187,7 @@ export function drawPanel(m: DashboardModel, compact: boolean): CanvasTexture {
         .replace(/-/g, "- ")
         .split(" ");
       ctx.save();
-      ctx.font = '500 26px PrivatSans, "Inter Variable", sans-serif';
+      ctx.font = '500 26px "Pryvat Sans", "Inter Variable", sans-serif';
       ctx.fillStyle = colors.muted;
       ctx.textAlign = "center";
       words.forEach((word, j) =>
@@ -368,7 +368,7 @@ export function drawLabel(
   ctx.beginPath();
   ctx.roundRect(2, 2, 1020, c.height - 4, c.height / 2 - 2);
   ctx.fill();
-  ctx.font = `500 ${Math.round(c.height * 0.3)}px PrivatSans, "Inter Variable", sans-serif`;
+  ctx.font = `500 ${Math.round(c.height * 0.3)}px "Pryvat Sans", "Inter Variable", sans-serif`;
   ctx.fillStyle = selected ? colors["on-primary"] : colors.text;
   ctx.textAlign = "center";
   ctx.textBaseline = "middle";
@@ -404,7 +404,7 @@ export function drawOverviewPanel(
     align: CanvasTextAlign = "left",
     max = 1150,
   ) => {
-    ctx.font = `500 ${size}px PrivatSans, "Inter Variable", sans-serif`;
+    ctx.font = `500 ${size}px "Pryvat Sans", "Inter Variable", sans-serif`;
     ctx.fillStyle = color;
     ctx.textAlign = align;
     ctx.fillText(t(value), x, y, max);
@@ -579,7 +579,7 @@ export function drawFocusPanel(
     align: CanvasTextAlign = "left",
     max = 1900,
   ) => {
-    ctx.font = `500 ${size}px PrivatSans, "Inter Variable", sans-serif`;
+    ctx.font = `500 ${size}px "Pryvat Sans", "Inter Variable", sans-serif`;
     ctx.fillStyle = color;
     ctx.textAlign = align;
     ctx.fillText(t(value), x, y, max);

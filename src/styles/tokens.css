@@ -75,9 +75,9 @@
   --color-space-sun-core: #fff4e2;
   --color-space-day-haze: #d8e8f6;
   --color-space-day-sky: #5d7fa8;
-  --font-display: PrivatSans, Manrope Variable, Inter Variable, sans-serif;
-  --font-body: PrivatSans, Inter Variable, system-ui, sans-serif;
-  --font-data: PrivatSans, Inter Variable, system-ui, sans-serif;
+  --font-display: Pryvat Sans Display, Manrope Variable, sans-serif;
+  --font-body: Pryvat Sans, Inter Variable, system-ui, sans-serif;
+  --font-data: Pryvat Sans, Inter Variable, system-ui, sans-serif;
   --radius-default: 1.5rem;
   --radius-control: 0.75rem;
   --radius-panel: 1.75rem;

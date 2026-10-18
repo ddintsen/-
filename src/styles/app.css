@@ -1,27 +1,85 @@
 @import "./tokens.css";
-/* PrivatBank brand typeface. Resolved from an installed copy until licensed files are added
-   to src/assets/fonts (see docs/DECISIONS.md); Inter/Manrope stay the shipped fallback. */
+/* Pryvat Sans, PrivatBank's typeface ("Exclusively for JSC CB PRIVATBANK", embedding allowed).
+   An installed copy wins; public/fonts holds local woff2 copies that are not committed to the
+   public repository. Without either, Inter/Manrope render. See docs/DECISIONS.md. */
 @font-face {
-  font-family: PrivatSans;
-  src: local("PrivatSans"), local("Privat Sans"), local("PrivatSans-Regular");
+  font-family: "Pryvat Sans";
+  src:
+    local("Pryvat Sans Thin"),
+    local("PryvatSans-Thin"),
+    url("/fonts/PryvatSans-Thin.woff2") format("woff2");
+  font-weight: 100;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Pryvat Sans";
+  src:
+    local("Pryvat Sans"),
+    local("PryvatSans-Regular"),
+    url("/fonts/PryvatSans-Regular.woff2") format("woff2");
   font-weight: 400;
   font-display: swap;
 }
 @font-face {
-  font-family: PrivatSans;
-  src: local("PrivatSans Medium"), local("PrivatSans-Medium");
+  font-family: "Pryvat Sans";
+  src:
+    local("Pryvat Sans Medium"),
+    local("PryvatSans-Medium"),
+    url("/fonts/PryvatSans-Medium.woff2") format("woff2");
   font-weight: 500;
   font-display: swap;
 }
 @font-face {
-  font-family: PrivatSans;
-  src: local("PrivatSans SemiBold"), local("PrivatSans-SemiBold");
+  font-family: "Pryvat Sans";
+  src:
+    local("Pryvat Sans Medium"),
+    local("PryvatSans-Medium"),
+    url("/fonts/PryvatSans-Medium.woff2") format("woff2");
   font-weight: 600;
   font-display: swap;
 }
 @font-face {
-  font-family: PrivatSans;
-  src: local("PrivatSans Bold"), local("PrivatSans-Bold");
+  font-family: "Pryvat Sans";
+  src:
+    local("Pryvat Sans Bold"),
+    local("PryvatSans-Bold"),
+    url("/fonts/PryvatSans-Bold.woff2") format("woff2");
+  font-weight: 700;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Pryvat Sans Display";
+  src:
+    local("Pryvat Sans Display"),
+    local("PryvatSans-DisplayRegular"),
+    url("/fonts/PryvatSans-DisplayRegular.woff2") format("woff2");
+  font-weight: 400;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Pryvat Sans Display";
+  src:
+    local("Pryvat Sans Display Medium"),
+    local("PryvatSans-DisplayMedium"),
+    url("/fonts/PryvatSans-DisplayMedium.woff2") format("woff2");
+  font-weight: 500;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Pryvat Sans Display";
+  src:
+    local("Pryvat Sans Display Medium"),
+    local("PryvatSans-DisplayMedium"),
+    url("/fonts/PryvatSans-DisplayMedium.woff2") format("woff2");
+  font-weight: 600;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Pryvat Sans Display";
+  src:
+    local("Pryvat Sans Display Bold"),
+    local("PryvatSans-DisplayBold"),
+    url("/fonts/PryvatSans-DisplayBold.woff2") format("woff2");
   font-weight: 700;
   font-display: swap;
 }
