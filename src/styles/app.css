@@ -98,7 +98,7 @@
 ::-webkit-scrollbar-thumb {
   background: var(--color-scrollbar);
   border: 2px solid var(--color-scrollbar-track);
-  border-radius: 8px;
+  border-radius: var(--radius-small);
 }
 ::-webkit-scrollbar-thumb:hover {
   background: var(--color-scrollbar-hover);
@@ -273,7 +273,7 @@ select {
   left: max(24px, calc((100vw - 1800px) / 2 + 24px));
   width: 64px;
   height: min(550px, calc(100dvh - 48px));
-  border-radius: 32px;
+  border-radius: var(--radius-pill);
   background: var(--color-chrome);
   box-shadow: var(--panel-shadow);
   backdrop-filter: blur(32px) saturate(0.7);
@@ -307,7 +307,7 @@ select {
   width: 44px;
   height: 44px;
   padding: 0;
-  border-radius: 14px;
+  border-radius: var(--radius-field);
   color: var(--color-muted);
 }
 .button.dock-button.active {
@@ -432,7 +432,7 @@ h1 {
   padding: 12px 17px;
   background: var(--color-primary);
   color: var(--color-on-primary);
-  border-radius: 14px;
+  border-radius: var(--radius-field);
   font-size: 12px;
   box-shadow: 0 3px 15px rgba(0, 0, 0, 0.12);
 }
@@ -666,13 +666,13 @@ h1 {
   display: flex;
   gap: 3px;
   background: rgba(0, 0, 0, 0.12);
-  border-radius: 8px;
+  border-radius: var(--radius-small);
   padding: 3px;
 }
 .monthly-switch .button {
   font-size: 9px;
   min-height: 25px;
-  border-radius: 6px;
+  border-radius: var(--radius-small);
   padding: 4px 9px;
 }
 .monthly-layout {
@@ -955,7 +955,7 @@ h1 {
   align-items: center;
   gap: 14px;
   background: rgba(92, 72, 32, 0.72);
-  border-radius: 16px;
+  border-radius: var(--radius-tile);
   padding: 16px;
   margin-bottom: 20px;
 }
@@ -1178,7 +1178,7 @@ thead th {
   margin-bottom: 25px;
   padding: 4px;
   background: rgba(0, 0, 0, 0.12);
-  border-radius: 13px;
+  border-radius: var(--radius-field);
   width: fit-content;
 }
 .settings-body {
@@ -1205,7 +1205,7 @@ select {
   width: 100%;
   background: var(--color-card);
   border: 1px solid var(--color-border);
-  border-radius: 11px;
+  border-radius: var(--radius-field);
   color: var(--color-text);
   padding: 12px 14px;
   outline-offset: 3px;
@@ -1241,7 +1241,7 @@ textarea::placeholder {
   display: flex;
   align-items: center;
   border: 1px solid var(--color-border);
-  border-radius: 11px;
+  border-radius: var(--radius-field);
   padding-right: 6px;
   background: var(--color-card);
 }
@@ -1309,7 +1309,7 @@ textarea::placeholder {
   text-align: left;
   padding: 18px;
   gap: 12px;
-  border-radius: 15px;
+  border-radius: var(--radius-tile);
 }
 .scenario > svg {
   color: var(--color-primary);
@@ -1380,7 +1380,7 @@ textarea::placeholder {
   pointer-events: none;
   background: var(--color-primary);
   color: var(--color-on-primary);
-  border-radius: 15px;
+  border-radius: var(--radius-tile);
   padding: 14px 20px;
   font-size: 12px;
   display: flex;
@@ -1438,7 +1438,7 @@ textarea::placeholder {
   height: min(55vh, 580px);
   min-height: 300px;
   background: var(--color-background);
-  border-radius: 18px;
+  border-radius: var(--radius-tile);
   overflow: hidden;
 }
 .xr-controls {
@@ -2013,7 +2013,7 @@ textarea::placeholder {
     width: calc(100vw - 20px);
     max-height: calc(100dvh - 24px);
     padding: 19px;
-    border-radius: 22px;
+    border-radius: var(--radius-tile);
   }
   .modal-header {
     gap: 10px;
@@ -2677,7 +2677,7 @@ textarea::placeholder {
   justify-content: space-between;
   padding: 16px 18px;
   background: var(--color-control-glass);
-  border-radius: 18px;
+  border-radius: var(--radius-tile);
 }
 .focus-content .metric-trend {
   display: block;
@@ -3451,7 +3451,7 @@ summary:focus-visible,
 }
 .cockpit .wing {
   padding: 18px 12px 12px;
-  border-radius: 36px;
+  border-radius: var(--radius-stand);
   background: var(--stand-bg);
   -webkit-backdrop-filter: blur(40px) saturate(160%);
   backdrop-filter: blur(40px) saturate(160%);
@@ -3479,7 +3479,7 @@ summary:focus-visible,
 [data-theme="dark"] .cockpit .dashboard-card {
   background: var(--section-bg);
   border: 0;
-  border-radius: 26px;
+  border-radius: var(--radius-section);
   box-shadow: var(--section-rim);
   -webkit-backdrop-filter: none;
   backdrop-filter: none;
@@ -3530,7 +3530,7 @@ summary:focus-visible,
     border-radius: 28px;
   }
   .cockpit .dashboard-card {
-    border-radius: 22px;
+    border-radius: var(--radius-tile);
   }
 }
 @supports not (
@@ -3817,4 +3817,255 @@ select:not([multiple]) {
 .space-backdrop {
   bottom: auto;
   height: 100lvh;
+}
+
+/* ── One system (finish pass, 18 Oct 2026) ─────────────────────────────────────────────
+   Type: 11 caption · 12 small/control · 13 body · 15 title/value · 18 stand · 26 KPI ·
+   32 hero figure · 44 page. Weights 400/500/600. Data figures are tabular, SVG included.
+   Controls: one height, pill radius; fields share one fill and a 14px radius.
+   No decorative rules: spacing separates sections, tables keep their row lines. */
+:root {
+  --control-h: 40px;
+  --field-radius: 14px;
+  --control-fill: rgba(255, 255, 255, 0.08);
+  --field-bg: rgba(255, 255, 255, 0.05);
+}
+[data-theme="office"] {
+  --control-fill: rgba(15, 23, 42, 0.06);
+  --field-bg: rgba(255, 255, 255, 0.66);
+}
+@media (pointer: coarse) {
+  :root {
+    --control-h: 44px;
+  }
+}
+
+/* Type scale */
+.heading-copy > h1 {
+  font-size: 44px;
+  font-weight: 500;
+  letter-spacing: -1.2px;
+}
+.modal-header h2 {
+  font-size: 26px;
+  font-weight: 600;
+  letter-spacing: -0.6px;
+}
+.section-heading h3,
+.simulation-row h3 {
+  font-family: var(--font-display);
+  font-size: 15px;
+  font-weight: 600;
+}
+.field > label {
+  font-weight: 500;
+}
+.metric-info > span,
+.vacancy strong span,
+.slice-legend span {
+  font-size: 12px;
+}
+.metric-trend > span,
+.dbo-share .chart-legend,
+.vacancy p,
+.equipment-downtime > p,
+.progress-detail,
+.progress-reference,
+.progress-actual small {
+  font-size: 11px;
+}
+.metric-trend > span {
+  font-weight: 500;
+}
+.metric-info > strong,
+.view-overview .monthly-layout .metric-info > strong {
+  font-family: var(--font-display);
+  font-size: 26px;
+  font-weight: 500;
+  letter-spacing: -0.6px;
+}
+.vacancy strong {
+  font-family: var(--font-display);
+}
+.monthly-switch .button,
+.modal .button {
+  font-size: 12px;
+}
+.data-details summary {
+  font-weight: 600;
+  color: var(--color-text);
+}
+svg text,
+.progress-percent,
+.progress-actual,
+.metric-info strong,
+.slice-legend strong,
+.vacancy strong,
+td {
+  font-variant-numeric: tabular-nums;
+}
+.chart-value {
+  font-weight: 600;
+}
+.chart-value.is-reference,
+.chart-label {
+  font-weight: 500;
+}
+.bar-percent {
+  font-weight: 600;
+}
+
+/* Controls */
+.button {
+  min-height: var(--control-h);
+  border-radius: var(--radius-pill);
+}
+.button.icon-button {
+  width: var(--control-h);
+  min-width: var(--control-h);
+  height: var(--control-h);
+}
+.side-dock .dock-button {
+  border-radius: var(--radius-pill);
+}
+.view-tools .button {
+  border-radius: var(--radius-pill);
+}
+.tool-divider {
+  display: none;
+}
+.button.outline,
+[data-theme="office"] .button.outline {
+  background: var(--control-fill);
+  border-color: transparent;
+}
+.button.xr-entry,
+[data-theme="office"] .button.xr-entry {
+  min-height: var(--control-h);
+  padding: 0 18px;
+  border: 0;
+  border-radius: var(--radius-pill);
+  background: var(--color-primary);
+  color: var(--color-on-primary);
+  box-shadow: none;
+  font-weight: 600;
+}
+@media (hover: hover) and (pointer: fine) {
+  .button.xr-entry:hover:not(:disabled) {
+    background: var(--color-primary);
+    color: var(--color-on-primary);
+    filter: brightness(0.94);
+  }
+  .button.outline:hover:not(:disabled) {
+    background: var(--control-hover);
+  }
+}
+.form-actions .button {
+  min-height: var(--control-h);
+}
+.button.scenario,
+[data-theme="office"] .button.scenario {
+  border: 0;
+  border-radius: var(--radius-tile);
+  background: var(--control-fill);
+  min-height: 0;
+}
+.scenario[aria-pressed="true"],
+[data-theme="office"] .scenario[aria-pressed="true"] {
+  background: var(--control-selected);
+  box-shadow: inset 0 0 0 1.5px var(--color-text);
+}
+
+/* Fields */
+input:not([type="range"]):not([type="checkbox"]):not([type="radio"]),
+textarea,
+.modal select {
+  background-color: var(--field-bg);
+  border: 1px solid var(--color-border);
+  border-radius: var(--field-radius);
+  font-size: 13px;
+}
+input:not([type="range"]):not([type="checkbox"]):not([type="radio"]),
+.modal select {
+  min-height: var(--control-h);
+  padding-top: 0;
+  padding-bottom: 0;
+}
+input:not([type="range"]):not([type="checkbox"]):not([type="radio"]) {
+  padding-left: 14px;
+  padding-right: 14px;
+}
+.modal select {
+  padding-left: 14px;
+  padding-right: 34px;
+}
+
+/* No decorative rules */
+.modal-header {
+  border-bottom: 0;
+  padding-bottom: 0;
+  margin-bottom: 28px;
+}
+.staff-bottom,
+.equipment-downtime,
+.data-details,
+.simulation-row {
+  border-top: 0;
+  border-bottom: 0;
+}
+.progress-actual > span {
+  font-size: 11px;
+}
+@media (max-width: 760px) {
+  .topbar-right .button.icon-button {
+    width: 36px;
+    min-width: 36px;
+    height: 36px;
+    min-height: 36px;
+    padding: 6px;
+  }
+  .language-switch select,
+  .topbar-right .language-switch select {
+    padding: 0 24px 0 10px;
+    background-position: right 8px center;
+  }
+}
+.demo-settings > h3 {
+  font-family: var(--font-display);
+  font-size: 15px;
+  font-weight: 600;
+}
+/* Rows share one height; a shorter dashboard centres its content instead of leaving an empty foot. */
+@media (min-width: 1251px) {
+  .view-overview .dashboard-card {
+    display: flex;
+    flex-direction: column;
+  }
+  .view-overview .dashboard-card > .card-heading {
+    flex: none;
+  }
+  .view-overview .dashboard-card > :not(.card-heading):first-of-type {
+    margin-top: auto;
+  }
+  .view-overview .dashboard-card > :last-child:not(.card-heading) {
+    margin-bottom: auto;
+  }
+}
+@media (min-width: 1251px) {
+  /* Staff: the trend sits under its title, the vacancy and downtime close the card. */
+  .view-overview .card-7 > :not(.card-heading):first-of-type {
+    margin-top: 0;
+  }
+  .view-overview .dashboard-card.card-7 > .staff-bottom:last-child {
+    margin-top: auto;
+    margin-bottom: 0;
+  }
+  /* Year-to-date plans spread over the row instead of floating in its middle. */
+  .view-overview .card-4 > .gauges-row {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-evenly;
+    margin: 0;
+  }
 }

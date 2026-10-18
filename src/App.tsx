@@ -365,9 +365,8 @@ export default function App() {
                   className="xr-entry"
                   onClick={() => setSpatial(true)}
                 >
-                  <Glasses size={21} />
+                  <Glasses size={20} />
                   {t("Открыть в пространстве")}
-                  <ArrowUpRight size={16} />
                 </Button>
               </div>
             </div>

@@ -90,6 +90,11 @@ rounded:
   control: '0.75rem'
   panel: '1.75rem'
   pill: '999px'
+  stand: '36px'
+  section: '26px'
+  tile: '22px'
+  field: '14px'
+  small: '8px'
 spacing:
   unit: '0.25rem'
   card: '1.25rem'

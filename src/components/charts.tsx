@@ -134,7 +134,7 @@ export function GroupedBars({ bars }: { bars: Bar[] }) {
     barWidth = Math.max(8, Math.min(24, (group - 36) / 2)),
     pairGap = Math.max(10, Math.min(18, group * 0.14)),
     // Narrow stands (1251-1400px) give each channel under 60px; category labels step down.
-    labelSize = group < 62 ? 10.5 : 12;
+    labelSize = group < 62 ? 11 : 12;
   // Both values of a pair share one baseline above the taller bar, so pairs read as a row.
   const pairLabelY = bars.map(
     (bar) => base - (Math.max(...bar.values) / max) * plot - 9,
@@ -215,7 +215,7 @@ export function GroupedBars({ bars }: { bars: Bar[] }) {
                       y={pairLabelY[i] - (j === 0 ? 0 : 14)}
                       className={`chart-value${j === 0 ? " is-reference" : ""}`}
                       textAnchor="middle"
-                      style={{ fontSize: j === 0 ? 10.5 : 12.5 }}
+                      style={{ fontSize: j === 0 ? 11 : 12 }}
                     >
                       {formatNumber(v)}
                     </text>
@@ -318,7 +318,7 @@ export function PlanBars({ bars }: { bars: Bar[] }) {
                 y={base - height + 20}
                 textAnchor="middle"
                 className="bar-percent"
-                style={{ fontSize: 12.5, fill: colors["on-primary"] }}
+                style={{ fontSize: 12, fill: colors["on-primary"] }}
               >
                 {formatPercent(bar.values[0])}
               </text>

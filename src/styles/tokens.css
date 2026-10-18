@@ -82,6 +82,11 @@
   --radius-control: 0.75rem;
   --radius-panel: 1.75rem;
   --radius-pill: 999px;
+  --radius-stand: 36px;
+  --radius-section: 26px;
+  --radius-tile: 22px;
+  --radius-field: 14px;
+  --radius-small: 8px;
   --space-unit: 0.25rem;
   --space-card: 1.25rem;
   --space-gap: 0.875rem;

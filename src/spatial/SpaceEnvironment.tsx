@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef } from "react";
-import { useFrame, useLoader } from "@react-three/fiber";
+import { useFrame, useLoader, useThree } from "@react-three/fiber";
 import {
   AdditiveBlending,
   BackSide,
@@ -31,13 +31,14 @@ const SUN_LIGHT = new Vector3(-500, 700, 600);
 function skyTexture(dark: boolean) {
   const canvas = document.createElement("canvas");
   canvas.width = 32;
-  canvas.height = 512;
+  canvas.height = 1024;
   const ctx = canvas.getContext("2d")!;
-  const base = ctx.createLinearGradient(0, 0, 0, 512);
+  const base = ctx.createLinearGradient(0, 0, 0, 1024);
   if (dark) {
     base.addColorStop(0, colors["space-night"]);
-    base.addColorStop(0.46, colors["space-night"]);
-    base.addColorStop(0.53, colors["space-blue"]);
+    base.addColorStop(0.36, colors["space-night"]);
+    base.addColorStop(0.52, colors["space-blue"]);
+    base.addColorStop(0.7, colors["space-night"]);
     base.addColorStop(1, colors["space-night"]);
   } else {
     base.addColorStop(0, colors["space-day-sky"]);
@@ -47,7 +48,7 @@ function skyTexture(dark: boolean) {
     base.addColorStop(1, colors["space-light-mid"]);
   }
   ctx.fillStyle = base;
-  ctx.fillRect(0, 0, 32, 512);
+  ctx.fillRect(0, 0, 32, 1024);
   const texture = new CanvasTexture(canvas);
   texture.colorSpace = SRGBColorSpace;
   return texture;
@@ -76,7 +77,8 @@ function starsGeometry() {
     return seed / 4294967296;
   };
   const positions: number[] = [],
-    shades: number[] = [];
+    shades: number[] = [],
+    phases: number[] = [];
   for (let i = 0; i < 1800; i++) {
     const y = random() * 2 - 1,
       angle = random() * Math.PI * 2,
@@ -90,12 +92,39 @@ function starsGeometry() {
     const brightness = 0.25 + random() ** 3 * 0.75;
     const color = new Color(colors["space-star"]).multiplyScalar(brightness);
     shades.push(color.r, color.g, color.b);
+    phases.push(random());
   }
   const geometry = new BufferGeometry();
   geometry.setAttribute("position", new Float32BufferAttribute(positions, 3));
-  geometry.setAttribute("color", new Float32BufferAttribute(shades, 3));
+  geometry.setAttribute("starColor", new Float32BufferAttribute(shades, 3));
+  geometry.setAttribute("phase", new Float32BufferAttribute(phases, 1));
   return geometry;
 }
+
+// Each star breathes on its own slow period (4-10 s); the field never repeats in step.
+const starVertex = /* glsl */ `
+  attribute vec3 starColor;
+  attribute float phase;
+  uniform float time;
+  uniform float size;
+  varying vec3 vColor;
+  void main() {
+    float speed = 0.6 + fract(phase * 7.31) * 0.9;
+    float breath = 0.7 + 0.3 * sin(time * speed + phase * 6.2832);
+    vColor = starColor * breath;
+    gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+    gl_PointSize = size;
+  }
+`;
+const starFragment = /* glsl */ `
+  uniform float opacity;
+  varying vec3 vColor;
+  void main() {
+    float d = length(gl_PointCoord - 0.5);
+    if (d > 0.5) discard;
+    gl_FragColor = vec4(vColor, smoothstep(0.5, 0.0, d) * 1.35 * opacity);
+  }
+`;
 
 const earthVertex = /* glsl */ `
   varying vec2 vUv;
@@ -168,7 +197,7 @@ const haloFragment = /* glsl */ `
 // One revolution in about 40 minutes: the surface drifts, the limb and the stands stay still.
 const EARTH_SPIN = 0.0026;
 
-/** A distant environment with one slow motion (Earth spin); no remote runtime resources. AR omits it. */
+/** A distant environment with slow motion (Earth spin, star breathing); no remote runtime resources. AR omits it. */
 export function SpaceEnvironment({
   dark,
   motion = true,
@@ -177,9 +206,20 @@ export function SpaceEnvironment({
   motion?: boolean;
 }) {
   const spin = useRef<Group>(null);
+  const pixelRatio = useThree((state) => state.gl.getPixelRatio());
+  const starUniforms = useMemo(
+    () => ({
+      time: { value: 0 },
+      size: { value: 3.2 * pixelRatio },
+      opacity: { value: dark ? 0.95 : 0.2 },
+    }),
+    [dark, pixelRatio],
+  );
   useFrame((_, delta) => {
-    if (motion && spin.current)
-      spin.current.rotation.y += Math.min(delta, 0.2) * EARTH_SPIN;
+    if (!motion) return;
+    const step = Math.min(delta, 0.2);
+    if (spin.current) spin.current.rotation.y += step * EARTH_SPIN;
+    starUniforms.time.value += step;
   });
   const sky = useMemo(() => skyTexture(dark), [dark]);
   const glow = useMemo(glowTexture, []);
@@ -228,12 +268,11 @@ export function SpaceEnvironment({
         <meshBasicMaterial map={sky} side={BackSide} toneMapped={false} />
       </mesh>
       <points geometry={stars} raycast={() => {}} renderOrder={-9}>
-        <pointsMaterial
-          vertexColors
-          size={1.6}
-          sizeAttenuation={false}
+        <shaderMaterial
+          uniforms={starUniforms}
+          vertexShader={starVertex}
+          fragmentShader={starFragment}
           transparent
-          opacity={dark ? 0.95 : 0.18}
           depthWrite={false}
           toneMapped={false}
         />

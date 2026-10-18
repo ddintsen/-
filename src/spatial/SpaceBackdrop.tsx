@@ -27,6 +27,8 @@ class SpaceBoundary extends Component<
 const LOOK_FROM = new Vector3(0, 1.75, -9);
 const LOOK_TO = new Vector3(0, 2.45, -9);
 const INTRO_SECONDS = 2.8;
+// About ±1.4° of yaw and ±0.8° of pitch at the look distance.
+const PARALLAX = { x: 0.22, y: 0.13 };
 // The surface drift is a few pixels per second, so a low redraw rate stays smooth and cheap
 // for the frosted glass that resamples the canvas.
 const DRIFT_FPS = 12;
@@ -54,6 +56,19 @@ function BackgroundScene({ dark }: { dark: boolean }) {
   );
   const intro = useRef(reduced ? INTRO_SECONDS : 0);
   const look = useMemo(() => new Vector3(), []);
+  // The page is a window into orbit: a fine pointer tilts the view a little, with easing.
+  const pointer = useRef({ x: 0, y: 0, tx: 0, ty: 0 });
+  useEffect(() => {
+    if (reduced || !matchMedia("(hover: hover) and (pointer: fine)").matches)
+      return;
+    const onMove = (event: PointerEvent) => {
+      pointer.current.tx = (event.clientX / innerWidth) * 2 - 1;
+      pointer.current.ty = (event.clientY / innerHeight) * 2 - 1;
+      invalidate();
+    };
+    addEventListener("pointermove", onMove, { passive: true });
+    return () => removeEventListener("pointermove", onMove);
+  }, [reduced, invalidate]);
   useEffect(() => {
     gl.setClearColor(dark ? colors["space-night"] : colors["space-light"], 1);
     gl.domElement.dataset.spaceReady = "true";
@@ -75,8 +90,16 @@ function BackgroundScene({ dark }: { dark: boolean }) {
       intro.current + Math.min(delta, 0.05),
     );
     const k = 1 - Math.pow(1 - intro.current / INTRO_SECONDS, 3);
-    camera.lookAt(look.lerpVectors(LOOK_FROM, LOOK_TO, k));
-    if (running) invalidate();
+    const p = pointer.current;
+    const ease = 1 - Math.exp(-Math.min(delta, 0.1) * 4);
+    p.x += (p.tx - p.x) * ease;
+    p.y += (p.ty - p.y) * ease;
+    look.lerpVectors(LOOK_FROM, LOOK_TO, k);
+    look.x += p.x * PARALLAX.x;
+    look.y -= p.y * PARALLAX.y;
+    camera.lookAt(look);
+    const settling = Math.abs(p.tx - p.x) + Math.abs(p.ty - p.y) > 0.002;
+    if (running || settling) invalidate();
   });
   return <SpaceEnvironment dark={dark} motion={!reduced} />;
 }
