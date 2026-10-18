@@ -7,10 +7,12 @@ test("nine overview cards, ten focus dashboards, actionable attention and real l
   await page.goto("/");
   await expect(page.locator("[data-dashboard-id]")).toHaveCount(9);
   const surface = page.locator('[data-dashboard-id="1"]');
-  const light = await surface.evaluate((el) => getComputedStyle(el).background);
+  const background = () =>
+    surface.evaluate((el) => getComputedStyle(el).background);
+  const light = await background();
   await page.getByRole("button", { name: "Увімкнути темне оточення" }).click();
-  const dark = await surface.evaluate((el) => getComputedStyle(el).background);
-  expect(light).not.toBe(dark);
+  // Surfaces cross-fade between themes; compare once the transition has settled.
+  await expect.poll(background).not.toBe(light);
   await page.getByRole("button", { name: "Увімкнути світле оточення" }).click();
   await page
     .getByLabel("Зони уваги", { exact: true })

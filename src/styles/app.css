@@ -4116,3 +4116,27 @@ input:not([type="range"]):not([type="checkbox"]):not([type="radio"]) {
     filter: brightness(0.94);
   }
 }
+
+/* Optical lockup: «Орбіта» sits on the wordmark's baseline and matches its cap height,
+   instead of being centred on the logo box (which lifted it by about 3px). */
+.wordmark > span:last-child {
+  position: relative;
+  top: 0.176em;
+}
+@media (max-width: 760px) {
+  .wordmark {
+    font-size: 12px;
+  }
+  .privatbank-logo {
+    width: 104px;
+  }
+}
+@media (max-width: 380px) {
+  .wordmark {
+    gap: 5px;
+    font-size: 11px;
+  }
+  .privatbank-logo {
+    width: 96px;
+  }
+}

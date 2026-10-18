@@ -1,9 +1,12 @@
 import { CanvasTexture, SRGBColorSpace } from "three";
 import {
   type DashboardModel,
+  type MeterTone,
   colors,
   seriesColors,
   comparisonRows,
+  meterTone,
+  meterToneColors,
 } from "../api/model";
 import {
   formatNumber,
@@ -47,6 +50,23 @@ function alpha(color: string, a: number) {
   return `rgba(${(n >> 16) & 255}, ${(n >> 8) & 255}, ${n & 255}, ${a})`;
 }
 
+/** The business band as a colour role, when no model context is available. */
+function toneOf(percent: number, mode: "plan" | "downtime"): MeterTone {
+  const band = gaugeTone(percent, mode);
+  return band === "cyan" ? "neutral" : band;
+}
+
+/** Figures are ink; only a value past its limit is coloured, as in the DOM. */
+function figureColor(
+  pal: XrPalette,
+  percent: number,
+  mode: "plan" | "downtime",
+) {
+  return gaugeTone(percent, mode) === "danger"
+    ? pal.tone(palette["danger-text"] ?? colors.danger)
+    : pal.text;
+}
+
 export type XrPalette = ReturnType<typeof xrPalette>;
 /** Theme-resolved colours for canvas textures, mirroring the DOM's [data-theme] mapping. */
 export function xrPalette(dark: boolean) {
@@ -63,8 +83,9 @@ export function xrPalette(dark: boolean) {
     text,
     muted: pick("muted"),
     tone,
-    track: alpha(text, dark ? 0.12 : 0.1),
-    grid: alpha(text, dark ? 0.08 : 0.09),
+    track: tone(palette["chart-track"] ?? alpha(text, 0.12)),
+    grid: tone(palette["chart-grid"] ?? alpha(text, 0.08)),
+    marker: tone(palette["chart-marker"] ?? text),
     section: dark
       ? alpha(palette.text, 0.06)
       : alpha(palette["light-surface"], 0.66),
@@ -85,7 +106,6 @@ export function xrPalette(dark: boolean) {
       : alpha(palette["light-surface"], 0.94),
     selected: dark ? palette.primary : palette["light-primary"],
     selectedText: dark ? palette["on-primary"] : palette["light-surface"],
-    onBar: palette["on-primary"],
   };
 }
 
@@ -167,6 +187,7 @@ function meter(
   y: number,
   width: number,
   height: number,
+  fillTone?: MeterTone,
 ) {
   const max = meterMaximum(percent, mode),
     target = mode === "plan" ? 100 : DOWNTIME_LIMIT;
@@ -175,9 +196,9 @@ function meter(
   ctx.fill();
   const fill = Math.max(height, (width * Math.min(percent, max)) / max);
   roundRect(ctx, x, y, fill, height, height / 2);
-  ctx.fillStyle = pal.tone(colors[gaugeTone(percent, mode)]);
+  ctx.fillStyle = pal.tone(meterToneColors[fillTone ?? toneOf(percent, mode)]);
   ctx.fill();
-  ctx.fillStyle = pal.text;
+  ctx.fillStyle = pal.marker;
   roundRect(
     ctx,
     x + (width * target) / max - 2,
@@ -304,8 +325,9 @@ function gaugeRow(
   w: number,
   compact: boolean,
   scale = 1,
+  fillTone?: MeterTone,
 ) {
-  const tone = pal.tone(colors[gaugeTone(g.percent, g.mode)]);
+  const tone = figureColor(pal, g.percent, g.mode);
   write(ctx, t(g.label), x, y, {
     size: 30 * scale,
     color: pal.text,
@@ -318,7 +340,17 @@ function gaugeRow(
     align: "right",
     max: 200 * scale,
   });
-  meter(ctx, pal, g.percent, g.mode, x, y + 26 * scale, w, 14 * scale);
+  meter(
+    ctx,
+    pal,
+    g.percent,
+    g.mode,
+    x,
+    y + 26 * scale,
+    w,
+    14 * scale,
+    fillTone,
+  );
   const detailY = y + 84 * scale;
   if (g.value !== undefined) {
     write(ctx, t("Факт"), x, detailY, { size: 26 * scale, color: pal.muted });
@@ -371,7 +403,8 @@ function channelBars(
   const group = w / Math.max(1, m.bars.length);
   const bw = Math.min(40, group * 0.26),
     gap = Math.min(14, group * 0.08);
-  const purple = pal.tone(colors.purple);
+  const current = pal.tone(seriesColors[0]),
+    january = pal.tone(palette["series-muted"] ?? colors.muted);
   ctx.strokeStyle = pal.grid;
   ctx.lineWidth = 2;
   ctx.beginPath();
@@ -384,11 +417,10 @@ function channelBars(
     b.values.forEach((v, j) => {
       const bx = cx + (j === 0 ? -bw - gap / 2 : gap / 2),
         bh = Math.max(6, (v / max) * h);
-      const fill = ctx.createLinearGradient(0, y + h - bh, 0, y + h);
-      fill.addColorStop(0, alpha(purple, j === 0 ? 0.4 : 1));
-      fill.addColorStop(1, alpha(purple, j === 0 ? 0.22 : 0.55));
-      roundRect(ctx, bx, y + h - bh, bw, bh, Math.min(10, bw / 2));
-      ctx.fillStyle = fill;
+      const radius = Math.min(10, bw / 2);
+      ctx.beginPath();
+      ctx.roundRect(bx, y + h - bh, bw, bh, [radius, radius, 0, 0]);
+      ctx.fillStyle = j === 0 ? alpha(january, 0.85) : current;
       ctx.fill();
     });
     const labelY = y + h - (top / max) * h - 16;
@@ -459,15 +491,19 @@ function planBars(
       bw = Math.min(150, group * 0.66);
     const color = pal.tone(seriesColors[i % seriesColors.length]);
     const fill = ctx.createLinearGradient(0, base - bh, 0, base);
-    fill.addColorStop(0, color);
-    fill.addColorStop(1, alpha(color, 0.45));
-    roundRect(ctx, cx - bw / 2, base - bh, bw, bh, 18);
+    fill.addColorStop(0, alpha(color, pal.dark ? 0.62 : 0.42));
+    fill.addColorStop(1, alpha(color, pal.dark ? 0.16 : 0.1));
+    ctx.beginPath();
+    ctx.roundRect(cx - bw / 2, base - bh, bw, bh, [18, 18, 0, 0]);
     ctx.fillStyle = fill;
+    ctx.fill();
+    roundRect(ctx, cx - bw / 2 + 10, base - bh + 2, bw - 20, 6, 3);
+    ctx.fillStyle = color;
     ctx.fill();
     write(ctx, formatPercent(bar.values[0]), cx, base - bh + 50, {
       size: 34,
       weight: 600,
-      color: pal.onBar,
+      color: pal.text,
       align: "center",
       max: bw - 12,
     });
@@ -566,8 +602,8 @@ function drawBody(
       ctx,
       pal,
       [
-        { label: "Январь", color: alpha(pal.tone(colors.purple), 0.5) },
-        { label: "Отчётный месяц", color: colors.purple },
+        { label: "Январь", color: palette["series-muted"] ?? colors.muted },
+        { label: "Отчётный месяц", color: seriesColors[0] },
       ],
       56,
       196,
@@ -628,7 +664,17 @@ function drawBody(
       step = Math.min(190 + extra / n, (720 + extra - top) / n + 20),
       scale = 1 + Math.min(0.2, extra / 1500);
     m.gauges.forEach((g, i) =>
-      gaugeRow(ctx, pal, g, 56, top + i * step, 1168, compact, scale),
+      gaugeRow(
+        ctx,
+        pal,
+        g,
+        56,
+        top + i * step,
+        1168,
+        compact,
+        scale,
+        meterTone(m, i),
+      ),
     );
     return;
   }
@@ -657,7 +703,17 @@ function drawBody(
         max: 260,
       });
     });
-    gaugeRow(ctx, pal, m.gauges[0], 470, 620 + extra * 0.85, 754, compact);
+    gaugeRow(
+      ctx,
+      pal,
+      m.gauges[0],
+      470,
+      620 + extra * 0.85,
+      754,
+      compact,
+      1,
+      meterTone(m, 0),
+    );
     return;
   }
   if (m.kind === "staff") {
@@ -676,7 +732,17 @@ function drawBody(
       color: pal.muted,
       max: 360,
     });
-    gaugeRow(ctx, pal, m.gauges[0], 870, 560 + grow, 354, compact, 0.9);
+    gaugeRow(
+      ctx,
+      pal,
+      m.gauges[0],
+      870,
+      560 + grow,
+      354,
+      compact,
+      0.9,
+      meterTone(m, 0),
+    );
     return;
   }
   // Equipment: working devices over the month, downtime against the SLA marker.
@@ -703,6 +769,7 @@ function drawBody(
       colW,
       compact,
       scale,
+      meterTone(m, i),
     ),
   );
 }
@@ -783,7 +850,7 @@ export function drawOverviewPanel(
     // The status sits beside its label: under the meter it read as the next row's caption.
     m.gauges.forEach((g, i) => {
       const y = 134 + i * 88;
-      const tone = pal.tone(colors[gaugeTone(g.percent, g.mode)]);
+      const tone = figureColor(pal, g.percent, g.mode);
       write(ctx, t(g.label), 790, y, { size: 28, color: pal.text, max: 150 });
       write(ctx, downtimeLabel(g.percent), 1124, y, {
         size: 24,
@@ -798,7 +865,7 @@ export function drawOverviewPanel(
         align: "right",
         max: 100,
       });
-      meter(ctx, pal, g.percent, g.mode, 790, y + 20, 446, 12);
+      meter(ctx, pal, g.percent, g.mode, 790, y + 20, 446, 12, meterTone(m, i));
     });
   } else if (m.kind === "cash") {
     const total = m.slices.reduce((n, s) => n + s.value, 0);
@@ -810,7 +877,7 @@ export function drawOverviewPanel(
       max: 440,
     });
     write(ctx, t("операций"), 48, 256, { size: 28, color: pal.muted });
-    gaugeRow(ctx, pal, m.gauges[0], 44, 312, 420, true, 0.8);
+    gaugeRow(ctx, pal, m.gauges[0], 44, 312, 420, true, 0.8, meterTone(m, 0));
     m.slices.forEach((slice, index) => {
       const y = 92 + index * 76;
       legendDot(ctx, 560, y - 10, pal.tone(slice.color), 9);
@@ -966,52 +1033,79 @@ export function drawFocusPanel(
   );
   const rows = facts.slice(start, start + FOCUS_ROWS),
     step = Math.min(84, (c.height - 400) / Math.max(1, rows.length));
-  // A short table reads at a larger size instead of floating in its section.
-  const roomy = step >= 76,
-    rowSize = roomy ? 28 : 25,
-    smallSize = roomy ? 26 : 23,
-    headSize = 24;
-  // Columns are measured from their real content, so no header or status is squeezed.
+  // Columns are measured from their real content, so no header or value is squeezed.
   const measure = (value: string, size: number, weight: number) => {
     ctx.font = `${Math.min(700, weight + 100)} ${size}px ${TEXT_FONT}`;
     return ctx.measureText(t(value)).width;
   };
   const widest = (values: string[], size: number, weight: number) =>
     Math.max(0, ...values.map((value) => measure(value, size, weight)));
+  // The last column is named by what it holds: plan rows show a share, risk rows a status.
+  const statusHead = rows.every(
+    (r) => r.status === "—" || /^[\d\s.,]+%$/.test(r.status),
+  )
+    ? "Выполнение"
+    : "Выполнение / Статус";
   const gap = 28,
     inner = tableW - 72;
-  const factW = Math.max(
-      widest(
-        rows.map((r) => r.actual),
-        rowSize,
-        600,
+  const layout = (rowSize: number, smallSize: number, headSize: number) => {
+    const factW = Math.max(
+        widest(
+          rows.map((r) => r.actual),
+          rowSize,
+          600,
+        ),
+        measure("Факт", headSize, 500),
       ),
-      measure("Факт", headSize, 500),
-    ),
-    refW = Math.max(
-      widest(
-        rows.map((r) => r.reference),
-        smallSize,
-        500,
+      refW = Math.max(
+        widest(
+          rows.map((r) => r.reference),
+          smallSize,
+          500,
+        ),
+        measure("План / Порог", headSize, 500),
       ),
-      measure("План / Порог", headSize, 500),
-    ),
-    statusW = Math.max(
-      widest(
-        rows.map((r) => r.status),
-        smallSize,
-        500,
+      statusW = Math.max(
+        widest(
+          rows.map((r) => r.status),
+          smallSize,
+          500,
+        ),
+        measure(statusHead, headSize, 500),
       ),
-      measure("Выполнение / Статус", headSize, 500),
-    );
-  let labelW = inner - (factW + refW + statusW + gap * 3);
-  let refMax = refW,
-    statusMax = statusW;
-  if (labelW < 250) {
-    // Too narrow: the reference and status columns give up width evenly.
-    const short = 250 - labelW;
-    refMax = Math.max(110, refW - short / 2);
-    statusMax = Math.max(130, statusW - short / 2);
+      labelNeed = Math.max(
+        widest(
+          rows.map((r) => r.label),
+          rowSize,
+          500,
+        ),
+        measure("Показатель", headSize, 500),
+      ),
+      labelW = inner - (factW + refW + statusW + gap * 3);
+    return {
+      rowSize,
+      smallSize,
+      headSize,
+      factW,
+      refW,
+      statusW,
+      labelW,
+      labelNeed,
+    };
+  };
+  // A short table reads at a larger size instead of floating in its section, when it fits.
+  const roomy = step >= 76;
+  let fit = roomy ? layout(28, 26, 24) : layout(25, 23, 24);
+  if (fit.labelW < fit.labelNeed && roomy) fit = layout(25, 23, 22);
+  let { labelW } = fit;
+  const { rowSize, smallSize, headSize, factW } = fit;
+  let refMax = fit.refW,
+    statusMax = fit.statusW;
+  if (labelW < Math.min(fit.labelNeed, 250)) {
+    // Still too narrow: the reference and status columns give up width evenly.
+    const short = Math.min(fit.labelNeed, 250) - labelW;
+    refMax = Math.max(110, fit.refW - short / 2);
+    statusMax = Math.max(110, fit.statusW - short / 2);
     labelW = inner - (factW + refMax + statusMax + gap * 3);
   }
   const labelX = tableX + 36,
@@ -1021,15 +1115,7 @@ export function drawFocusPanel(
   text("Показатель", labelX, 304, headSize, pal.muted, "left", labelW);
   text("Факт", factX, 304, headSize, pal.muted, "right", factW);
   text("План / Порог", refX, 304, headSize, pal.muted, "left", refMax);
-  text(
-    "Выполнение / Статус",
-    statusX,
-    304,
-    headSize,
-    pal.muted,
-    "right",
-    statusMax,
-  );
+  text(statusHead, statusX, 304, headSize, pal.muted, "right", statusMax);
   rows.forEach(({ label, actual, reference, status }, index) => {
     const y = 360 + index * step;
     ctx.strokeStyle = pal.grid;

@@ -1,6 +1,6 @@
 import { Maximize2 } from "lucide-react";
 import type { ReactNode } from "react";
-import { comparisonRows, type DashboardModel } from "../api/model";
+import { comparisonRows, meterTone, type DashboardModel } from "../api/model";
 import { formatNumber, formatPercent } from "../api/format";
 import { useDashboardStore } from "../store/dashboard";
 import { t, useLocale } from "../i18n";
@@ -12,6 +12,7 @@ import {
   Sparkline,
   Donut,
   LineChart,
+  chartColor,
 } from "./charts";
 import { Button } from "./ui";
 
@@ -51,8 +52,8 @@ export function DashboardContent({ model: m }: { model: DashboardModel }) {
   if (m.kind === "gauges")
     return (
       <div className="gauges-row">
-        {m.gauges.map((g) => (
-          <ArcGauge key={g.label} gauge={g} />
+        {m.gauges.map((g, i) => (
+          <ArcGauge key={g.label} gauge={g} tone={meterTone(m, i)} />
         ))}
       </div>
     );
@@ -68,13 +69,13 @@ export function DashboardContent({ model: m }: { model: DashboardModel }) {
             )}
             label={t("операций")}
           />
-          <ArcGauge gauge={m.gauges[0]} small />
+          <ArcGauge gauge={m.gauges[0]} tone={meterTone(m, 0)} small />
         </div>
         <div className="slice-legend">
           {m.slices.map((s) => (
             <div key={s.label}>
               <span>
-                <i style={{ background: s.color }} />
+                <i style={{ background: chartColor(s.color) }} />
                 {t(s.label)}
               </span>
               <strong title={formatNumber(s.value)}>
@@ -91,19 +92,21 @@ export function DashboardContent({ model: m }: { model: DashboardModel }) {
         <LineChart series={m.series} days={m.days} />
         <div className="staff-bottom">
           <div className="vacancy">
+            {/* Vacancies have no meter, so the large figure carries the state itself:
+                the warning mark colour (large text, ≥3:1) or the danger text colour. */}
             <strong
               style={{
                 color:
                   m.metrics[0].value > 20
                     ? "var(--color-danger-text, var(--color-danger))"
-                    : "var(--color-warning-text, var(--color-warning))",
+                    : "var(--color-warning)",
               }}
             >
               {m.metrics[0].value}
               <span>{t("вакансий")}</span>
             </strong>
           </div>
-          <ArcGauge gauge={m.gauges[0]} small />
+          <ArcGauge gauge={m.gauges[0]} tone={meterTone(m, 0)} small />
         </div>
       </>
     );
@@ -113,8 +116,8 @@ export function DashboardContent({ model: m }: { model: DashboardModel }) {
       <div className="equipment-downtime">
         <p>{t("Простой")}</p>
         <div className="gauges-row equipment-gauges">
-          {m.gauges.map((g) => (
-            <ArcGauge key={g.label} gauge={g} small />
+          {m.gauges.map((g, i) => (
+            <ArcGauge key={g.label} gauge={g} tone={meterTone(m, i)} small />
           ))}
         </div>
       </div>

@@ -3,12 +3,53 @@ import {
   formatNumber,
   formatPercent,
   downtimeLabel,
+  gaugeTone,
   DOWNTIME_LIMIT,
 } from "./format";
 import { formatDelta, formatReportDate, t } from "../i18n";
 import tokens from "../styles/tokens.json";
 export const colors = tokens.colors;
-export const seriesColors = [colors.cyan, colors.purple, colors.orange];
+/**
+ * Categorical series in their fixed, validated order (docs/design/CHARTS.md): atmosphere blue,
+ * aurora violet, sea aqua. Identity only; warm hues are reserved for status. Every value has a
+ * light-* twin in DESIGN.md, so DOM ([data-theme]) and XR (xrPalette) resolve the same pair.
+ */
+export const seriesColors = [
+  colors["series-1"],
+  colors["series-2"],
+  colors["series-3"],
+];
+/** Part-to-whole charts add a fourth slot (rose). Slots are assigned in order, never cycled. */
+export const categoryColors = [...seriesColors, colors["series-4"]];
+
+/** Colour role of a meter fill: success, a calm neutral, warning or danger. */
+export type MeterTone = "success" | "neutral" | "warning" | "danger";
+export const meterToneColors: Record<MeterTone, string> = {
+  success: colors.success,
+  neutral: colors["meter-neutral"],
+  warning: colors.warning,
+  danger: colors.danger,
+};
+/** Mirrors attention.ts: only these plan gauges are monthly; the rest is annual (YTD) progress. */
+const monthlyPlanGauge = (modelId: number, index: number) =>
+  modelId === 5 || ((modelId === 8 || modelId === 9) && index === 0);
+/**
+ * Visual tone of gauge `index` of a model. The business bands stay in gaugeTone; this maps
+ * them to colour: 85-95% of plan is calm (neutral), and annual progress below plan is neutral
+ * too, because YTD has no monthly pacing contract and stays out of attention zones.
+ */
+export function meterTone(model: DashboardModel, index: number): MeterTone {
+  const gauge = model.gauges[index];
+  const tone = gaugeTone(gauge.percent, gauge.mode);
+  if (tone === "cyan") return "neutral";
+  if (
+    tone === "warning" &&
+    gauge.mode === "plan" &&
+    !monthlyPlanGauge(model.id, index)
+  )
+    return "neutral";
+  return tone;
+}
 export type Gauge = {
   label: string;
   percent: number;
@@ -99,7 +140,8 @@ export function dashboardModel(
     }));
     m.share = p.dashboard1_channels.dboSharePercent;
     m.slices = [
-      { label: t("В ДБО"), value: m.share, color: colors.purple },
+      { label: t("В ДБО"), value: m.share, color: colors["series-1"] },
+      // The remainder is the ring's track, not a second series.
       { label: t("В отделениях"), value: 100 - m.share, color: colors.border },
     ];
     m.facts = m.bars.flatMap(
@@ -154,10 +196,12 @@ export function dashboardModel(
   if (id === 5) {
     m.kind = "cash";
     m.subtitle = t("За месяц");
-    m.slices = c.dashboard5_operationTypes.types.map((x) => ({
+    // Operation types take the product's categorical slots in API order. The API colour is
+    // a validated hint kept only past the fourth type (the palette has no fifth slot).
+    m.slices = c.dashboard5_operationTypes.types.map((x, i) => ({
       label: t(x.name),
       value: x.count,
-      color: x.color,
+      color: categoryColors[i] ?? x.color,
     }));
     m.gauges = [
       {
@@ -184,7 +228,7 @@ export function dashboardModel(
       {
         label: t("Работающие кассы"),
         points: d.workingCashDesksByDay,
-        color: colors.cyan,
+        color: colors["series-1"],
       },
     ];
     m.days = d.workingCashDesksByDay.map((_, i) =>
@@ -221,9 +265,10 @@ export function dashboardModel(
     m.subtitle = t("Работающие устройства");
     m.days = d.days;
     m.series = [
-      { label: t("ТСО"), points: d.tsoLine, color: colors.success },
-      { label: t("АТМ"), points: d.atmLine, color: colors.purple },
-      { label: "Recycle", points: d.recLine, color: colors.cyan },
+      // Identity hues, never status: the downtime meters below carry success/warning/danger.
+      { label: t("ТСО"), points: d.tsoLine, color: seriesColors[0] },
+      { label: t("АТМ"), points: d.atmLine, color: seriesColors[1] },
+      { label: "Recycle", points: d.recLine, color: seriesColors[2] },
     ];
     m.gauges = d.downtime.map((x) => ({
       label: x.name === "Rec" ? "Recycle" : t(x.name),

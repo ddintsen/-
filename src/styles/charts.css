@@ -1,1 +1,288 @@
-/* Chart and colour layer (owned by the charts/colours pass). Loaded after app.css. */
+/* Chart and colour layer (owned by the charts/colours pass). Loaded after app.css.
+   Palette: docs/design/CHARTS.md. Every colour is a DESIGN.md token with a light-* twin;
+   this file only maps the twins for [data-theme="office"] and sets the marks.
+   Rules: identity hues are cool (atmosphere blue, aurora violet, sea aqua, rose for a fourth
+   part); warmth is reserved for state (sunrise amber = warning, flare red = danger); numbers
+   wear ink, colour lives in marks; tracks, grid and markers are neutral hairlines. */
+
+/* Light twins of the chart roles (the dark values are the tokens themselves). */
+[data-theme="office"] {
+  --color-series-1: var(--color-light-series-1);
+  --color-series-2: var(--color-light-series-2);
+  --color-series-3: var(--color-light-series-3);
+  --color-series-4: var(--color-light-series-4);
+  --color-series-muted: var(--color-light-series-muted);
+  --color-meter-neutral: var(--color-light-meter-neutral);
+  --color-chart-track: var(--color-light-chart-track);
+  --color-chart-grid: var(--color-light-chart-grid);
+  --color-chart-marker: var(--color-light-chart-marker);
+  --color-chart-ring: var(--color-light-chart-ring);
+  --color-success-text: var(--color-light-success-text);
+  --color-warning-text: var(--color-light-warning-text);
+  --color-danger-text: var(--color-light-danger-text);
+}
+
+/* ── Axes, grid, legends ─────────────────────────────────────────────────────────────── */
+.chart-grid {
+  stroke: var(--color-chart-grid);
+  stroke-width: 1;
+  stroke-dasharray: none;
+  opacity: 1;
+}
+.chart-baseline {
+  stroke: var(--color-chart-track);
+  stroke-width: 1;
+}
+.chart-legend i,
+.slice-legend i {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+.chart-legend i.line-key {
+  width: 14px;
+  height: 3px;
+  border-radius: 2px;
+}
+.chart-legend {
+  gap: 6px 14px;
+}
+
+/* ── Meters: real length on a neutral track, a crisp target, ink numbers ──────────────── */
+.progress-gauge[data-meter-tone="success"] {
+  --meter-color: var(--color-success);
+}
+.progress-gauge[data-meter-tone="neutral"] {
+  --meter-color: var(--color-meter-neutral);
+}
+.progress-gauge[data-meter-tone="warning"] {
+  --meter-color: var(--color-warning);
+}
+.progress-gauge[data-meter-tone="danger"] {
+  --meter-color: var(--color-danger);
+}
+/* Figures are ink; only a value past its limit wears the danger text colour. */
+[data-theme] .progress-gauge[data-meter-tone] .progress-percent {
+  color: var(--color-text);
+}
+[data-theme] .progress-gauge[data-meter-tone="danger"] .progress-percent {
+  color: var(--color-danger-text);
+}
+[data-theme] .progress-gauge .progress-track {
+  height: 6px;
+  border-radius: var(--radius-pill);
+  background: var(--color-chart-track);
+}
+.progress-gauge .progress-fill {
+  height: 100%;
+  border-radius: inherit;
+  background: var(--meter-color);
+}
+/* Plan 100% / SLA 5%: one 2px marker, centred on its value, kept apart from the fill by a
+   ring of the surface instead of an outline. */
+.progress-gauge .progress-target {
+  top: -4px;
+  width: 2px;
+  height: 14px;
+  margin-left: -1px;
+  border-radius: 1px;
+  background: var(--color-chart-marker);
+  box-shadow: 0 0 0 1.5px var(--color-chart-ring);
+  opacity: 1;
+}
+.focus-content .progress-gauge .progress-track {
+  height: 8px;
+}
+.focus-content .progress-gauge .progress-target {
+  top: -4px;
+  height: 16px;
+}
+
+/* ── Channel pairs (Д1): solid narrow columns, January quiet, values on the caps ───────── */
+.chart-value.is-reference {
+  fill: var(--color-muted);
+}
+
+/* ── Monthly plan columns (Д2–Д3): tinted glass body, lit data end ───────────────────── */
+.plan-bars .tint-top {
+  stop-opacity: 0.62;
+}
+.plan-bars .tint-bottom {
+  stop-opacity: 0.16;
+}
+[data-theme="office"] .plan-bars .tint-top {
+  stop-opacity: 0.42;
+}
+[data-theme="office"] .plan-bars .tint-bottom {
+  stop-opacity: 0.1;
+}
+.plan-bars .bar-cap {
+  fill: none;
+  stroke-width: 3;
+  stroke-linecap: round;
+}
+.plan-bars .bar-percent {
+  font: 600 12px var(--font-data);
+  fill: var(--color-text);
+}
+.plan-bars .plan-target {
+  stroke: var(--color-chart-marker);
+  stroke-width: 1;
+  stroke-dasharray: 3 4;
+  opacity: 1;
+}
+
+/* ── Sparklines: one thin line and its latest point ──────────────────────────────────── */
+.sparkline {
+  overflow: visible;
+}
+.sparkline .spark-area {
+  display: none;
+}
+.sparkline .spark-end {
+  stroke: var(--color-chart-ring);
+  stroke-width: 3;
+  paint-order: stroke;
+  vector-effect: non-scaling-stroke;
+}
+.monthly-comparison .sparkline .spark-area {
+  display: inline;
+  opacity: 0.12;
+}
+.monthly-comparison .sparkline .spark-end {
+  r: 1.8px;
+}
+.metric-trend > span {
+  color: var(--color-muted);
+}
+
+/* ── Rings and donuts ─────────────────────────────────────────────────────────────────── */
+.donut .donut-track {
+  stroke: var(--color-chart-track);
+}
+
+/* ── Lines (Д7, Д10): 2px, small vertices, a ringed end point, a soft wash for one series ─ */
+.line-chart .area-top {
+  stop-opacity: 0.2;
+}
+.line-chart .area-bottom {
+  stop-opacity: 0;
+}
+[data-theme="office"] .line-chart .area-top {
+  stop-opacity: 0.14;
+}
+.line-chart .line-end {
+  stroke: var(--color-chart-ring);
+  stroke-width: 4;
+  paint-order: stroke;
+}
+
+/* ── Attention chips: actionable deviations, legible on both skies ────────────────────── */
+:root {
+  --attention-bg: color-mix(in srgb, var(--color-text) 13%, transparent);
+  --attention-hover: color-mix(in srgb, var(--color-text) 22%, transparent);
+  --attention-shadow:
+    inset 0 1px 0 color-mix(in srgb, var(--color-text) 16%, transparent),
+    0 12px 28px -16px
+      color-mix(in srgb, var(--color-space-night) 85%, transparent);
+  --attention-shadow-hover:
+    inset 0 1px 0 color-mix(in srgb, var(--color-text) 24%, transparent),
+    0 14px 30px -14px
+      color-mix(in srgb, var(--color-space-night) 90%, transparent);
+}
+[data-theme="office"] {
+  --attention-bg: color-mix(
+    in srgb,
+    var(--color-light-surface) 86%,
+    transparent
+  );
+  --attention-hover: var(--color-light-surface);
+  --attention-shadow:
+    inset 0 1px 0 var(--color-light-surface),
+    0 12px 26px -14px
+      color-mix(in srgb, var(--color-light-text) 45%, transparent);
+  --attention-shadow-hover:
+    inset 0 1px 0 var(--color-light-surface),
+    0 14px 30px -12px
+      color-mix(in srgb, var(--color-light-text) 55%, transparent);
+}
+.workspace-footer .attention-items {
+  gap: 8px;
+}
+.workspace-footer .attention-items > span {
+  color: var(--color-text);
+  font-size: 13px;
+  font-weight: 500;
+  margin-right: 4px;
+}
+.workspace-footer .attention-items .button {
+  min-height: var(--control-h);
+  padding: 0 14px;
+  gap: 8px;
+  border: 0;
+  background: var(--attention-bg);
+  color: var(--color-text);
+  font-size: 13px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  box-shadow: var(--attention-shadow);
+  -webkit-backdrop-filter: blur(24px) saturate(160%);
+  backdrop-filter: blur(24px) saturate(160%);
+}
+.workspace-footer .attention-items .button svg {
+  opacity: 0.72;
+}
+/* The state mark appears when the chip carries data-tone (attention kind: downtime → danger,
+   plan → warning). The state is real, so the mark is allowed; text stays ink. */
+.workspace-footer .attention-items .button[data-tone]::before {
+  content: "";
+  flex: 0 0 auto;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--attention-tone);
+}
+.attention-items .button[data-tone="danger"] {
+  --attention-tone: var(--color-danger);
+}
+.attention-items .button[data-tone="warning"] {
+  --attention-tone: var(--color-warning);
+}
+@media (hover: hover) and (pointer: fine) {
+  /* A quiet brighten: no shift, no hue; the keyboard ring stays the global focus-visible. */
+  .workspace-footer .attention-items .button:hover:not(:disabled) {
+    background: var(--attention-hover);
+    color: var(--color-text);
+    box-shadow: var(--attention-shadow-hover);
+  }
+}
+
+/* ── Inline warning (settings): a tinted wash, readable text ─────────────────────────── */
+.inline-warning {
+  background: color-mix(in srgb, var(--color-warning) 14%, transparent);
+  color: var(--color-warning-text);
+}
+[data-theme="office"] .inline-warning {
+  background: color-mix(in srgb, var(--color-warning) 12%, transparent);
+  color: var(--color-text);
+}
+
+@media (forced-colors: active) {
+  .progress-gauge .progress-track {
+    forced-color-adjust: none;
+    background: Canvas;
+    outline: 1px solid GrayText;
+  }
+  .progress-gauge .progress-fill {
+    forced-color-adjust: none;
+    background: Highlight;
+  }
+  .progress-gauge .progress-target {
+    forced-color-adjust: none;
+    background: CanvasText;
+    box-shadow: none;
+  }
+  .chart-baseline {
+    stroke: GrayText;
+  }
+}

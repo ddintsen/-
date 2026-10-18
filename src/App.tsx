@@ -488,6 +488,9 @@ export default function App() {
                     {attention.map((item, index) => (
                       <Button
                         key={index}
+                        data-tone={
+                          item.kind === "downtime" ? "danger" : "warning"
+                        }
                         onClick={() => setFocus(item.id)}
                         aria-label={`${item.label}: ${formatPercent(item.percent)} · ${item.title}`}
                       >

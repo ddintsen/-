@@ -26,7 +26,7 @@
 - `block1_payments.dashboard1_channels`: `channels: {name,jan,cur}[]` (до 20; значения в **млн шт.**), `dboSharePercent`.
 - `dashboard2_monthlyCount`, `dashboard3_monthlyVolume`: `planBars: {label,percent,planValue?:number}[3]`, `cards: {title,value,delta,spark:number[]}[3]`. Д2 value в шт., Д3 value в валюте meta.currency. Delta — строка источника; она не пересчитывается из неполного временного ряда.
 - `dashboard4_ytdMain`: `{label,percent,value,planValue?:number,scaleMode:'ytd'}[3]`. Индексы: количество / объём / прибыль. Последние два — денежные.
-- `block2_cashDesk.dashboard5_operationTypes`: `monthlyPlanPercent`, `types:{name,count,color}[]` (до 12). Count в шт.; цвет из проверенного HEX.
+- `block2_cashDesk.dashboard5_operationTypes`: `monthlyPlanPercent`, `types:{name,count,color}[]` (до 12). Count в шт.; цвет из проверенного HEX. С 18.10.2026 первые четыре типа окрашиваются палитрой продукта (`series-1…4`, проверенной на дальтонизм); `color` из API применяется начиная с пятого типа.
 - `dashboard6_ytdMain`: три YTD gauge — количество / объём / прибыль.
 - `dashboard7_operationsAndStaff`: `workingCashDesksByDay:number[]`, `staffShortageVacancies:number`, `downtimeTodayPercent:number`. Исходный контракт не задаёт даты кассового ряда; подписываются последовательные дни 01..N, эта договорённость должна быть подтверждена для live API.
 - `block3_atmTso.dashboard8_operationsCount`: два YTD-формата gauge, месячное количество / с начала года; labels определяют период, scaleMode исторически называется ytd даже для месячных.
