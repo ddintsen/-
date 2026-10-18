@@ -34,8 +34,7 @@ async function clickWorld(page: Page, x: number, y: number, distance: number) {
       )
     : Math.max(
         68,
-        (2 * Math.atan(1.1 / ((1.5 * box.width) / box.height)) * 180) /
-          Math.PI,
+        (2 * Math.atan(1.1 / ((1.5 * box.width) / box.height)) * 180) / Math.PI,
       );
   const px =
     box.height / (2 * distance * Math.tan(((fov / 2) * Math.PI) / 180));

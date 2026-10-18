@@ -128,9 +128,13 @@ export function GroupedBars({ bars }: { bars: Bar[] }) {
     base = 160,
     plot = 114,
     max = Math.max(1, ...bars.flatMap((b) => b.values)) * 1.28,
-    group = width / bars.length,
+    // Edge labels such as "Інтернет" are wider than their bar pair; keep them inside the chart.
+    pad = 12,
+    group = (width - pad * 2) / bars.length,
     barWidth = Math.max(8, Math.min(24, (group - 36) / 2)),
-    pairGap = Math.max(10, Math.min(18, group * 0.14));
+    pairGap = Math.max(10, Math.min(18, group * 0.14)),
+    // Narrow stands (1251-1400px) give each channel under 60px; category labels step down.
+    labelSize = group < 62 ? 10.5 : 12;
   // Both values of a pair share one baseline above the taller bar, so pairs read as a row.
   const pairLabelY = bars.map(
     (bar) => base - (Math.max(...bar.values) / max) * plot - 9,
@@ -182,6 +186,7 @@ export function GroupedBars({ bars }: { bars: Bar[] }) {
             <g key={b.label}>
               {b.values.map((v, j) => {
                 const x =
+                    pad +
                     i * group +
                     group / 2 +
                     (j === 0 ? -barWidth - pairGap / 2 : pairGap / 2),
@@ -206,7 +211,7 @@ export function GroupedBars({ bars }: { bars: Bar[] }) {
                       strokeWidth=".5"
                     />
                     <text
-                      x={i * group + group / 2}
+                      x={pad + i * group + group / 2}
                       y={pairLabelY[i] - (j === 0 ? 0 : 14)}
                       className={`chart-value${j === 0 ? " is-reference" : ""}`}
                       textAnchor="middle"
@@ -218,17 +223,17 @@ export function GroupedBars({ bars }: { bars: Bar[] }) {
                 );
               })}
               <text
-                x={i * group + group / 2}
+                x={pad + i * group + group / 2}
                 y={base + 23}
                 textAnchor="middle"
                 className="chart-label"
-                style={{ fontSize: 12 }}
+                style={{ fontSize: labelSize }}
               >
                 {labelLines.map((line, index) => (
                   <tspan
                     key={index}
-                    x={i * group + group / 2}
-                    dy={index ? 15 : 0}
+                    x={pad + i * group + group / 2}
+                    dy={index ? labelSize + 3 : 0}
                   >
                     {line}
                   </tspan>
