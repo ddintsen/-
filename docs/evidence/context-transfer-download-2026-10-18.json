@@ -1,0 +1,36 @@
+{
+  "checkedAt": "2026-10-18T08:51:15+03:00",
+  "packageCommit": "6e7efdd8a9147647c9e8205ec804ac06cc5af4ab",
+  "publishedRuntimeCommit": "57d17697a83a13d24a35f804eea118ec50d0096f",
+  "applicationChanged": false,
+  "archives": [
+    {
+      "url": "https://raw.githubusercontent.com/ddintsen/-/main/docs/downloads/orbita-context-markdown-2026-10-18.zip",
+      "status": 200,
+      "bytes": 210095,
+      "sha256": "e44942c77aa98bf2c93d9e5c108dda7cc2d88f72145deab1a9f7935c9e3ad38e",
+      "zipEntries": 26,
+      "matchesLocal": true,
+      "zipIntegrity": "passed"
+    },
+    {
+      "url": "https://raw.githubusercontent.com/ddintsen/-/main/docs/downloads/orbita-full-context-2026-10-18.zip",
+      "status": 200,
+      "bytes": 19199022,
+      "sha256": "2a746bd38564eb2fa7ba2c12f59ea02cdc23bfb0f96586216d0bcbe311de7de8",
+      "zipEntries": 76,
+      "matchesLocal": true,
+      "zipIntegrity": "passed"
+    }
+  ],
+  "singleMarkdown": {
+    "url": "https://raw.githubusercontent.com/ddintsen/-/main/docs/transfer/orbita-full-context-2026-10-18/01-FULL-CONTEXT.md",
+    "status": 200,
+    "bytes": 31408,
+    "matchesLocal": true
+  },
+  "limitations": [
+    "Original binaries of four inline user crops are unavailable; descriptions are included.",
+    "Browser captures are not physical Quest or direct live captures."
+  ]
+}
