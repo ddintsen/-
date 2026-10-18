@@ -4069,3 +4069,40 @@ input:not([type="range"]):not([type="checkbox"]):not([type="radio"]) {
     margin: 0;
   }
 }
+
+/* Category views (one subject): the page title names it, so there is no stand behind the
+   dashboards; each dashboard is its own glass pane and the row shares one height. */
+.cockpit:not(.view-overview) .wing {
+  padding: 0;
+  background: none;
+  box-shadow: none;
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+  border-radius: 0;
+}
+.cockpit:not(.view-overview) .wing-cards {
+  align-items: stretch;
+}
+.cockpit:not(.view-overview) .dashboard-card,
+[data-theme="office"] .cockpit:not(.view-overview) .dashboard-card,
+[data-theme="dark"] .cockpit:not(.view-overview) .dashboard-card {
+  background: var(--stand-bg);
+  -webkit-backdrop-filter: blur(40px) saturate(160%);
+  backdrop-filter: blur(40px) saturate(160%);
+  box-shadow: var(--stand-shadow);
+  border-radius: var(--radius-stand);
+}
+.heading-copy > h1 {
+  font-size: clamp(30px, 3.2vw, 44px);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* The navigation rail is the same glass as the stands. */
+.side-dock {
+  background: var(--stand-bg);
+  -webkit-backdrop-filter: blur(40px) saturate(160%);
+  backdrop-filter: blur(40px) saturate(160%);
+  box-shadow: var(--stand-shadow);
+}

@@ -14,7 +14,10 @@ import {
   Vector3,
 } from "three";
 import { colors } from "../api/model";
-import earthImage from "../assets/earth-atmosphere.jpg";
+// NASA Blue Marble Next Generation, October 2004 (topography and bathymetry) and Black Marble
+// 2016 night lights; public domain (NASA Earth Observatory), resized to 4096×2048.
+import earthDay from "../assets/earth-day-4096.jpg";
+import earthNight from "../assets/earth-night-4096.jpg";
 
 /**
  * Low orbit: Earth fills the lower field, its limb sits just below eye level and
@@ -129,34 +132,64 @@ const starFragment = /* glsl */ `
 const earthVertex = /* glsl */ `
   varying vec2 vUv;
   varying vec3 vNormal;
+  varying vec3 vTangent;
+  varying vec3 vBitangent;
   varying vec3 vView;
   void main() {
     vUv = uv;
     vec4 world = modelMatrix * vec4(position, 1.0);
-    vNormal = normalize(mat3(modelMatrix) * normal);
+    vec3 n = normalize(normal);
+    // East and north on the sphere, for relief derived from the photograph.
+    vec3 east = normalize(vec3(-n.z, 0.0, n.x) + vec3(1e-5, 0.0, 0.0));
+    vec3 north = cross(n, east);
+    vNormal = normalize(mat3(modelMatrix) * n);
+    vTangent = normalize(mat3(modelMatrix) * east);
+    vBitangent = normalize(mat3(modelMatrix) * north);
     vView = normalize(cameraPosition - world.xyz);
     gl_Position = projectionMatrix * viewMatrix * world;
   }
 `;
 const earthFragment = /* glsl */ `
   uniform sampler2D map;
+  uniform sampler2D lights;
+  uniform vec2 texel;
   uniform vec3 sunDir;
   uniform vec3 atmosphere;
   uniform vec3 sunColor;
+  uniform vec3 lightsColor;
+  uniform float lightsStrength;
+  uniform float relief;
   uniform float dayBoost;
   uniform float hazeAmount;
   uniform vec3 hazeTint;
   varying vec2 vUv;
   varying vec3 vNormal;
+  varying vec3 vTangent;
+  varying vec3 vBitangent;
   varying vec3 vView;
+  float height(vec2 uv) {
+    return dot(texture2D(map, uv).rgb, vec3(0.299, 0.587, 0.114));
+  }
   void main() {
-    vec3 n = normalize(vNormal);
-    float ndl = dot(n, sunDir);
     vec3 albedo = texture2D(map, vUv).rgb;
+    float h0 = dot(albedo, vec3(0.299, 0.587, 0.114));
+    vec2 slope = vec2(height(vUv + vec2(texel.x, 0.0)) - h0, height(vUv + vec2(0.0, texel.y)) - h0);
+    vec3 n = normalize(vNormal);
+    vec3 nr = normalize(n - (vTangent * slope.x + vBitangent * slope.y) * relief);
+    float ndl = dot(n, sunDir);
+    float shade = dot(nr, sunDir);
     float day = smoothstep(-0.12, 0.35, ndl);
     vec3 night = albedo * 0.025 + vec3(0.004, 0.009, 0.022);
-    vec3 lit = albedo * (0.22 + 1.05 * max(ndl, 0.0)) * dayBoost;
+    vec3 lit = albedo * (0.2 + 1.08 * max(shade, 0.0)) * dayBoost;
     vec3 color = mix(night, lit, day);
+    // Sun glint on open water: the photograph's oceans are blue-dominant and smooth.
+    float water = smoothstep(0.02, 0.09, albedo.b - max(albedo.r, albedo.g));
+    vec3 mirrored = reflect(-sunDir, n);
+    float glint = pow(max(dot(mirrored, vView), 0.0), 80.0) * water * day;
+    color += sunColor * glint * 1.6;
+    // City lights only where the night is deep enough.
+    float cities = smoothstep(0.2, 0.85, texture2D(lights, vUv).r);
+    color += lightsColor * cities * lightsStrength * (1.0 - smoothstep(-0.02, 0.24, ndl));
     float fresnel = pow(1.0 - max(dot(n, vView), 0.0), 5.0);
     float facing = pow(max(dot(-vView, sunDir), 0.0), 24.0);
     vec3 rim = mix(atmosphere, sunColor, clamp(facing * 1.3, 0.0, 1.0));
@@ -315,10 +348,12 @@ export function SpaceEnvironment({
   const sky = useMemo(() => skyTexture(dark), [dark]);
   const glow = useMemo(glowTexture, []);
   const stars = useMemo(starsGeometry, []);
-  const earth = useLoader(TextureLoader, earthImage);
-  // The shader writes display colour directly, so the photo is sampled without decoding.
-  earth.colorSpace = NoColorSpace;
-  earth.anisotropy = 8;
+  const [earth, nightLights] = useLoader(TextureLoader, [earthDay, earthNight]);
+  // The shader writes display colour directly, so the photos are sampled without decoding.
+  for (const texture of [earth, nightLights]) {
+    texture.colorSpace = NoColorSpace;
+    texture.anisotropy = 8;
+  }
   const sunPosition = dark ? SUN_DARK : SUN_LIGHT;
   const uniforms = useMemo(() => {
     const sunDir = sunPosition.clone().sub(EARTH_CENTER).normalize();
@@ -327,6 +362,11 @@ export function SpaceEnvironment({
     return {
       earth: {
         map: { value: earth },
+        lights: { value: nightLights },
+        texel: { value: [1 / 4096, 1 / 2048] },
+        lightsColor: { value: new Color(colors["space-sun"]) },
+        lightsStrength: { value: dark ? 1.7 : 0 },
+        relief: { value: dark ? 4.5 : 3.5 },
         sunDir: { value: sunDir },
         atmosphere: { value: atmosphere },
         sunColor: { value: sunColor },
@@ -343,7 +383,7 @@ export function SpaceEnvironment({
         strength: { value: dark ? 1 : 0.85 },
       },
     };
-  }, [earth, dark, sunPosition]);
+  }, [earth, nightLights, dark, sunPosition]);
   useEffect(() => () => sky.dispose(), [sky]);
   useEffect(
     () => () => {
