@@ -9,6 +9,7 @@ import {
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { XR, XROrigin, createXRStore, useXR } from "@react-three/xr";
 import { PerspectiveCamera, Quaternion, Vector3, type Group } from "three";
+import { RoundedBoxGeometry } from "three/examples/jsm/geometries/RoundedBoxGeometry.js";
 import {
   Glasses,
   RotateCcw,
@@ -26,7 +27,7 @@ import {
 } from "lucide-react";
 import { useDashboardStore } from "../store/dashboard";
 import { colors, dashboardModel, type DashboardModel } from "../api/model";
-import { formatSource } from "../api/format";
+import { formatSource, sourceNotice } from "../api/format";
 import { drawOverviewPanel, drawFocusPanel } from "./drawPanel";
 import {
   SpatialSurface,
@@ -40,6 +41,8 @@ import { Button, NativeSelect } from "../components/ui";
 import { formatReportDate, t, useLocale } from "../i18n";
 
 const PREVIEW_PULLBACK = 1.5;
+// The stand's thickness: rounded like its glass, inset so no corner shows past it.
+const standSlab = new RoundedBoxGeometry(1.26, 1.1, 0.03, 4, 0.07);
 // Payments first, then the side stands, matching the DOM arrival.
 const STAND_ORDER = [1, 0, 1];
 // No remote hand/controller model download. Local profile JSON resolves controller buttons.
@@ -92,7 +95,9 @@ function Panel({
   height = 0.8,
   wide = false,
   appearDelay = 0,
+  period = "",
 }: {
+  period?: string;
   appearDelay?: number;
   factsOffset?: number;
   width?: number;
@@ -106,14 +111,25 @@ function Panel({
   onSelect?: () => void;
 }) {
   const compact = useDashboardStore((s) => s.compact);
+  const dark = useDashboardStore((s) => s.theme === "dark");
   const locale = useLocale();
   const fontReady = useBrandFontReady();
   const texture = useMemo(
     () =>
       focused
-        ? drawFocusPanel(model, compact, factsOffset)
-        : drawOverviewPanel(model, wide),
-    [model, compact, focused, locale, factsOffset, wide, fontReady],
+        ? drawFocusPanel(model, compact, factsOffset, dark, period)
+        : drawOverviewPanel(model, wide, dark),
+    [
+      model,
+      compact,
+      focused,
+      locale,
+      factsOffset,
+      wide,
+      fontReady,
+      dark,
+      period,
+    ],
   );
   useEffect(() => () => texture.dispose(), [texture]);
   return (
@@ -135,7 +151,8 @@ function Scene({
   setFocused,
   focused,
   environmentOnly,
-  dataContext,
+  sourceAlert,
+  period,
   recenter,
   onRecenter,
   factsOffset,
@@ -144,7 +161,8 @@ function Scene({
   yaw: number;
   focused: number | null;
   environmentOnly: boolean;
-  dataContext: string;
+  sourceAlert: string | null;
+  period: string;
   setFocused: (v: number | null) => void;
   recenter: number;
   onRecenter: () => void;
@@ -276,9 +294,13 @@ function Scene({
                   renderOrder={0}
                   raycast={() => {}}
                 >
-                  <boxGeometry args={[1.3, 1.14, 0.028]} />
+                  <primitive object={standSlab} attach="geometry" />
                   <meshStandardMaterial
-                    color={colors["space-blue"]}
+                    color={
+                      theme === "dark"
+                        ? colors["space-blue"]
+                        : colors["light-elevated"]
+                    }
                     roughness={0.35}
                     metalness={0.15}
                     transparent
@@ -288,6 +310,7 @@ function Scene({
                 </mesh>
                 <SpatialWing
                   appearDelay={STAND_ORDER[standIndex] * 0.12}
+                  aside={stand.key === "payments" ? period : undefined}
                   title={t(stand.title)}
                   width={1.28}
                   height={1.12}
@@ -311,9 +334,9 @@ function Scene({
               </group>
             ))
           : null}
-        {!hasFocus && data ? (
+        {!hasFocus && data && sourceAlert ? (
           <SpatialControl
-            label={dataContext}
+            label={sourceAlert}
             position={[0, 0.91, -1.85]}
             width={1.6}
             height={0.1}
@@ -354,6 +377,7 @@ function Scene({
             position={[0, 0, 0]}
             focused
             factsOffset={factsOffset}
+            period={period}
           />
           <SpatialControl
             label={t("← Назад")}
@@ -413,13 +437,15 @@ function Scene({
               />
             </>
           ) : null}
-          <SpatialControl
-            label={dataContext}
-            position={[0, -focusHeight / 2 - 0.31, 0]}
-            width={1.8}
-            height={0.1}
-            focused
-          />
+          {sourceAlert ? (
+            <SpatialControl
+              label={sourceAlert}
+              position={[0, -focusHeight / 2 - 0.31, 0]}
+              width={1.8}
+              height={0.1}
+              focused
+            />
+          ) : null}
         </group>
       ) : null}
     </>
@@ -498,6 +524,11 @@ export default function SpatialView() {
   const source = useDashboardStore((s) => s.source);
   const hasLiveSnapshot = useDashboardStore((s) => !!s.lastLive);
   const dataContext = `${formatSource(source, hasLiveSnapshot)} · ${data ? formatReportDate(data.meta.reportDate) : t("Нет данных")}`;
+  // In space the report period sits on the payments stand and the focus title; the source is
+  // spoken only when it needs attention (fallback snapshot or API error).
+  const period = data ? formatReportDate(data.meta.reportDate) : "";
+  const notice = sourceNotice(source, hasLiveSnapshot);
+  const sourceAlert = notice ? `${notice} · ${period}` : null;
   const loading = useDashboardStore((s) => s.busy);
   const refresh = useDashboardStore((s) => s.refresh);
   useEffect(() => {
@@ -612,7 +643,8 @@ export default function SpatialView() {
                 focused={focused}
                 setFocused={setFocused}
                 environmentOnly={environmentOnly}
-                dataContext={dataContext}
+                sourceAlert={sourceAlert}
+                period={period}
                 recenter={recenter}
                 onRecenter={recenterSpace}
                 factsOffset={factsOffset}

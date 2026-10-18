@@ -22,7 +22,12 @@ import {
 import { useDashboardStore, startSync } from "./store/dashboard";
 import { dashboardModel } from "./api/model";
 import { attentionItems } from "./api/attention";
-import { formatSource, formatTime, formatPercent } from "./api/format";
+import {
+  formatSource,
+  formatTime,
+  formatPercent,
+  sourceNotice,
+} from "./api/format";
 import {
   DashboardCard,
   DashboardContent,
@@ -125,6 +130,7 @@ export default function App() {
     setAdmin(open);
   }
   const sourceLabel = formatSource(s.source, !!s.lastLive);
+  const sourceAlert = sourceNotice(s.source, !!s.lastLive);
   const attention = attentionItems(models);
   const monthlyControls = (
     <div
@@ -499,7 +505,7 @@ export default function App() {
       {focus && s.data ? (
         <Modal
           title={models[focus - 1].title}
-          description={`${formatReportDate(s.data.meta.reportDate)} · ${sourceLabel}`}
+          description={`${formatReportDate(s.data.meta.reportDate)}${sourceAlert ? ` · ${sourceAlert}` : ""}`}
           onClose={() => setFocus(null)}
           wide
           className="focus-modal"

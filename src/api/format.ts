@@ -54,6 +54,15 @@ export const downtimeLabel = (value: number) =>
         : "Высокий простой",
   );
 
+/** Visible source text only for states that need attention; demo, live and simulation stay quiet. */
+export function sourceNotice(
+  source: Source,
+  hasLiveSnapshot = false,
+): string | null {
+  return source === "fallback" || source === "error"
+    ? formatSource(source, hasLiveSnapshot)
+    : null;
+}
 export function formatSource(source: Source, hasLiveSnapshot = false): string {
   return t(
     {

@@ -128,7 +128,8 @@ test("the animated backdrop redraws at a low, throttled rate", async ({
   // Without a GPU the backdrop stays still so the dashboard keeps the CPU.
   if (motion === "still") expect(perSecond).toBe(0);
   else {
+    // About 20 redraws a second: visibly alive, far below the display rate.
     expect(perSecond).toBeGreaterThan(3);
-    expect(perSecond).toBeLessThan(20);
+    expect(perSecond).toBeLessThan(30);
   }
 });

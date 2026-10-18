@@ -1,6 +1,7 @@
 import { test, expect } from "@playwright/test";
 import AxeBuilder from "@axe-core/playwright";
 import data from "../../public/mock/dashboard-data.json" with { type: "json" };
+import { keyboardSelect } from "./helpers";
 
 // Preserve the established Russian regressions; fresh UA/EN sessions live in localization.spec.ts.
 test.beforeEach(async ({ context }) => {
@@ -371,8 +372,7 @@ test("keyboard native settings select, quick validation and JSON download", asyn
   const mode = page.getByLabel("Источник", { exact: true });
   await expect(mode).toHaveValue("hybrid");
   await mode.focus();
-  await page.keyboard.press("ArrowDown");
-  await page.keyboard.press("Enter");
+  await keyboardSelect(page, ["ArrowDown"]);
   await expect(mode).toHaveValue("live");
   await page.getByRole("tab", { name: "Демонстрация", exact: true }).click();
   await page.getByLabel("Доля в ДБО, %").fill("120");

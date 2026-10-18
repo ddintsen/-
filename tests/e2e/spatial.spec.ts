@@ -1,6 +1,7 @@
 import { test, expect, type Page } from "@playwright/test";
 import AxeBuilder from "@axe-core/playwright";
 import data from "../../public/mock/dashboard-data.json" with { type: "json" };
+import { keyboardSelect } from "./helpers";
 
 // Keep the spatial regression language explicit; the app now defaults to Ukrainian.
 test.beforeEach(async ({ context }) => {
@@ -76,8 +77,7 @@ test("WebGL panel and in-scene controls navigate focus, with keyboard parity and
   await expect(page.getByLabel("Поворот взгляда в градусах")).toHaveValue("0");
   await picker.selectOption("1");
   await picker.focus();
-  await page.keyboard.press("End");
-  await page.keyboard.press("Enter");
+  await keyboardSelect(page, ["End"]);
   await expect(picker).toHaveValue("10");
   await expect(
     page.getByRole("button", { name: "Следующий дашборд" }),

@@ -18,7 +18,7 @@ From screen to space: the same three glass stands that sit on the screen are the
 ## Material: only the real product
 - Desktop scenes are captured from the running app (dark theme, 1440 or 1920 wide, DPR 2): overview with the arrival motion, a hover on an attention chip, a dashboard in focus, the spatial preview.
 - The in-headset view is rendered from the real XR scene, not a mock-up: `src/spatial/SpaceEnvironment.tsx` (Earth, sun, stars), panel textures from `src/spatial/drawPanel.ts` (`drawOverviewPanel`, `drawFocusPanel`, `drawWing`), stand placement from `src/spatial/layout.ts` (1.85 m arc, side stands at ±42°, turned 24°), data from `public/mock/dashboard-data.json` through `dashboardModel`. Import these read-only.
-- Data is demo data for October 2026. Never imply live data; the end card says so in small type.
+- Data is demo data for October 2026. Never imply live data (no "live", "real time", "online" claims); the owner asked not to print "демодані" on screen.
 
 ## The headset
 - A stylised, logo-free headset of the Quest 3S class (wide front visor, soft strap, two lenses), matte graphite with a satin visor that catches the sunrise. Model it procedurally in three.js, or use a CC0 model and record its source and licence.
@@ -30,7 +30,7 @@ From screen to space: the same three glass stands that sit on the screen are the
 3. Leaving the screen: the UI becomes a window floating over Earth; the headset glides in, turns to camera, its visor catches the sun.
 4. Into the lens: the camera dollies into one lens; the lens rim frames the frame for a moment; light blooms; we are inside.
 5. Through the headset: first person at eye height, three stands in a semicircle over Earth; the head turns left to cash operations, back to payments, right to equipment; a thin controller ray hovers a panel, it rises toward us, a select opens its focus panel with the chart and exact values; back to the panorama.
-6. End card: out of the headset; lockup, «Відкрийте в Meta Quest Browser» + `ddintsen.github.io/-`, «Демонстраційні дані».
+6. End card: out of the headset; lockup, «Відкрийте в Meta Quest Browser» + `ddintsen.github.io/-`.
 
 ## Typography and brand
 - Pryvat Sans / Pryvat Sans Display (`public/fonts/*.woff2`), sentence case, one title at a time, no more than six words per title.

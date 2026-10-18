@@ -8,6 +8,7 @@ import {
 } from "three";
 import { drawLabel, drawWing } from "./drawPanel";
 import { useLocale } from "../i18n";
+import { useDashboardStore } from "../store/dashboard";
 
 const surfaceColor = new Color(1, 1, 1);
 const hoverColor = new Color(1.16, 1.16, 1.16);
@@ -175,8 +176,11 @@ export function SpatialWing({
   position,
   opacity = 1,
   appearDelay = 0,
+  aside,
 }: {
   appearDelay?: number;
+  /** Quiet context on the heading line, such as the report period. */
+  aside?: string;
   title: string;
   width: number;
   height: number;
@@ -185,9 +189,10 @@ export function SpatialWing({
 }) {
   const locale = useLocale();
   const fontReady = useBrandFontReady();
+  const dark = useDashboardStore((state) => state.theme === "dark");
   const texture = useMemo(
-    () => drawWing(title, width / height),
-    [title, width, height, locale, fontReady],
+    () => drawWing(title, width / height, dark, aside),
+    [title, width, height, locale, fontReady, dark, aside],
   );
   useEffect(() => () => texture.dispose(), [texture]);
   return (
@@ -225,9 +230,11 @@ export function SpatialControl({
 }) {
   const locale = useLocale();
   const fontReady = useBrandFontReady();
+  const dark = useDashboardStore((state) => state.theme === "dark");
+  const notice = !onSelect;
   const texture = useMemo(
-    () => drawLabel(label, width / height, selected),
-    [label, width, height, locale, selected, fontReady],
+    () => drawLabel(label, width / height, selected, dark, notice),
+    [label, width, height, locale, selected, fontReady, dark, notice],
   );
   useEffect(() => () => texture.dispose(), [texture]);
   return (

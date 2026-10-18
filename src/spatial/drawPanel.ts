@@ -16,9 +16,151 @@ import {
 import { t } from "../i18n";
 import { FOCUS_ROWS, focusTextureHeight } from "./layout";
 
-/** Shared truthful canvas scales: actual fill and an explicit plan/SLA reference. */
-function paintMeter(
-  ctx: CanvasRenderingContext2D,
+/*
+ * XR textures follow the DOM system: a stand is one glass surface, dashboards are tonal
+ * sections on it, type is Pryvat Sans on one scale (sized for reading at 1.5-1.85 m),
+ * legends are dots with neutral text, colour lives in marks and key figures only.
+ * Every colour comes from DESIGN.md tokens; alpha is the only thing added here.
+ */
+const TEXT_FONT = '"Pryvat Sans", "Inter Variable", sans-serif';
+const DISPLAY_FONT =
+  '"Pryvat Sans Display", "Pryvat Sans", "Manrope Variable", sans-serif';
+
+type Tokens = Record<string, string>;
+const palette = colors as unknown as Tokens;
+
+function alpha(color: string, a: number) {
+  const rgba = color.match(/rgba?\(([^)]+)\)/);
+  if (rgba) {
+    const [r, g, b] = rgba[1].split(",").map((v) => parseFloat(v));
+    return `rgba(${r}, ${g}, ${b}, ${a})`;
+  }
+  const hex = color.replace("#", "");
+  const full =
+    hex.length === 3
+      ? hex
+          .split("")
+          .map((c) => c + c)
+          .join("")
+      : hex.slice(0, 6);
+  const n = parseInt(full, 16);
+  return `rgba(${(n >> 16) & 255}, ${(n >> 8) & 255}, ${n & 255}, ${a})`;
+}
+
+export type XrPalette = ReturnType<typeof xrPalette>;
+/** Theme-resolved colours for canvas textures, mirroring the DOM's [data-theme] mapping. */
+export function xrPalette(dark: boolean) {
+  const pick = (key: string) =>
+    (!dark && palette[`light-${key}`]) || palette[key];
+  const tone = (color: string) => {
+    if (dark) return color;
+    const key = Object.entries(palette).find(([, v]) => v === color)?.[0];
+    return (key && palette[`light-${key}`]) || color;
+  };
+  const text = pick("text");
+  return {
+    dark,
+    text,
+    muted: pick("muted"),
+    tone,
+    track: alpha(text, dark ? 0.12 : 0.1),
+    grid: alpha(text, dark ? 0.08 : 0.09),
+    section: dark
+      ? alpha(palette.text, 0.06)
+      : alpha(palette["light-surface"], 0.66),
+    sectionRim: dark
+      ? alpha(palette.text, 0.1)
+      : alpha(palette["light-surface"], 1),
+    standTop: dark
+      ? alpha(palette.elevated, 0.8)
+      : alpha(palette["light-surface"], 0.88),
+    standBottom: dark
+      ? alpha(palette["space-night"], 0.88)
+      : alpha(palette["light-background"], 0.82),
+    standRim: dark
+      ? alpha(palette.text, 0.2)
+      : alpha(palette["light-surface"], 1),
+    control: dark
+      ? alpha(palette.elevated, 0.95)
+      : alpha(palette["light-surface"], 0.94),
+    selected: dark ? palette.primary : palette["light-primary"],
+    selectedText: dark ? palette["on-primary"] : palette["light-surface"],
+    onBar: palette["on-primary"],
+  };
+}
+
+type Ctx = CanvasRenderingContext2D;
+type TextOptions = {
+  size?: number;
+  weight?: number;
+  color?: string;
+  align?: CanvasTextAlign;
+  max?: number;
+  display?: boolean;
+};
+
+function write(ctx: Ctx, value: string, x: number, y: number, o: TextOptions) {
+  const size = o.size ?? 28;
+  // Textures are minified in the browser preview and sit 1.5-1.85 m away in the headset:
+  // one weight step heavier than the DOM keeps strokes from dissolving.
+  const weight = Math.min(700, (o.weight ?? 500) + 100);
+  ctx.font = `${weight} ${size}px ${o.display ? DISPLAY_FONT : TEXT_FONT}`;
+  ctx.fillStyle = o.color ?? "#000";
+  ctx.textAlign = o.align ?? "left";
+  ctx.textBaseline = "alphabetic";
+  if (o.max) ctx.fillText(value, x, y, o.max);
+  else ctx.fillText(value, x, y);
+}
+
+function roundRect(
+  ctx: Ctx,
+  x: number,
+  y: number,
+  w: number,
+  h: number,
+  r: number,
+) {
+  ctx.beginPath();
+  ctx.roundRect(x, y, w, h, r);
+}
+
+/** A tonal section with a hairline of light on its upper edge. */
+function section(
+  ctx: Ctx,
+  pal: XrPalette,
+  x: number,
+  y: number,
+  w: number,
+  h: number,
+  r: number,
+) {
+  roundRect(ctx, x, y, w, h, r);
+  ctx.fillStyle = pal.section;
+  ctx.fill();
+  ctx.save();
+  roundRect(ctx, x + 1, y + 1, w - 2, h - 2, r);
+  ctx.clip();
+  const rim = ctx.createLinearGradient(0, y, 0, y + 6);
+  rim.addColorStop(0, pal.sectionRim);
+  // Fade to the same colour: canvas gradients interpolate unpremultiplied, so a fade to
+  // transparent black would draw a grey hairline.
+  rim.addColorStop(1, alpha(pal.sectionRim, 0));
+  ctx.fillStyle = rim;
+  ctx.fillRect(x, y, w, 6);
+  ctx.restore();
+}
+
+function texture(canvas: HTMLCanvasElement, anisotropy = 8) {
+  const result = new CanvasTexture(canvas);
+  result.colorSpace = SRGBColorSpace;
+  result.anisotropy = anisotropy;
+  return result;
+}
+
+/** Truthful meter: actual length on its own scale, with the plan or SLA marker. */
+function meter(
+  ctx: Ctx,
+  pal: XrPalette,
   percent: number,
   mode: "plan" | "downtime",
   x: number,
@@ -28,529 +170,718 @@ function paintMeter(
 ) {
   const max = meterMaximum(percent, mode),
     target = mode === "plan" ? 100 : DOWNTIME_LIMIT;
-  ctx.fillStyle = colors.border;
-  ctx.fillRect(x, y, width, height);
-  ctx.fillStyle = colors[gaugeTone(percent, mode)];
-  ctx.fillRect(x, y, (width * percent) / max, height);
-  ctx.fillStyle = colors.text;
-  ctx.fillRect(x + (width * target) / max, y - 4, 2, height + 8);
+  roundRect(ctx, x, y, width, height, height / 2);
+  ctx.fillStyle = pal.track;
+  ctx.fill();
+  const fill = Math.max(height, (width * Math.min(percent, max)) / max);
+  roundRect(ctx, x, y, fill, height, height / 2);
+  ctx.fillStyle = pal.tone(colors[gaugeTone(percent, mode)]);
+  ctx.fill();
+  ctx.fillStyle = pal.text;
+  roundRect(
+    ctx,
+    x + (width * target) / max - 2,
+    y - height * 0.6,
+    4,
+    height * 2.2,
+    2,
+  );
+  ctx.fill();
+}
+
+function legendDot(ctx: Ctx, x: number, y: number, color: string, r = 8) {
+  ctx.beginPath();
+  ctx.arc(x, y, r, 0, Math.PI * 2);
+  ctx.fillStyle = color;
+  ctx.fill();
+}
+
+/** Line series with soft area under the first series and calm round joins. */
+function lineChart(
+  ctx: Ctx,
+  pal: XrPalette,
+  m: DashboardModel,
+  x: number,
+  y: number,
+  w: number,
+  h: number,
+  labelSize: number,
+) {
+  if (!m.days.length || !m.series.length) {
+    write(ctx, t("Нет данных за этот период"), x + w / 2, y + h / 2, {
+      size: labelSize + 4,
+      color: pal.muted,
+      align: "center",
+    });
+    return;
+  }
+  const max = Math.max(1, ...m.series.flatMap((s) => s.points)) * 1.12;
+  for (const f of [0, 0.5, 1]) {
+    const gy = y + h - f * h;
+    ctx.strokeStyle = pal.grid;
+    ctx.lineWidth = 2;
+    ctx.setLineDash(f === 0 ? [] : [6, 10]);
+    ctx.beginPath();
+    ctx.moveTo(x, gy);
+    ctx.lineTo(x + w, gy);
+    ctx.stroke();
+    ctx.setLineDash([]);
+    write(ctx, formatNumber(Math.round(max * f), true), x - 18, gy + 9, {
+      size: labelSize,
+      color: pal.muted,
+      align: "right",
+      max: 120,
+    });
+  }
+  const px = (i: number, n: number) => x + (i / Math.max(1, n - 1)) * w;
+  m.series.forEach((s, index) => {
+    const color = pal.tone(s.color);
+    const pts = s.points.map((v, i) => [
+      px(i, s.points.length),
+      y + h - (v / max) * h,
+    ]);
+    if (index === 0 && m.series.length === 1) {
+      const area = ctx.createLinearGradient(0, y, 0, y + h);
+      area.addColorStop(0, alpha(color, 0.28));
+      area.addColorStop(1, alpha(color, 0));
+      ctx.beginPath();
+      pts.forEach(([a, b], i) => (i ? ctx.lineTo(a, b) : ctx.moveTo(a, b)));
+      ctx.lineTo(pts[pts.length - 1][0], y + h);
+      ctx.lineTo(pts[0][0], y + h);
+      ctx.closePath();
+      ctx.fillStyle = area;
+      ctx.fill();
+    }
+    ctx.strokeStyle = color;
+    ctx.lineWidth = 5;
+    ctx.lineJoin = "round";
+    ctx.lineCap = "round";
+    ctx.beginPath();
+    pts.forEach(([a, b], i) => (i ? ctx.lineTo(a, b) : ctx.moveTo(a, b)));
+    ctx.stroke();
+    for (const [a, b] of pts) legendDot(ctx, a, b, color, 6);
+  });
+  const step = Math.max(1, Math.ceil(m.days.length / 6));
+  m.days.forEach((d, i) => {
+    if (i % step === 0 || i === m.days.length - 1)
+      write(ctx, d, px(i, m.days.length), y + h + labelSize + 16, {
+        size: labelSize,
+        color: pal.muted,
+        align: "center",
+        max: 80,
+      });
+  });
+}
+
+function legend(
+  ctx: Ctx,
+  pal: XrPalette,
+  items: { label: string; color: string }[],
+  x: number,
+  y: number,
+  size: number,
+) {
+  let cursor = x;
+  for (const item of items) {
+    legendDot(ctx, cursor + 8, y - size * 0.33, pal.tone(item.color));
+    write(ctx, t(item.label), cursor + 26, y, {
+      size,
+      color: pal.muted,
+      max: 300,
+    });
+    ctx.font = `500 ${size}px ${TEXT_FONT}`;
+    cursor += 26 + ctx.measureText(t(item.label)).width + 36;
+  }
+}
+
+/** Plan meter row: label, percent, meter, fact and reference. */
+function gaugeRow(
+  ctx: Ctx,
+  pal: XrPalette,
+  g: DashboardModel["gauges"][number],
+  x: number,
+  y: number,
+  w: number,
+  compact: boolean,
+  scale = 1,
+) {
+  const tone = pal.tone(colors[gaugeTone(g.percent, g.mode)]);
+  write(ctx, t(g.label), x, y, {
+    size: 30 * scale,
+    color: pal.text,
+    max: w - 200 * scale,
+  });
+  write(ctx, formatPercent(g.percent), x + w, y + 2 * scale, {
+    size: 40 * scale,
+    weight: 600,
+    color: tone,
+    align: "right",
+    max: 200 * scale,
+  });
+  meter(ctx, pal, g.percent, g.mode, x, y + 26 * scale, w, 14 * scale);
+  const detailY = y + 84 * scale;
+  if (g.value !== undefined) {
+    write(ctx, t("Факт"), x, detailY, { size: 26 * scale, color: pal.muted });
+    ctx.font = `500 ${26 * scale}px ${TEXT_FONT}`;
+    const factX = x + ctx.measureText(t("Факт")).width + 14 * scale;
+    write(
+      ctx,
+      `${formatNumber(g.value, compact)} ${g.unit ?? t("шт.")}`,
+      factX,
+      detailY,
+      { size: 32 * scale, weight: 600, color: pal.text, max: w * 0.6 },
+    );
+  }
+  if (g.value !== undefined)
+    write(
+      ctx,
+      g.mode === "plan" ? t("План 100%") : downtimeLabel(g.percent),
+      x + w,
+      detailY,
+      {
+        size: 26 * scale,
+        color: pal.muted,
+        align: "right",
+      },
+    );
+  else
+    write(
+      ctx,
+      g.mode === "plan" ? t("План 100%") : downtimeLabel(g.percent),
+      x,
+      detailY,
+      {
+        size: 26 * scale,
+        color: pal.muted,
+      },
+    );
+}
+
+/** Paired channel bars: one label row per pair, current value above the reference. */
+function channelBars(
+  ctx: Ctx,
+  pal: XrPalette,
+  m: DashboardModel,
+  x: number,
+  y: number,
+  w: number,
+  h: number,
+) {
+  const max = Math.max(1, ...m.bars.flatMap((b) => b.values)) * 1.3;
+  const group = w / Math.max(1, m.bars.length);
+  const bw = Math.min(40, group * 0.26),
+    gap = Math.min(14, group * 0.08);
+  const purple = pal.tone(colors.purple);
+  ctx.strokeStyle = pal.grid;
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.moveTo(x, y + h);
+  ctx.lineTo(x + w, y + h);
+  ctx.stroke();
+  m.bars.forEach((b, i) => {
+    const cx = x + i * group + group / 2;
+    const top = Math.max(...b.values);
+    b.values.forEach((v, j) => {
+      const bx = cx + (j === 0 ? -bw - gap / 2 : gap / 2),
+        bh = Math.max(6, (v / max) * h);
+      const fill = ctx.createLinearGradient(0, y + h - bh, 0, y + h);
+      fill.addColorStop(0, alpha(purple, j === 0 ? 0.4 : 1));
+      fill.addColorStop(1, alpha(purple, j === 0 ? 0.22 : 0.55));
+      roundRect(ctx, bx, y + h - bh, bw, bh, Math.min(10, bw / 2));
+      ctx.fillStyle = fill;
+      ctx.fill();
+    });
+    const labelY = y + h - (top / max) * h - 16;
+    const [jan, cur] = b.values;
+    if (cur !== undefined)
+      write(ctx, formatNumber(cur), cx, labelY - 34, {
+        size: 34,
+        weight: 600,
+        color: pal.text,
+        align: "center",
+        max: group,
+      });
+    write(ctx, formatNumber(jan), cx, labelY, {
+      size: 26,
+      color: pal.muted,
+      align: "center",
+      max: group,
+    });
+    const words = t(b.label === "Автоплат." ? "Автоплатежи" : b.label)
+      .replace(/^Авто(?=плат)/, "Авто ")
+      .replace(/-/g, "- ")
+      .split(" ");
+    words.forEach((word, k) =>
+      write(ctx, word, cx, y + h + 44 + k * 32, {
+        size: 28,
+        color: pal.muted,
+        align: "center",
+        max: group - 6,
+      }),
+    );
+  });
+}
+
+/** Monthly plan: three vertical bars on a 100% line, the percent inside each bar. */
+function planBars(
+  ctx: Ctx,
+  pal: XrPalette,
+  m: DashboardModel,
+  x: number,
+  y: number,
+  w: number,
+  h: number,
+) {
+  const max = Math.max(
+    115,
+    ...m.bars.flatMap((b) => b.values).map((v) => v * 1.14),
+  );
+  const base = y + h,
+    group = w / Math.max(1, m.bars.length),
+    targetY = base - (100 / max) * h;
+  ctx.save();
+  ctx.setLineDash([12, 10]);
+  ctx.strokeStyle = pal.muted;
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.moveTo(x, targetY);
+  ctx.lineTo(x + w, targetY);
+  ctx.stroke();
+  ctx.restore();
+  write(ctx, t("План 100%"), x + w, targetY - 14, {
+    size: 26,
+    color: pal.muted,
+    align: "right",
+  });
+  m.bars.forEach((bar, i) => {
+    const bh = (bar.values[0] / max) * h,
+      cx = x + (i + 0.5) * group,
+      bw = Math.min(150, group * 0.66);
+    const color = pal.tone(seriesColors[i % seriesColors.length]);
+    const fill = ctx.createLinearGradient(0, base - bh, 0, base);
+    fill.addColorStop(0, color);
+    fill.addColorStop(1, alpha(color, 0.45));
+    roundRect(ctx, cx - bw / 2, base - bh, bw, bh, 18);
+    ctx.fillStyle = fill;
+    ctx.fill();
+    write(ctx, formatPercent(bar.values[0]), cx, base - bh + 50, {
+      size: 34,
+      weight: 600,
+      color: pal.onBar,
+      align: "center",
+      max: bw - 12,
+    });
+    write(ctx, i === 0 ? t("Всего") : bar.label, cx, base + 46, {
+      size: 28,
+      color: pal.muted,
+      align: "center",
+      max: group - 8,
+    });
+  });
+}
+
+function donut(
+  ctx: Ctx,
+  pal: XrPalette,
+  m: DashboardModel,
+  cx: number,
+  cy: number,
+  r: number,
+  center: string,
+  caption: string,
+) {
+  const total = m.slices.reduce((a, b) => a + b.value, 0);
+  ctx.lineWidth = r * 0.2;
+  ctx.lineCap = "butt";
+  ctx.strokeStyle = pal.track;
+  ctx.beginPath();
+  ctx.arc(cx, cy, r, 0, Math.PI * 2);
+  ctx.stroke();
+  let cursor = -Math.PI / 2;
+  m.slices.forEach((s) => {
+    const share = total ? s.value / total : 0;
+    const end = cursor + share * Math.PI * 2;
+    const color = s.color === colors.border ? pal.track : pal.tone(s.color);
+    ctx.strokeStyle = color;
+    ctx.beginPath();
+    ctx.arc(cx, cy, r, cursor + 0.012, Math.max(cursor + 0.012, end - 0.012));
+    ctx.stroke();
+    cursor = end;
+  });
+  write(ctx, center, cx, cy + r * 0.16, {
+    size: Math.round(r * 0.52),
+    weight: 500,
+    display: true,
+    color: pal.text,
+    align: "center",
+    max: r * 1.5,
+  });
+  write(ctx, t(caption), cx, cy + r * 0.5, {
+    size: Math.max(24, Math.round(r * 0.2)),
+    color: pal.muted,
+    align: "center",
+    max: r * 1.5,
+  });
+}
+
+function sparkline(
+  ctx: Ctx,
+  points: number[],
+  color: string,
+  x: number,
+  y: number,
+  w: number,
+  h: number,
+) {
+  if (points.length < 2) return;
+  const min = Math.min(...points),
+    range = Math.max(...points) - min || 1;
+  ctx.strokeStyle = color;
+  ctx.lineWidth = 4;
+  ctx.lineCap = "round";
+  ctx.lineJoin = "round";
+  ctx.beginPath();
+  points.forEach((v, j) => {
+    const px = x + (j / (points.length - 1)) * w,
+      py = y + h - ((v - min) / range) * h;
+    if (j) ctx.lineTo(px, py);
+    else ctx.moveTo(px, py);
+  });
+  ctx.stroke();
+}
+
+/** Body of a dashboard inside a 1280×800 area; shared by overview panels and the focus surface. */
+function drawBody(
+  ctx: Ctx,
+  pal: XrPalette,
+  m: DashboardModel,
+  compact: boolean,
+) {
+  if (m.kind === "channels") {
+    legend(
+      ctx,
+      pal,
+      [
+        { label: "Январь", color: alpha(pal.tone(colors.purple), 0.5) },
+        { label: "Отчётный месяц", color: colors.purple },
+      ],
+      56,
+      196,
+      26,
+    );
+    if (m.bars.length) channelBars(ctx, pal, m, 56, 300, 800, 300);
+    else
+      write(ctx, t("Нет данных по каналам"), 56, 420, {
+        size: 32,
+        color: pal.muted,
+      });
+    donut(
+      ctx,
+      pal,
+      m,
+      1060,
+      440,
+      130,
+      formatPercent(m.share ?? 0),
+      "доля в ДБО",
+    );
+    write(
+      ctx,
+      `${t("В отделениях")} ${formatPercent(100 - (m.share ?? 0))}`,
+      1060,
+      640,
+      { size: 26, color: pal.muted, align: "center", max: 360 },
+    );
+    return;
+  }
+  if (m.kind === "monthly") {
+    planBars(ctx, pal, m, 56, 260, 560, 390);
+    m.metrics.forEach((metric, i) => {
+      const y = 236 + i * 172;
+      write(ctx, t(metric.label), 690, y, {
+        size: 26,
+        color: pal.muted,
+        max: 360,
+      });
+      write(
+        ctx,
+        `${formatNumber(metric.value, compact)} ${metric.unit ?? ""}`,
+        690,
+        y + 60,
+        { size: 56, weight: 500, display: true, color: pal.text, max: 330 },
+      );
+      const color = pal.tone(metric.color);
+      write(ctx, metric.delta ?? "", 1224, y, {
+        size: 26,
+        weight: 600,
+        color,
+        align: "right",
+        max: 160,
+      });
+      if (metric.spark)
+        sparkline(ctx, metric.spark, color, 1044, y + 18, 180, 44);
+    });
+    return;
+  }
+  if (m.kind === "gauges") {
+    const n = Math.max(1, m.gauges.length),
+      top = 236,
+      step = Math.min(190, (720 - top) / n + 20);
+    m.gauges.forEach((g, i) =>
+      gaugeRow(ctx, pal, g, 56, top + i * step, 1168, compact),
+    );
+    return;
+  }
+  if (m.kind === "cash") {
+    const total = m.slices.reduce((a, b) => a + b.value, 0);
+    donut(ctx, pal, m, 230, 420, 150, formatNumber(total, true), "операций");
+    m.slices.forEach((s, i) => {
+      const y = 260 + i * 78;
+      legendDot(ctx, 470, y - 10, pal.tone(s.color), 9);
+      write(ctx, t(s.label), 494, y, { size: 30, color: pal.text, max: 380 });
+      write(ctx, formatNumber(s.value, compact), 1224, y, {
+        size: 32,
+        weight: 600,
+        color: pal.text,
+        align: "right",
+        max: 260,
+      });
+    });
+    gaugeRow(ctx, pal, m.gauges[0], 470, 620, 754, compact);
+    return;
+  }
+  if (m.kind === "staff") {
+    lineChart(ctx, pal, m, 150, 220, 640, 330, 24);
+    legend(ctx, pal, m.series, 150, 640, 24);
+    const vacancies = m.metrics[0];
+    write(ctx, String(vacancies.value), 870, 360, {
+      size: 120,
+      weight: 500,
+      display: true,
+      color: pal.tone(vacancies.color),
+    });
+    write(ctx, t("Открытые вакансии"), 874, 410, {
+      size: 28,
+      color: pal.muted,
+      max: 360,
+    });
+    gaugeRow(ctx, pal, m.gauges[0], 870, 560, 354, compact, 0.9);
+    return;
+  }
+  // Equipment: working devices over the month, downtime against the SLA marker.
+  lineChart(ctx, pal, m, 150, 200, 1070, 250, 24);
+  legend(ctx, pal, m.series, 150, 530, 24);
+  write(
+    ctx,
+    `${t("Простой")} · SLA ${formatPercent(DOWNTIME_LIMIT)}`,
+    56,
+    610,
+    {
+      size: 26,
+      color: pal.muted,
+    },
+  );
+  const n = Math.max(1, m.gauges.length),
+    colW = (1168 - (n - 1) * 48) / n;
+  m.gauges.forEach((g, i) =>
+    gaugeRow(ctx, pal, g, 56 + i * (colW + 48), 668, colW, compact, 0.85),
+  );
+}
+
+function header(ctx: Ctx, pal: XrPalette, m: DashboardModel, scale = 1) {
+  write(ctx, t(m.title), 56 * scale, 92 * scale, {
+    size: 44 * scale,
+    weight: 600,
+    display: true,
+    color: pal.text,
+    max: 1100 * scale,
+  });
+  if (m.subtitle)
+    write(ctx, t(m.subtitle), 56 * scale, 138 * scale, {
+      size: 28 * scale,
+      color: pal.muted,
+      max: 1100 * scale,
+    });
 }
 
 /** @dashboard Д1–Д10. Rasterize the same data model into the XR framebuffer, with Cyrillic fonts. */
-export function drawPanel(m: DashboardModel, compact: boolean): CanvasTexture {
+export function drawPanel(
+  m: DashboardModel,
+  compact: boolean,
+  dark = true,
+): CanvasTexture {
   const canvas = document.createElement("canvas");
   canvas.width = 1280;
   canvas.height = 800;
   const ctx = canvas.getContext("2d")!;
-  const text = (
-    value: string,
-    x: number,
-    y: number,
-    size = 26,
-    color = colors.text,
-    align: CanvasTextAlign = "left",
-  ) => {
-    size = Math.max(26, size);
-    ctx.font = `${size >= 36 ? 600 : 500} ${size}px "Pryvat Sans", "Inter Variable", sans-serif`;
-    ctx.fillStyle = color;
-    ctx.textAlign = align;
-    ctx.fillText(
-      t(value),
-      x,
-      y,
-      align === "center" ? 360 : align === "right" ? x - 30 : 1230 - x,
-    );
-  };
-  const line = (
-    x: number,
-    y: number,
-    x2: number,
-    y2: number,
-    color = colors.border,
-    width = 2,
-  ) => {
-    ctx.beginPath();
-    ctx.strokeStyle = color;
-    ctx.lineWidth = width;
-    ctx.moveTo(x, y);
-    ctx.lineTo(x2, y2);
-    ctx.stroke();
-  };
-  const panelFill = ctx.createLinearGradient(0, 0, 1280, 800);
-  panelFill.addColorStop(0, colors.elevated);
-  panelFill.addColorStop(1, colors.background);
-  ctx.fillStyle = panelFill;
-  ctx.beginPath();
-  ctx.roundRect(3, 3, 1274, 794, 34);
-  ctx.fill();
-  text(m.title, 45, 64, 34);
-  text(m.subtitle, 45, 108, 23, colors.muted);
-  const gauge = (
-    g: DashboardModel["gauges"][number],
-    x: number,
-    y: number,
-    w: number,
-  ) => {
-    const tone = colors[gaugeTone(g.percent, g.mode)];
-    text(g.label, x, y + 32, 32, colors.muted);
-    text(formatPercent(g.percent), x, y + 92, 48, tone);
-    paintMeter(ctx, g.percent, g.mode, x, y + 120, w - 30, 12);
-    text(
-      g.mode === "plan" ? "План 100%" : downtimeLabel(g.percent),
-      x,
-      y + 183,
-      32,
-      colors.muted,
-    );
-    if (g.value !== undefined)
-      text(
-        `${formatNumber(g.value, compact)} ${g.unit ?? t("шт.")}`,
-        x,
-        y + 238,
-        34,
-      );
-  };
-  const bars = (x: number, y: number, w: number, h: number) => {
-    if (m.kind === "monthly") {
-      const max = Math.max(
-        115,
-        ...m.bars.flatMap((b) => b.values).map((v) => v * 1.14),
-      );
-      const base = y + h,
-        group = w / Math.max(1, m.bars.length);
-      const targetY = base - (100 / max) * h;
-      ctx.save();
-      ctx.setLineDash([10, 8]);
-      line(x, targetY, x + w, targetY, colors.muted, 2);
-      ctx.restore();
-      text("План 100%", x, y - 25, 28, colors.muted);
-      m.bars.forEach((bar, i) => {
-        const height = (bar.values[0] / max) * h,
-          bx = x + (i + 0.5) * group,
-          bw = group * 0.6;
-        const fill = ctx.createLinearGradient(0, base - height, 0, base);
-        fill.addColorStop(0, seriesColors[i % 3]);
-        fill.addColorStop(1, colors.elevated);
-        ctx.fillStyle = fill;
-        ctx.beginPath();
-        ctx.roundRect(bx - bw / 2, base - height, bw, height, 10);
-        ctx.fill();
-        text(
-          formatPercent(bar.values[0]),
-          bx,
-          base - height + 44,
-          32,
-          colors["on-primary"],
-          "center",
-        );
-        ctx.save();
-        ctx.font = '500 28px "Pryvat Sans", "Inter Variable", sans-serif';
-        ctx.fillStyle = colors.muted;
-        ctx.textAlign = "center";
-        ctx.fillText(
-          i === 0 ? t("Всего") : bar.label,
-          bx,
-          base + 45,
-          group - 12,
-        );
-        ctx.restore();
-      });
-      return;
-    }
-    const max = Math.max(1, ...m.bars.flatMap((b) => b.values)) * 1.1;
-    const group = w / Math.max(1, m.bars.length);
-    line(x, y + h, x + w, y + h);
-    m.bars.forEach((b, i) => {
-      const count = b.values.length,
-        bw = Math.min(55, group / (count + 1));
-      b.values.forEach((v, j) => {
-        const bx = x + i * group + (group - count * bw - 8) / 2 + j * (bw + 8),
-          bh = (v / max) * h;
-        ctx.globalAlpha = j === 0 && count === 2 ? 0.5 : 1;
-        ctx.fillStyle = count === 2 ? colors.purple : seriesColors[i % 3];
-        ctx.beginPath();
-        ctx.roundRect(bx, y + h - bh, bw, bh, 6);
-        ctx.fill();
-        ctx.globalAlpha = 1;
-        text(
-          formatNumber(v),
-          bx + bw / 2,
-          y + h - bh - 18 - (j === 1 ? 36 : 0),
-          26,
-          colors.text,
-          "center",
-        );
-      });
-      const label = t(b.label === "Автоплат." ? "Автоплатежи" : b.label);
-      const words = label
-        .replace(/^Авто(?=плат)/, "Авто ")
-        .replace(/-/g, "- ")
-        .split(" ");
-      ctx.save();
-      ctx.font = '500 26px "Pryvat Sans", "Inter Variable", sans-serif';
-      ctx.fillStyle = colors.muted;
-      ctx.textAlign = "center";
-      words.forEach((word, j) =>
-        ctx.fillText(
-          word,
-          x + i * group + group / 2,
-          y + h + 42 + j * 31,
-          group - 8,
-        ),
-      );
-      ctx.restore();
-    });
-  };
-  const donut = (cx: number, cy: number, r: number) => {
-    const total = m.slices.reduce((a, b) => a + b.value, 0);
-    let cursor = -Math.PI / 2;
-    ctx.lineWidth = 28;
-    m.slices.forEach((s) => {
-      const end = cursor + (total ? s.value / total : 0) * Math.PI * 2;
-      ctx.strokeStyle = s.color;
-      ctx.beginPath();
-      ctx.arc(cx, cy, r, cursor, end);
-      ctx.stroke();
-      cursor = end;
-    });
-    text(
-      m.share === undefined
-        ? formatNumber(total, true)
-        : formatPercent(m.share),
-      cx,
-      cy + 12,
-      43,
-      colors.text,
-      "center",
-    );
-    text(
-      m.share === undefined ? "операций" : "доля в ДБО",
-      cx,
-      cy + 53,
-      24,
-      colors.muted,
-      "center",
-    );
-  };
-  const lines = (x: number, y: number, w: number, h: number) => {
-    if (!m.days.length) {
-      text(
-        "Нет данных за этот период",
-        x + w / 2,
-        y + h / 2,
-        32,
-        colors.muted,
-        "center",
-      );
-      return;
-    }
-    const max = Math.max(1, ...m.series.flatMap((s) => s.points)) * 1.1;
-    [0, 0.5, 1].forEach((t) => {
-      line(x, y + h - t * h, x + w, y + h - t * h);
-      text(
-        formatNumber(Math.round(max * t), true),
-        x - 24,
-        y + h - t * h + 8,
-        20,
-        colors.muted,
-        "right",
-      );
-    });
-    m.series.forEach((s, index) => {
-      ctx.strokeStyle = s.color;
-      ctx.lineWidth = 5;
-      ctx.beginPath();
-      s.points.forEach((v, i) => {
-        const px = x + (i / Math.max(1, s.points.length - 1)) * w,
-          py = y + h - (v / max) * h;
-        if (i === 0) ctx.moveTo(px, py);
-        else ctx.lineTo(px, py);
-      });
-      ctx.stroke();
-      text(s.label, x + index * 220, y + h + 110, 26, s.color);
-    });
-    m.days.forEach((d, i) => {
-      if (
-        i % Math.max(1, Math.ceil(m.days.length / 6)) === 0 ||
-        i === m.days.length - 1
-      )
-        text(
-          d,
-          x + (i / Math.max(1, m.days.length - 1)) * w,
-          y + h + 56,
-          20,
-          colors.muted,
-          "center",
-        );
-    });
-  };
-  if (m.kind === "channels") {
-    if (m.bars.length) bars(50, 250, 820, 370);
-    else text("Нет данных по каналам", 70, 350, 32);
-    donut(1060, 400, 115);
-    text("Январь / отчётный месяц", 60, 190, 24, colors.purple);
-  }
-  if (m.kind === "monthly") {
-    bars(45, 235, 570, 385);
-    m.metrics.forEach((metric, i) => {
-      const y = 230 + i * 160;
-      text(metric.label, 690, y, 26, colors.muted);
-      text(
-        `${formatNumber(metric.value, compact)} ${metric.unit ?? ""}`,
-        690,
-        y + 53,
-        40,
-      );
-      text(metric.delta ?? "", 1190, y + 53, 26, metric.color, "right");
-      if (metric.spark && metric.spark.length > 1) {
-        const min = Math.min(...metric.spark),
-          range = Math.max(...metric.spark) - min || 1;
-        ctx.strokeStyle = metric.color;
-        ctx.lineWidth = 3;
-        ctx.beginPath();
-        metric.spark.forEach((v, j) => {
-          const px = 1010 + (j / (metric.spark!.length - 1)) * 180,
-            py = y + 110 - ((v - min) / range) * 40;
-          if (j) ctx.lineTo(px, py);
-          else ctx.moveTo(px, py);
-        });
-        ctx.stroke();
-      }
-    });
-  }
-  if (m.kind === "gauges") {
-    m.gauges.forEach((g, i) =>
-      gauge(g, 40 + (i * 1200) / m.gauges.length, 260, 1200 / m.gauges.length),
-    );
-  }
-  if (m.kind === "cash") {
-    donut(230, 350, 120);
-    m.slices.forEach((s, i) => {
-      const y = 200 + i * 85;
-      text(s.label, 450, y, 28, s.color);
-      text(formatNumber(s.value, compact), 900, y, 29, colors.text, "right");
-    });
-    gauge(m.gauges[0], 920, 290, 300);
-  }
-  if (m.kind === "staff") {
-    lines(165, 200, 615, 330);
-    text(
-      String(m.metrics[0].value),
-      1020,
-      270,
-      78,
-      m.metrics[0].color,
-      "center",
-    );
-    text("Открытые вакансии", 1020, 315, 25, colors.muted, "center");
-    gauge(m.gauges[0], 850, 410, 340);
-  }
-  if (m.kind === "equipment") {
-    lines(155, 165, 1040, 200);
-    text("Простой", 70, 530, 25, colors.muted);
-    m.gauges.forEach((g, i) => gauge(g, 150 + i * 360, 550, 230));
-  }
-  const texture = new CanvasTexture(canvas);
-  texture.colorSpace = SRGBColorSpace;
-  texture.anisotropy = 4;
-  return texture;
+  const pal = xrPalette(dark);
+  section(ctx, pal, 4, 4, 1272, 792, 48);
+  header(ctx, pal, m);
+  drawBody(ctx, pal, m, compact);
+  return texture(canvas);
 }
+
+/** Wide bottom equipment/cash panels fill the stand without distorting their type. */
+export function drawOverviewPanel(
+  m: DashboardModel,
+  wide = false,
+  dark = true,
+): CanvasTexture {
+  if (!wide) return drawPanel(m, true, dark);
+  const c = document.createElement("canvas");
+  c.width = 1280;
+  c.height = 400;
+  const ctx = c.getContext("2d")!;
+  const pal = xrPalette(dark);
+  section(ctx, pal, 3, 3, 1274, 394, 40);
+  write(ctx, t(m.title), 44, 66, {
+    size: 40,
+    weight: 600,
+    display: true,
+    color: pal.text,
+    max: 700,
+  });
+  if (m.subtitle)
+    write(ctx, t(m.subtitle), 44, 106, {
+      size: 26,
+      color: pal.muted,
+      max: 700,
+    });
+  if (m.kind === "equipment") {
+    lineChart(ctx, pal, m, 120, 150, 560, 150, 22);
+    legend(ctx, pal, m.series, 120, 372, 22);
+    write(
+      ctx,
+      `${t("Простой")} · SLA ${formatPercent(DOWNTIME_LIMIT)}`,
+      790,
+      66,
+      {
+        size: 26,
+        color: pal.muted,
+        max: 440,
+      },
+    );
+    m.gauges.forEach((g, i) => {
+      const y = 128 + i * 92;
+      const tone = pal.tone(colors[gaugeTone(g.percent, g.mode)]);
+      write(ctx, t(g.label), 790, y, { size: 28, color: pal.text, max: 260 });
+      write(ctx, formatPercent(g.percent), 1236, y, {
+        size: 34,
+        weight: 600,
+        color: tone,
+        align: "right",
+        max: 180,
+      });
+      meter(ctx, pal, g.percent, g.mode, 790, y + 20, 446, 12);
+      write(ctx, downtimeLabel(g.percent), 790, y + 60, {
+        size: 22,
+        color: pal.muted,
+        max: 446,
+      });
+    });
+  } else if (m.kind === "cash") {
+    const total = m.slices.reduce((n, s) => n + s.value, 0);
+    write(ctx, formatNumber(total, true), 44, 214, {
+      size: 92,
+      weight: 500,
+      display: true,
+      color: pal.text,
+      max: 440,
+    });
+    write(ctx, t("операций"), 48, 256, { size: 28, color: pal.muted });
+    gaugeRow(ctx, pal, m.gauges[0], 44, 312, 420, true, 0.8);
+    m.slices.forEach((slice, index) => {
+      const y = 92 + index * 76;
+      legendDot(ctx, 560, y - 10, pal.tone(slice.color), 9);
+      write(ctx, t(slice.label), 584, y, {
+        size: 30,
+        color: pal.text,
+        max: 400,
+      });
+      write(ctx, formatNumber(slice.value, true), 1236, y, {
+        size: 32,
+        weight: 600,
+        color: pal.text,
+        align: "right",
+        max: 240,
+      });
+    });
+  } else {
+    drawBody(ctx, pal, m, true);
+  }
+  return texture(c);
+}
+
+/** @dashboard Д1–Д10. The stand: one glass surface carrying its subject heading. */
+export function drawWing(
+  title: string,
+  aspect: number,
+  dark = true,
+  aside?: string,
+): CanvasTexture {
+  const c = document.createElement("canvas");
+  c.width = 1280;
+  c.height = Math.round(c.width / aspect);
+  const ctx = c.getContext("2d")!;
+  const pal = xrPalette(dark);
+  const fill = ctx.createLinearGradient(0, 0, 0, c.height);
+  fill.addColorStop(0, pal.standTop);
+  fill.addColorStop(1, pal.standBottom);
+  roundRect(ctx, 3, 3, c.width - 6, c.height - 6, 64);
+  ctx.fillStyle = fill;
+  ctx.fill();
+  ctx.save();
+  roundRect(ctx, 4, 4, c.width - 8, c.height - 8, 64);
+  ctx.clip();
+  const rim = ctx.createLinearGradient(0, 0, 0, 10);
+  rim.addColorStop(0, pal.standRim);
+  rim.addColorStop(1, alpha(pal.standRim, 0));
+  ctx.fillStyle = rim;
+  ctx.fillRect(0, 0, c.width, 10);
+  ctx.restore();
+  write(ctx, t(title), 64, 96, {
+    size: 56,
+    weight: 600,
+    display: true,
+    color: pal.text,
+    max: aside ? c.width - 520 : c.width - 128,
+  });
+  if (aside)
+    write(ctx, aside, c.width - 64, 94, {
+      size: 32,
+      color: pal.muted,
+      align: "right",
+      max: 380,
+    });
+  return texture(c, 4);
+}
+
+/** Buttons are pills in the control fill; a non-interactive label is a tinted state notice. */
 export function drawLabel(
   label: string,
   aspect = 6.4,
   selected = false,
+  dark = true,
+  notice = false,
 ): CanvasTexture {
   const c = document.createElement("canvas");
   c.width = 1024;
   c.height = Math.round(c.width / aspect);
   const ctx = c.getContext("2d")!;
-  ctx.fillStyle = selected ? colors.purple : colors.elevated;
-  ctx.beginPath();
-  ctx.roundRect(2, 2, 1020, c.height - 4, c.height / 2 - 2);
+  const pal = xrPalette(dark);
+  roundRect(ctx, 2, 2, 1020, c.height - 4, c.height / 2 - 2);
+  ctx.fillStyle = notice
+    ? alpha(pal.tone(colors.warning), dark ? 0.24 : 0.3)
+    : selected
+      ? pal.selected
+      : pal.control;
   ctx.fill();
-  ctx.font = `500 ${Math.round(c.height * 0.3)}px "Pryvat Sans", "Inter Variable", sans-serif`;
-  ctx.fillStyle = selected ? colors["on-primary"] : colors.text;
+  ctx.font = `600 ${Math.round(c.height * (notice ? 0.4 : 0.32))}px ${TEXT_FONT}`;
+  ctx.fillStyle = selected && !notice ? pal.selectedText : pal.text;
   ctx.textAlign = "center";
   ctx.textBaseline = "middle";
   ctx.fillText(t(label), 512, c.height / 2, 930);
-  const texture = new CanvasTexture(c);
-  texture.colorSpace = SRGBColorSpace;
-  return texture;
-}
-
-/** Wide bottom equipment/cash cards fill the stand without distorting their type. */
-export function drawOverviewPanel(
-  m: DashboardModel,
-  wide = false,
-): CanvasTexture {
-  if (!wide) return drawPanel(m, true);
-  const c = document.createElement("canvas");
-  c.width = 1280;
-  c.height = 400;
-  const ctx = c.getContext("2d")!;
-  const fill = ctx.createLinearGradient(0, 0, 1280, 400);
-  fill.addColorStop(0, colors.elevated);
-  fill.addColorStop(1, colors.background);
-  ctx.fillStyle = fill;
-  ctx.beginPath();
-  ctx.roundRect(2, 2, 1276, 396, 24);
-  ctx.fill();
-  const text = (
-    value: string,
-    x: number,
-    y: number,
-    size = 28,
-    color = colors.text,
-    align: CanvasTextAlign = "left",
-    max = 1150,
-  ) => {
-    ctx.font = `500 ${size}px "Pryvat Sans", "Inter Variable", sans-serif`;
-    ctx.fillStyle = color;
-    ctx.textAlign = align;
-    ctx.fillText(t(value), x, y, max);
-  };
-  text(m.title, 40, 52, 36);
-  text(m.subtitle, 40, 91, 25, colors.muted);
-  if (m.kind === "equipment") {
-    const left = 90,
-      right = 740,
-      top = 140,
-      base = 290,
-      max = Math.max(1, ...m.series.flatMap((s) => s.points)) * 1.12;
-    for (const fraction of [0, 0.5, 1]) {
-      const y = base - fraction * (base - top);
-      ctx.strokeStyle = colors.border;
-      ctx.lineWidth = 1;
-      ctx.beginPath();
-      ctx.moveTo(left, y);
-      ctx.lineTo(right, y);
-      ctx.stroke();
-      text(
-        formatNumber(Math.round(max * fraction), true),
-        left - 15,
-        y + 7,
-        23,
-        colors.muted,
-        "right",
-        70,
-      );
-    }
-    m.series.forEach((series, index) => {
-      ctx.strokeStyle = series.color;
-      ctx.lineWidth = 4;
-      ctx.beginPath();
-      series.points.forEach((v, i) => {
-        const x =
-            left + (i / Math.max(1, series.points.length - 1)) * (right - left),
-          y = base - (v / max) * (base - top);
-        if (i) ctx.lineTo(x, y);
-        else ctx.moveTo(x, y);
-      });
-      ctx.stroke();
-      text(
-        series.label,
-        left + index * 210,
-        375,
-        25,
-        series.color,
-        "left",
-        190,
-      );
-    });
-    m.days.forEach((day, i) => {
-      if (
-        i % Math.max(1, Math.ceil(m.days.length / 6)) === 0 ||
-        i === m.days.length - 1
-      )
-        text(
-          day,
-          left + (i / Math.max(1, m.days.length - 1)) * (right - left),
-          332,
-          23,
-          colors.muted,
-          "center",
-          80,
-        );
-    });
-    text(
-      `${t("Простой")} · SLA ${formatPercent(DOWNTIME_LIMIT)}`,
-      820,
-      91,
-      25,
-      colors.muted,
-      "left",
-      400,
-    );
-    m.gauges.forEach((g, i) => {
-      const y = 155 + i * 90;
-      text(g.label, 820, y, 27, colors.muted, "left", 220);
-      text(
-        formatPercent(g.percent),
-        1225,
-        y,
-        32,
-        colors[gaugeTone(g.percent, g.mode)],
-        "right",
-        190,
-      );
-      paintMeter(ctx, g.percent, g.mode, 820, y + 18, 405, 8);
-    });
-  } else if (m.kind === "cash") {
-    const total = m.slices.reduce((n, s) => n + s.value, 0);
-    text(formatNumber(total, true), 45, 190, 66);
-    text("операций", 45, 232, 27, colors.muted);
-    text("Месячный план", 45, 295, 27, colors.muted);
-    text(
-      formatPercent(m.gauges[0].percent),
-      430,
-      295,
-      37,
-      colors.success,
-      "right",
-      180,
-    );
-    paintMeter(ctx, m.gauges[0].percent, "plan", 45, 322, 385, 8);
-    m.slices.forEach((slice, index) => {
-      const y = 147 + index * 63;
-      text(slice.label, 540, y, 29, slice.color, "left", 420);
-      text(
-        formatNumber(slice.value, true),
-        1225,
-        y,
-        31,
-        colors.text,
-        "right",
-        250,
-      );
-    });
-  }
-  const texture = new CanvasTexture(c);
-  texture.colorSpace = SRGBColorSpace;
-  texture.anisotropy = 4;
-  return texture;
-}
-
-/** @dashboard Д1–Д10. Decorative group material; headings encode the real data groups. */
-export function drawWing(title: string, aspect: number): CanvasTexture {
-  const c = document.createElement("canvas");
-  c.width = 1280;
-  c.height = Math.round(c.width / aspect);
-  const ctx = c.getContext("2d")!;
-  const fill = ctx.createLinearGradient(0, 0, c.width, c.height);
-  fill.addColorStop(0, colors.elevated);
-  fill.addColorStop(1, colors.background);
-  ctx.fillStyle = fill;
-  ctx.globalAlpha = 0.78;
-  ctx.beginPath();
-  ctx.roundRect(3, 3, c.width - 6, c.height - 6, 58);
-  ctx.fill();
-  ctx.globalAlpha = 1;
-  ctx.font = '600 48px "Manrope Variable", sans-serif';
-  ctx.fillStyle = colors.text;
-  ctx.fillText(t(title), 60, 82, c.width - 120);
-  const texture = new CanvasTexture(c);
-  texture.colorSpace = SRGBColorSpace;
-  return texture;
+  return texture(c, 4);
 }
 
 /** A chart and a dense exact-value table share one focus surface. Long API series scroll by row. */
@@ -558,74 +889,89 @@ export function drawFocusPanel(
   model: DashboardModel,
   compact: boolean,
   offset = 0,
+  dark = true,
+  period = "",
 ): CanvasTexture {
   const c = document.createElement("canvas");
   c.width = 2048;
   c.height = focusTextureHeight(model.facts.length);
   const ctx = c.getContext("2d")!;
-  const fill = ctx.createLinearGradient(0, 0, c.width, c.height);
-  fill.addColorStop(0, colors.elevated);
-  fill.addColorStop(1, colors.background);
+  const pal = xrPalette(dark);
+  const fill = ctx.createLinearGradient(0, 0, 0, c.height);
+  fill.addColorStop(0, pal.standTop);
+  fill.addColorStop(1, pal.standBottom);
+  roundRect(ctx, 3, 3, c.width - 6, c.height - 6, 56);
   ctx.fillStyle = fill;
-  ctx.beginPath();
-  ctx.roundRect(3, 3, c.width - 6, c.height - 6, 36);
   ctx.fill();
   const text = (
     value: string,
     x: number,
     y: number,
     size: number,
-    color = colors.text,
+    color = pal.text,
     align: CanvasTextAlign = "left",
     max = 1900,
-  ) => {
-    ctx.font = `500 ${size}px "Pryvat Sans", "Inter Variable", sans-serif`;
-    ctx.fillStyle = color;
-    ctx.textAlign = align;
-    ctx.fillText(t(value), x, y, max);
-  };
-  text(model.title, 55, 82, 56);
-  text(model.subtitle, 55, 133, 32, colors.muted);
-  const chart = drawPanel(model, compact);
+    weight = 500,
+  ) => write(ctx, t(value), x, y, { size, color, align, max, weight });
+  write(ctx, t(model.title), 64, 96, {
+    size: 60,
+    weight: 600,
+    display: true,
+    color: pal.text,
+    max: 1200,
+  });
+  if (model.subtitle) text(model.subtitle, 64, 146, 32, pal.muted);
+  if (period) text(period, c.width - 64, 96, 34, pal.muted, "right", 420);
+  // The chart is the overview body, drawn at a larger scale on its own section.
+  const chart = document.createElement("canvas");
+  chart.width = 1280;
+  chart.height = 800;
+  const chartCtx = chart.getContext("2d")!;
+  drawBody(chartCtx, pal, model, compact);
+  const chartH = c.height - 232;
+  section(ctx, pal, 48, 184, 1010, chartH, 40);
   ctx.drawImage(
-    chart.image as HTMLCanvasElement,
+    chart,
     0,
-    145,
+    160,
     1280,
-    655,
-    35,
-    195,
-    1000,
-    512,
+    620,
+    58,
+    184 + Math.max(20, (chartH - 480) / 2),
+    990,
+    480,
   );
-  chart.dispose();
-  text("Точные значения", 1100, 155, 36);
-  text("Показатель", 1100, 200, 25, colors.muted, "left", 300);
-  text("Факт", 1615, 200, 25, colors.muted, "right", 200);
-  text("План / Порог", 1700, 200, 24, colors.muted, "center", 155);
-  text("Выполнение", 1985, 200, 24, colors.muted, "right", 195);
+  const tableX = 1092,
+    tableW = c.width - tableX - 48;
+  section(ctx, pal, tableX, 184, tableW, c.height - 232, 40);
+  text("Точные значения", tableX + 36, 252, 36, pal.text, "left", 600, 600);
+  text("Показатель", tableX + 36, 304, 24, pal.muted, "left", 300);
+  text("Факт", tableX + 556, 304, 24, pal.muted, "right", 210);
+  text("План / Порог", tableX + 580, 304, 24, pal.muted, "left", 140);
+  text("Выполнение", tableX + tableW - 36, 304, 24, pal.muted, "right", 150);
   const facts = comparisonRows(model);
   const start = Math.min(
     Math.max(0, offset),
     Math.max(0, facts.length - FOCUS_ROWS),
   );
   const rows = facts.slice(start, start + FOCUS_ROWS),
-    step = Math.min(72, (c.height - 275) / Math.max(1, rows.length));
+    step = Math.min(84, (c.height - 400) / Math.max(1, rows.length));
+  // A short table reads at a larger size instead of floating in its section.
+  const roomy = step >= 76,
+    rowSize = roomy ? 28 : 25,
+    smallSize = roomy ? 26 : 23;
   rows.forEach(({ label, actual, reference, status }, index) => {
-    const y = 255 + index * step;
-    ctx.strokeStyle = colors.border;
-    ctx.lineWidth = 1;
+    const y = 360 + index * step;
+    ctx.strokeStyle = pal.grid;
+    ctx.lineWidth = 2;
     ctx.beginPath();
-    ctx.moveTo(1090, y + 17);
-    ctx.lineTo(1990, y + 17);
+    ctx.moveTo(tableX + 36, y + 20);
+    ctx.lineTo(tableX + tableW - 36, y + 20);
     ctx.stroke();
-    text(label, 1100, y, 25, colors.muted, "left", 300);
-    text(actual, 1615, y, 25, colors.text, "right", 200);
-    text(reference, 1700, y, 24, colors.muted, "center", 155);
-    text(status, 1985, y, 24, colors.text, "right", 195);
+    text(label, tableX + 36, y, rowSize, pal.muted, "left", 290);
+    text(actual, tableX + 556, y, rowSize, pal.text, "right", 210, 600);
+    text(reference, tableX + 580, y, smallSize, pal.muted, "left", 140);
+    text(status, tableX + tableW - 36, y, smallSize, pal.text, "right", 150);
   });
-  const texture = new CanvasTexture(c);
-  texture.colorSpace = SRGBColorSpace;
-  texture.anisotropy = 4;
-  return texture;
+  return texture(c);
 }
