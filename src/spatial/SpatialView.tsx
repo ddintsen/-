@@ -1,8 +1,10 @@
 import {
   Component,
+  useCallback,
   useEffect,
   useMemo,
   useRef,
+  Suspense,
   useState,
   type ReactNode,
 } from "react";
@@ -458,6 +460,11 @@ function Scene({
     </>
   );
 }
+/** Mounts only after everything in its Suspense boundary has loaded. */
+function SceneReady({ onReady }: { onReady: () => void }) {
+  useEffect(() => onReady(), [onReady]);
+  return null;
+}
 export default function SpatialView() {
   useLocale();
   const [recenter, setRecenter] = useState(0);
@@ -476,13 +483,20 @@ export default function SpatialView() {
     setYaw(nextYaw);
   }
   const [expanded, setExpanded] = useState(false);
+  const [sceneReady, setSceneReady] = useState(false);
+  const markSceneReady = useCallback(() => setSceneReady(true), []);
   const [environmentOnly, setEnvironmentOnly] = useState(false);
   const theme = useDashboardStore((s) => s.theme);
   const [error, setError] = useState(""),
     [busy, setBusy] = useState(false),
     [sessionActive, setSessionActive] = useState(false);
+  const previousSession = useRef(sessionActive);
   useEffect(() => {
-    // A focus pose belongs to its current viewing space; start each XR/preview transition in panorama.
+    // A focus pose belongs to its current viewing space; start each XR/preview transition in
+    // panorama. Only a real transition resets it: effects can re-run without one (a remount
+    // after a suspension), and that must not throw the viewer out of the dashboard they chose.
+    if (previousSession.current === sessionActive) return;
+    previousSession.current = sessionActive;
     setFocused(null);
     setYaw(0);
     setEnvironmentOnly(false);
@@ -625,6 +639,8 @@ export default function SpatialView() {
         data-environment={theme}
         data-panorama-wings={data && !focused && !environmentOnly ? 3 : 0}
         data-focus-view={focused ? "combined" : "panorama"}
+        data-scene-ready={sceneReady ? "true" : "false"}
+        aria-busy={!sceneReady}
         role="group"
         aria-label={t(
           environmentOnly
@@ -645,20 +661,31 @@ export default function SpatialView() {
             }
           >
             <XR store={xrStore}>
-              <Scene
-                yaw={yaw}
-                focused={focused}
-                setFocused={setFocused}
-                environmentOnly={environmentOnly}
-                sourceAlert={sourceAlert}
-                period={period}
-                recenter={recenter}
-                onRecenter={recenterSpace}
-                factsOffset={factsOffset}
-                setFactsOffset={setFactsOffset}
-              />
+              {/* Keep scene loading inside the canvas: a suspension that reaches the DOM
+                  would swap the whole view for its fallback and remount its effects. */}
+              <Suspense fallback={null}>
+                <Scene
+                  yaw={yaw}
+                  focused={focused}
+                  setFocused={setFocused}
+                  environmentOnly={environmentOnly}
+                  sourceAlert={sourceAlert}
+                  period={period}
+                  recenter={recenter}
+                  onRecenter={recenterSpace}
+                  factsOffset={factsOffset}
+                  setFactsOffset={setFactsOffset}
+                />
+                <SceneReady onReady={markSceneReady} />
+              </Suspense>
             </XR>
           </Canvas>
+          {/* Inside the boundary, so a WebGL failure replaces it with the error message. */}
+          {!sceneReady ? (
+            <div className="xr-loading xr-scene-loading" aria-hidden="true">
+              {t("Загружаем 3D…")}
+            </div>
+          ) : null}
         </GraphicsBoundary>
         {!data && !environmentOnly ? (
           <div className="xr-no-data">

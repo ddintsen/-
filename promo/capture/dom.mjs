@@ -139,6 +139,8 @@ log("renderer", renderer);
 // Pre-warm the spatial chunk, its textures and the Earth photographs, then close it.
 await page.evaluate(() => document.querySelector(".xr-entry").dispatchEvent(new MouseEvent("click", { bubbles: true })));
 await until(() => !!document.querySelector(".xr-canvas canvas"), "spatial canvas");
+// The canvas mounts before its scene has loaded; the app marks the loaded scene.
+await until(() => document.querySelector(".xr-canvas")?.dataset.sceneReady === "true", "spatial scene");
 await step(1500, 16, 2);
 // The preview toolbar's «Dark environment» button (same layout in either theme).
 const darkButton = await page.evaluate(() => {
@@ -364,10 +366,14 @@ for (let k = TL.DOM_FIRST; k <= lastFrame; k++) {
         h: b.height,
         radius: parseFloat(getComputedStyle(m).borderTopLeftRadius),
         canvas: cb ? { x: cb.x, y: cb.y, w: cb.width, h: cb.height } : null,
+        // The scene finishes loading as the film clock advances (React reveals a resolved
+        // Suspense boundary on a timer), so it is checked here rather than awaited at the click.
+        sceneReady: canvas?.dataset.sceneReady === "true",
         support: m.querySelector(".xr-support")?.textContent ?? null,
         title: m.querySelector("h2")?.textContent,
       };
     });
+    if (info.spatialModal && !info.spatialModal.sceneReady) throw new Error("spatial scene not loaded by the last DOM frame");
   }
   frames[k] = info;
   if (k % 30 === 0) log(`frame ${k} (${((Date.now() - started) / 1000).toFixed(0)} s)`);

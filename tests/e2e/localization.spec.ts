@@ -417,6 +417,11 @@ test("mounted spatial view updates its controls, report and focus labels with la
   await expect(page.locator(".xr-canvas canvas")).toBeVisible({
     timeout: 15000,
   });
+  await expect(page.locator(".xr-canvas")).toHaveAttribute(
+    "data-scene-ready",
+    "true",
+    { timeout: 20000 },
+  );
   await expect(
     page.getByRole("dialog").locator(".sr-only").filter({ hasText: "2026" }),
   ).toContainText("Демодані · Жовтень 2026");

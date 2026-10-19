@@ -17,6 +17,11 @@ async function openSpatial(page: Page) {
   await expect(page.locator(".xr-canvas canvas")).toBeVisible({
     timeout: 15000,
   });
+  await expect(page.locator(".xr-canvas")).toHaveAttribute(
+    "data-scene-ready",
+    "true",
+    { timeout: 20000 },
+  );
 }
 
 // Project known world-space targets to the browser camera; this exercises actual Three.js raycasts.

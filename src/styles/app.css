@@ -4140,3 +4140,18 @@ input:not([type="range"]):not([type="checkbox"]):not([type="radio"]) {
     width: 96px;
   }
 }
+
+/* The scene loads inside the canvas area; the view and its controls stay in place. A cached
+   scene is ready in about 0.2 s, so the label waits before it appears instead of flashing. */
+.xr-canvas > .xr-scene-loading {
+  position: absolute;
+  inset: 0;
+  min-height: 0;
+  pointer-events: none;
+  animation: scene-loading-in 0.2s ease-out 0.5s backwards;
+}
+@keyframes scene-loading-in {
+  from {
+    opacity: 0;
+  }
+}

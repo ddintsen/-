@@ -316,6 +316,11 @@ test("real WebGL preview renders and unsupported immersive mode is explained", a
   await expect(page.locator(".xr-canvas canvas")).toBeVisible({
     timeout: 15000,
   });
+  await expect(page.locator(".xr-canvas")).toHaveAttribute(
+    "data-scene-ready",
+    "true",
+    { timeout: 20000 },
+  );
   await expect(
     page.getByText("Для AR и VR откройте сайт в Meta Quest Browser."),
   ).toBeVisible();

@@ -130,6 +130,11 @@ test("spatial overview paints channel labels and focus paints all equipment fact
     .click();
   await expect(page.locator(".xr-canvas canvas")).toBeVisible();
   await expect(page.locator(".xr-canvas")).toHaveAttribute(
+    "data-scene-ready",
+    "true",
+    { timeout: 20000 },
+  );
+  await expect(page.locator(".xr-canvas")).toHaveAttribute(
     "data-panorama-wings",
     "3",
   );
