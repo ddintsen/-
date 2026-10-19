@@ -1,0 +1,19 @@
+<!doctype html>
+<html lang="uk">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1920, initial-scale=1" />
+    <title>Orbita film player</title>
+    <link rel="icon" href="data:," />
+    <style>
+      html, body { margin: 0; width: 1920px; height: 1080px; overflow: hidden; background: #000; }
+      #stage { position: fixed; left: 0; top: 0; width: 1920px; height: 1080px; }
+      #overlay { position: fixed; left: 0; top: 0; width: 1920px; height: 1080px; pointer-events: none; overflow: hidden; }
+    </style>
+  </head>
+  <body>
+    <div id="stage"></div>
+    <div id="overlay"></div>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>

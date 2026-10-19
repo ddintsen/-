@@ -1,0 +1,91 @@
+@font-face {
+  font-family: "Pryvat Sans";
+  src:
+    local("Pryvat Sans Thin"),
+    local("PryvatSans-Thin"),
+    url("../../../public/fonts/PryvatSans-Thin.woff2") format("woff2");
+  font-weight: 100;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Pryvat Sans";
+  src:
+    local("Pryvat Sans"),
+    local("PryvatSans-Regular"),
+    url("../../../public/fonts/PryvatSans-Regular.woff2") format("woff2");
+  font-weight: 400;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Pryvat Sans";
+  src:
+    local("Pryvat Sans Medium"),
+    local("PryvatSans-Medium"),
+    url("../../../public/fonts/PryvatSans-Medium.woff2") format("woff2");
+  font-weight: 500;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Pryvat Sans";
+  src:
+    local("Pryvat Sans Medium"),
+    local("PryvatSans-Medium"),
+    url("../../../public/fonts/PryvatSans-Medium.woff2") format("woff2");
+  font-weight: 600;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Pryvat Sans";
+  src:
+    local("Pryvat Sans Bold"),
+    local("PryvatSans-Bold"),
+    url("../../../public/fonts/PryvatSans-Bold.woff2") format("woff2");
+  font-weight: 700;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Pryvat Sans Display";
+  src:
+    local("Pryvat Sans Display"),
+    local("PryvatSans-DisplayRegular"),
+    url("../../../public/fonts/PryvatSans-DisplayRegular.woff2") format("woff2");
+  font-weight: 400;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Pryvat Sans Display";
+  src:
+    local("Pryvat Sans Display Medium"),
+    local("PryvatSans-DisplayMedium"),
+    url("../../../public/fonts/PryvatSans-DisplayMedium.woff2") format("woff2");
+  font-weight: 500;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Pryvat Sans Display";
+  src:
+    local("Pryvat Sans Display Medium"),
+    local("PryvatSans-DisplayMedium"),
+    url("../../../public/fonts/PryvatSans-DisplayMedium.woff2") format("woff2");
+  font-weight: 600;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Pryvat Sans Display";
+  src:
+    local("Pryvat Sans Display Bold"),
+    local("PryvatSans-DisplayBold"),
+    url("../../../public/fonts/PryvatSans-DisplayBold.woff2") format("woff2");
+  font-weight: 700;
+  font-display: swap;
+}
+
+/* The app's root typography, so overlay text rasterises exactly like the product's. */
+:root {
+  font-family: "Pryvat Sans", "Inter Variable", system-ui, sans-serif;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  font-size: 14px;
+  color-scheme: dark;
+}

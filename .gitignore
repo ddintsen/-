@@ -17,3 +17,5 @@ standalone-dist/
 stackblitz-export/
 .qa/
 .claude/
+# Superseded promo drafts (owner: English only); kept locally, not published.
+_to_delete/promo-uk-drafts/

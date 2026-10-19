@@ -1,0 +1,186 @@
+{
+ "locale": "en",
+ "joins": {
+  "lockupHandover": {
+   "frames": "146/147",
+   "mad": 0.376,
+   "max": 67
+  },
+  "pane": {
+   "frames": "629/630",
+   "mad": 0.049,
+   "max": 3
+  },
+  "lensIn": {
+   "frames": "839/840",
+   "mad": 3.149,
+   "max": 218
+  },
+  "lensOut": {
+   "frames": "1259/1260",
+   "mad": 0.192,
+   "max": 87
+  }
+ },
+ "spikes": [
+  {
+   "frame": 553,
+   "mad": 8.28,
+   "localMedian": 0.74,
+   "expected": true
+  },
+  {
+   "frame": 554,
+   "mad": 8.61,
+   "localMedian": 0.71,
+   "expected": true
+  },
+  {
+   "frame": 555,
+   "mad": 16.32,
+   "localMedian": 0.69,
+   "expected": true
+  },
+  {
+   "frame": 556,
+   "mad": 10.19,
+   "localMedian": 0.66,
+   "expected": true
+  },
+  {
+   "frame": 557,
+   "mad": 10.18,
+   "localMedian": 0.62,
+   "expected": true
+  },
+  {
+   "frame": 558,
+   "mad": 10.04,
+   "localMedian": 0.6,
+   "expected": true
+  },
+  {
+   "frame": 559,
+   "mad": 9.38,
+   "localMedian": 0.6,
+   "expected": true
+  },
+  {
+   "frame": 832,
+   "mad": 14.58,
+   "localMedian": 4.81,
+   "expected": true
+  },
+  {
+   "frame": 833,
+   "mad": 16.1,
+   "localMedian": 4.67,
+   "expected": true
+  },
+  {
+   "frame": 834,
+   "mad": 17.57,
+   "localMedian": 4.17,
+   "expected": true
+  },
+  {
+   "frame": 835,
+   "mad": 17.5,
+   "localMedian": 3.98,
+   "expected": true
+  },
+  {
+   "frame": 836,
+   "mad": 14.94,
+   "localMedian": 3.45,
+   "expected": true
+  },
+  {
+   "frame": 837,
+   "mad": 10.31,
+   "localMedian": 3.22,
+   "expected": true
+  },
+  {
+   "frame": 1096,
+   "mad": 9.92,
+   "localMedian": 1.99,
+   "expected": true
+  },
+  {
+   "frame": 1206,
+   "mad": 16.74,
+   "localMedian": 0.86,
+   "expected": true
+  }
+ ],
+ "titles": {
+  "T3": {
+   "text": "Now in Meta Quest 3S",
+   "contrastMean": 12.7,
+   "brightestPixel": 0.245
+  },
+  "T4": {
+   "text": "The same stands, all around you",
+   "contrastMean": 15.4,
+   "brightestPixel": 0.348
+  },
+  "T5": {
+   "text": "Point the ray, pull the trigger",
+   "contrastMean": 17.7,
+   "brightestPixel": 0.679
+  },
+  "endAction": {
+   "contrastMean": 13
+  },
+  "endLine": {
+   "contrastMean": 7
+  }
+ },
+ "text": {
+  "T3": "ok",
+  "T4": "ok",
+  "T5": "ok",
+  "endCard": "ok",
+  "dom": [
+   {
+    "frame": 149,
+    "forbidden": null
+   },
+   {
+    "frame": 200,
+    "forbidden": null
+   },
+   {
+    "frame": 300,
+    "forbidden": null
+   },
+   {
+    "frame": 380,
+    "forbidden": null
+   },
+   {
+    "frame": 470,
+    "forbidden": null
+   },
+   {
+    "frame": 520,
+    "forbidden": null
+   },
+   {
+    "frame": 580,
+    "forbidden": null
+   },
+   {
+    "frame": 629,
+    "forbidden": null
+   }
+  ]
+ },
+ "determinism": null,
+ "envRegistration": null,
+ "frameDiff": {
+  "max": 17.57,
+  "mean": 3.22
+ }
+}

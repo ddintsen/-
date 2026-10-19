@@ -1,0 +1,160 @@
+{
+ "locale": "en",
+ "file": "D:\\--main\\promo\\out\\orbita-promo-en.mp4",
+ "bytes": 26202678,
+ "framesDecoded": 1410,
+ "streams": [
+  "Stream #0:0[0x1](und): Video: h264 (High) (avc1 / 0x31637661), yuv420p(tv, bt709, progressive), 1920x1080, 4255 kb/s, 30 fps, 30 tbr, 15360 tbn (default)",
+  "Stream #0:1[0x2](und): Audio: aac (LC) (mp4a / 0x6134706D), 48000 Hz, stereo, fltp, 196 kb/s (default)",
+  "Stream #0:0 -> #0:0 (h264 (native) -> wrapped_avframe (native))",
+  "Stream #0:0(und): Video: wrapped_avframe, yuv420p(tv, bt709, progressive), 1920x1080, q=2-31, 200 kb/s, 30 fps, 30 tbn (default)"
+ ],
+ "duration": "00:00:47.00",
+ "audio": {
+  "track": "D:\\--main\\promo\\music\\pixabay-future-design-344320.mp3",
+  "offsetSeconds": 2.443,
+  "loudness": {
+   "integrated": -13.9,
+   "truePeak": -2
+  }
+ },
+ "capture": {
+  "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 4060 (0x00002882) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+  "T_start": 6681,
+  "T_mount": 7481,
+  "measure": {
+   "scrollMax": 627,
+   "chip": [
+    403.9453125,
+    996.390625
+   ],
+   "cta": [
+    1745.4609375,
+    122.390625
+   ],
+   "wordmark": {
+    "x": 180,
+    "y": 15,
+    "w": 226.796875,
+    "h": 40,
+    "cx": 293.3984375,
+    "cy": 35
+   }
+  },
+  "clicks": [
+   {
+    "frame": 332,
+    "e": "down"
+   },
+   {
+    "frame": 334,
+    "e": "up"
+   },
+   {
+    "frame": 419,
+    "e": "down"
+   },
+   {
+    "frame": 421,
+    "e": "up"
+   },
+   {
+    "frame": 478,
+    "e": "down"
+   },
+   {
+    "frame": 480,
+    "e": "up"
+   },
+   {
+    "frame": 551,
+    "e": "down"
+   },
+   {
+    "frame": 553,
+    "e": "up"
+   },
+   {
+    "frame": 598,
+    "e": "down"
+   },
+   {
+    "frame": 600,
+    "e": "up"
+   }
+  ],
+  "textChecks": [
+   {
+    "frame": 149,
+    "forbidden": null
+   },
+   {
+    "frame": 200,
+    "forbidden": null
+   },
+   {
+    "frame": 300,
+    "forbidden": null
+   },
+   {
+    "frame": 380,
+    "forbidden": null
+   },
+   {
+    "frame": 470,
+    "forbidden": null
+   },
+   {
+    "frame": 520,
+    "forbidden": null
+   },
+   {
+    "frame": 580,
+    "forbidden": null
+   },
+   {
+    "frame": 629,
+    "forbidden": null
+   }
+  ],
+  "freeze": {
+   "before": {
+    "head": "d34c0ded583217bd5aa875134f0ba9026cb52bbc",
+    "status": "?? promo/.gitignore\n?? promo/README.md\n?? promo/capture/\n?? promo/out/\n?? promo/package-lock.json\n?? promo/package.json\n?? promo/player/\n?? promo/render/\n?? promo/timeline.mjs",
+    "src": "f953d3965185051a0ea4dadde44e5855b3e237d7623e63fedcb211e510112fdf",
+    "mock": "77d1b65aa7d0fdfb606ac3e68e3af08584b9971cb37ec0f2e87b921a3a182c9f"
+   },
+   "after": {
+    "head": "d34c0ded583217bd5aa875134f0ba9026cb52bbc",
+    "status": "?? promo/.gitignore\n?? promo/README.md\n?? promo/capture/\n?? promo/out/\n?? promo/package-lock.json\n?? promo/package.json\n?? promo/player/\n?? promo/render/\n?? promo/timeline.mjs",
+    "src": "f953d3965185051a0ea4dadde44e5855b3e237d7623e63fedcb211e510112fdf",
+    "mock": "77d1b65aa7d0fdfb606ac3e68e3af08584b9971cb37ec0f2e87b921a3a182c9f"
+   },
+   "stable": true
+  },
+  "seconds": 204.027
+ },
+ "frames": {
+  "info": {
+   "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 4060 (0x00002882) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+   "floatBlend": true,
+   "fonts": {
+    "display500": true,
+    "text400": true,
+    "text600": true,
+    "text700": true
+   },
+   "clock": 1.5
+  },
+  "seconds": 329.802,
+  "msPerFrame": 230.70496453900708,
+  "errors": []
+ },
+ "freeze": {
+  "head": "d34c0ded583217bd5aa875134f0ba9026cb52bbc",
+  "status": "?? promo/.gitignore\n?? promo/README.md\n?? promo/capture/\n?? promo/out/\n?? promo/package-lock.json\n?? promo/package.json\n?? promo/player/\n?? promo/render/\n?? promo/timeline.mjs",
+  "src": "f953d3965185051a0ea4dadde44e5855b3e237d7623e63fedcb211e510112fdf",
+  "mock": "77d1b65aa7d0fdfb606ac3e68e3af08584b9971cb37ec0f2e87b921a3a182c9f"
+ },
+ "encodeSeconds": 59.736
+}
