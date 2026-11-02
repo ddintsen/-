@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_name">Кухонный таймер</string>
+    <string name="accessibility_desc">Перехватывает выбранную кнопку пульта и показывает таймер поверх любых приложений. Другие кнопки не изменяет.</string>
+</resources>
